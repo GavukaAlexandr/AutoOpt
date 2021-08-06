@@ -73,6 +73,7 @@ class _OrderCarPartsState extends State<OrderCarParts> {
     if (email == '') return alert();
     if (phoneNumber == '') return alert();
     if (telegram == false && phone == false && viber == false) return alert();
+    if (telegram == null && phone == null && viber == null) return alert();
     resultFromProfile = {
       'name': name,
       'email': email,
@@ -625,8 +626,28 @@ class _OrderCarPartsState extends State<OrderCarParts> {
                                   left: 34, right: 34, top: 12, bottom: 12)),
                           onPressed: () async {
                             searchFormStore.validateAll();
-                            if (searchFormStore.error.hasErrors) return;
-                            checkProfileData();
+                            if (searchFormStore.error.hasErrors) {
+                              Alert(
+                                context: context,
+                                type: AlertType.error,
+                                title:
+                                    "Проверьте правильность заполненных данных",
+                                buttons: [
+                                  DialogButton(
+                                    child: Text(
+                                      "Закрыть",
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 16),
+                                    ),
+                                    onPressed: () => Navigator.pop(context),
+                                    color: Colors.red[300],
+                                  ),
+                                ],
+                              ).show();
+                              return;
+                            } else {
+                              return checkProfileData();
+                            }
                             // print(resultFromProfile);
                           },
                           child: Text(
