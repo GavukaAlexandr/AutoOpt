@@ -2,23 +2,6 @@ import 'package:mobx/mobx.dart';
 import 'package:validators/validators.dart';
 part 'user_form_store.g.dart';
 
-class FormErrorState = _FormErrorState with _$FormErrorState;
-
-abstract class _FormErrorState with Store {
-  @observable
-  String? username;
-
-  @observable
-  String? email;
-
-  @observable
-  String? numberPhone;
-
-  @computed
-  bool get hasErrors =>
-      username != null || email != null || numberPhone != null;
-}
-
 class UserFormStore = _UserFormStore with _$UserFormStore;
 
 abstract class _UserFormStore with Store {
@@ -114,4 +97,21 @@ abstract class _UserFormStore with Store {
     validateEmail(email);
     validateUsername(userName);
   }
+}
+
+class FormErrorState = _FormErrorState with _$FormErrorState;
+
+abstract class _FormErrorState with Store {
+  @observable
+  String? username;
+
+  @observable
+  String? email;
+
+  @observable
+  String? numberPhone;
+
+  @computed
+  bool get hasErrors =>
+      username != null || email != null || numberPhone != null;
 }

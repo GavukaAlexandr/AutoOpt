@@ -8,71 +8,6 @@ part of 'user_form_store.dart';
 
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
-mixin _$FormErrorState on _FormErrorState, Store {
-  Computed<bool>? _$hasErrorsComputed;
-
-  @override
-  bool get hasErrors =>
-      (_$hasErrorsComputed ??= Computed<bool>(() => super.hasErrors,
-              name: '_FormErrorState.hasErrors'))
-          .value;
-
-  final _$usernameAtom = Atom(name: '_FormErrorState.username');
-
-  @override
-  String? get username {
-    _$usernameAtom.reportRead();
-    return super.username;
-  }
-
-  @override
-  set username(String? value) {
-    _$usernameAtom.reportWrite(value, super.username, () {
-      super.username = value;
-    });
-  }
-
-  final _$emailAtom = Atom(name: '_FormErrorState.email');
-
-  @override
-  String? get email {
-    _$emailAtom.reportRead();
-    return super.email;
-  }
-
-  @override
-  set email(String? value) {
-    _$emailAtom.reportWrite(value, super.email, () {
-      super.email = value;
-    });
-  }
-
-  final _$numberPhoneAtom = Atom(name: '_FormErrorState.numberPhone');
-
-  @override
-  String? get numberPhone {
-    _$numberPhoneAtom.reportRead();
-    return super.numberPhone;
-  }
-
-  @override
-  set numberPhone(String? value) {
-    _$numberPhoneAtom.reportWrite(value, super.numberPhone, () {
-      super.numberPhone = value;
-    });
-  }
-
-  @override
-  String toString() {
-    return '''
-username: ${username},
-email: ${email},
-numberPhone: ${numberPhone},
-hasErrors: ${hasErrors}
-    ''';
-  }
-}
-
 mixin _$UserFormStore on _UserFormStore, Store {
   final _$userNameAtom = Atom(name: '_UserFormStore.userName');
 
@@ -275,6 +210,71 @@ numberPhone: ${numberPhone},
 telegram: ${telegram},
 phone: ${phone},
 viber: ${viber}
+    ''';
+  }
+}
+
+mixin _$FormErrorState on _FormErrorState, Store {
+  Computed<bool>? _$hasErrorsComputed;
+
+  @override
+  bool get hasErrors =>
+      (_$hasErrorsComputed ??= Computed<bool>(() => super.hasErrors,
+              name: '_FormErrorState.hasErrors'))
+          .value;
+
+  final _$usernameAtom = Atom(name: '_FormErrorState.username');
+
+  @override
+  String? get username {
+    _$usernameAtom.reportRead();
+    return super.username;
+  }
+
+  @override
+  set username(String? value) {
+    _$usernameAtom.reportWrite(value, super.username, () {
+      super.username = value;
+    });
+  }
+
+  final _$emailAtom = Atom(name: '_FormErrorState.email');
+
+  @override
+  String? get email {
+    _$emailAtom.reportRead();
+    return super.email;
+  }
+
+  @override
+  set email(String? value) {
+    _$emailAtom.reportWrite(value, super.email, () {
+      super.email = value;
+    });
+  }
+
+  final _$numberPhoneAtom = Atom(name: '_FormErrorState.numberPhone');
+
+  @override
+  String? get numberPhone {
+    _$numberPhoneAtom.reportRead();
+    return super.numberPhone;
+  }
+
+  @override
+  set numberPhone(String? value) {
+    _$numberPhoneAtom.reportWrite(value, super.numberPhone, () {
+      super.numberPhone = value;
+    });
+  }
+
+  @override
+  String toString() {
+    return '''
+username: ${username},
+email: ${email},
+numberPhone: ${numberPhone},
+hasErrors: ${hasErrors}
     ''';
   }
 }
