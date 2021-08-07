@@ -1,0 +1,40 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Type {
+  id     Int          @id @default(autoincrement())
+  type   String       @db.VarChar(255)
+  brands BrandTypes[]
+}
+
+model Brand {
+  id     Int          @id @default(autoincrement())
+  brand  String       @db.VarChar(255)
+  types  BrandTypes[]
+  models Model[]
+}
+
+model BrandTypes {
+  typeId  Int
+  brandId Int
+
+  Type  Type  @relation(fields: [typeId], references: [id])
+  Brand Brand @relation(fields: [brandId], references: [id])
+  @@id([typeId, brandId])
+}
+
+model Model {
+  id      Int    @id @default(autoincrement())
+  name    String @db.VarChar(255)
+  brand   Brand  @relation(fields: [brandID], references: [id])
+  brandID Int
+}
