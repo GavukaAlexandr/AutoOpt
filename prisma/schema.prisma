@@ -36,15 +36,16 @@ model BrandType {
 }
 
 model Model {
-  id      String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  model   String  @db.VarChar(255)
-  brandId String  @map("brand_id") @db.Uuid
-  typeId  String  @map("type_id") @db.Uuid
-  userId  String  @map("user_id") @db.Uuid
-  type    Type    @relation(fields: [typeId], references: [id])
-  brand   Brand   @relation(fields: [brandId], references: [id])
-  user    User    @relation(fields: [userId], references: [id])
-  order   Order[]
+  id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  model     String      @db.VarChar(255)
+  brandId   String      @map("brand_id") @db.Uuid
+  typeId    String      @map("type_id") @db.Uuid
+  userId    String      @map("user_id") @db.Uuid
+  type      Type        @relation(fields: [typeId], references: [id])
+  brand     Brand       @relation(fields: [brandId], references: [id])
+  user      User        @relation(fields: [userId], references: [id])
+  order     Order[]
+  UserModel UserModel[]
 }
 
 model Order {
@@ -56,8 +57,19 @@ model Order {
 }
 
 model User {
-  id     String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name   String  @db.VarChar(255)
-  models Model[]
-  orders Order[]
+  id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String      @db.VarChar(255)
+  models    Model[]
+  orders    Order[]
+  UserModel UserModel[]
+}
+
+model UserModel {
+  userId  String @map("user_id") @db.Uuid
+  modelId String @map("model_id") @db.Uuid
+
+  user  User  @relation(fields: [userId], references: [id])
+  model Model @relation(fields: [modelId], references: [id])
+  @@id([userId, modelId])
+  @@map("user_model")
 }
