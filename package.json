@@ -1,5 +1,5 @@
 {
-  "name": "auto-opt",
+  "name": "api-auto-opt",
   "version": "0.0.1",
   "description": "",
   "author": "",
@@ -21,19 +21,13 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@hapi/joi": "^17.1.1",
     "@nestjs/common": "^7.6.15",
-    "@nestjs/config": "^0.6.3",
     "@nestjs/core": "^7.6.15",
     "@nestjs/platform-express": "^7.6.15",
-    "@nestjs/typeorm": "^7.1.5",
-    "@prisma/client": "^2.26.0",
-    "@types/hapi__joi": "^17.1.6",
-    "pg": "^8.6.0",
+    "@prisma/client": "^2.28.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
-    "rxjs": "^6.6.6",
-    "typeorm": "^0.2.34"
+    "rxjs": "^6.6.6"
   },
   "devDependencies": {
     "@nestjs/cli": "^7.6.0",

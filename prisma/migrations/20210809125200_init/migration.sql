@@ -1,29 +1,18 @@
-/*
-  Warnings:
+-- CreateTable
+CREATE TABLE "Type" (
+    "id" SERIAL NOT NULL,
+    "type" VARCHAR(255) NOT NULL,
 
-  - You are about to drop the column `brandID` on the `Model` table. All the data in the column will be lost.
-  - You are about to drop the `BrandTypes` table. If the table is not empty, all the data it contains will be lost.
-  - A unique constraint covering the columns `[type_id]` on the table `Model` will be added. If there are existing duplicate values, this will fail.
-  - Added the required column `brand_id` to the `Model` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `type_id` to the `Model` table without a default value. This is not possible if the table is not empty.
+    PRIMARY KEY ("id")
+);
 
-*/
--- DropForeignKey
-ALTER TABLE "BrandTypes" DROP CONSTRAINT "BrandTypes_brandId_fkey";
+-- CreateTable
+CREATE TABLE "Brand" (
+    "id" SERIAL NOT NULL,
+    "brand" VARCHAR(255) NOT NULL,
 
--- DropForeignKey
-ALTER TABLE "BrandTypes" DROP CONSTRAINT "BrandTypes_typeId_fkey";
-
--- DropForeignKey
-ALTER TABLE "Model" DROP CONSTRAINT "Model_brandID_fkey";
-
--- AlterTable
-ALTER TABLE "Model" DROP COLUMN "brandID",
-ADD COLUMN     "brand_id" INTEGER NOT NULL,
-ADD COLUMN     "type_id" INTEGER NOT NULL;
-
--- DropTable
-DROP TABLE "BrandTypes";
+    PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "brand_types" (
@@ -31,6 +20,16 @@ CREATE TABLE "brand_types" (
     "brand" INTEGER NOT NULL,
 
     PRIMARY KEY ("type_id","brand")
+);
+
+-- CreateTable
+CREATE TABLE "Model" (
+    "id" SERIAL NOT NULL,
+    "name" VARCHAR(255) NOT NULL,
+    "brand_id" INTEGER NOT NULL,
+    "type_id" INTEGER NOT NULL,
+
+    PRIMARY KEY ("id")
 );
 
 -- CreateTable

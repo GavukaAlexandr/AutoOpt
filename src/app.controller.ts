@@ -1,15 +1,12 @@
-import {
-  Controller,
-  Get,
-  Param,
-  Post,
-  Body,
-  Put,
-  Delete,
-} from '@nestjs/common';
-// import { UserService } from './services/user.service';
-// import { PostService } from './services/post.service';
-// import { User as UserModel, Post as PostModel } from '@prisma/client';
+import { Controller, Get } from '@nestjs/common';
+import { AppService } from './app.service';
 
 @Controller()
-export class AppController {}
+export class AppController {
+  constructor(private readonly appService: AppService) {}
+
+  @Get()
+  getHello(): string {
+    return this.appService.getHello();
+  }
+}
