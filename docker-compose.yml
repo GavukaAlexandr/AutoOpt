@@ -10,7 +10,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-auto_db}
       PGDATA: /data/postgres
     volumes:
-       - postgres:/data/postgres
+      - ./postgres-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     networks:

@@ -11,17 +11,16 @@ generator client {
 }
 
 model Type {
-  id     String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  type   String      @db.VarChar(255)
-  brands BrandType[]
-  model  Model?
+  id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String      @unique @db.VarChar(255)
+  brands    BrandType[]
+  ModelType ModelType[]
 }
 
 model Brand {
   id     String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  brand  String      @db.VarChar(255)
+  name   String      @unique @db.VarChar(255)
   types  BrandType[]
-  models Model[]
 }
 
 model BrandType {
@@ -35,17 +34,24 @@ model BrandType {
   @@map("brand_types")
 }
 
+model ModelType {
+  modelId String @map("model_id") @db.Uuid
+  typeId  String @map("type_id") @db.Uuid
+
+  type  Type  @relation(fields: [typeId], references: [id])
+  model Model @relation(fields: [modelId], references: [id])
+  @@id([typeId, modelId])
+  @@map("model_types")
+}
+
 model Model {
   id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  model     String      @db.VarChar(255)
-  brandId   String      @map("brand_id") @db.Uuid
-  typeId    String      @map("type_id") @db.Uuid
-  userId    String      @map("user_id") @db.Uuid
-  type      Type        @relation(fields: [typeId], references: [id])
-  brand     Brand       @relation(fields: [brandId], references: [id])
-  user      User        @relation(fields: [userId], references: [id])
+  name      String      @unique @db.VarChar(255)
+  userId    String?     @map("user_id") @db.Uuid
+  user      User?       @relation(fields: [userId], references: [id])
   order     Order[]
   UserModel UserModel[]
+  ModelType ModelType[]
 }
 
 model Order {
@@ -68,8 +74,8 @@ model UserModel {
   userId  String @map("user_id") @db.Uuid
   modelId String @map("model_id") @db.Uuid
 
-  user  User  @relation(fields: [userId], references: [id])
-  model Model @relation(fields: [modelId], references: [id])
+  user  User?  @relation(fields: [userId], references: [id])
+  model Model? @relation(fields: [modelId], references: [id])
   @@id([userId, modelId])
   @@map("user_model")
 }
