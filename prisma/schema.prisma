@@ -11,30 +11,50 @@ generator client {
 }
 
 model Type {
-  id     Int          @id @default(autoincrement())
-  type   String       @db.VarChar(255)
-  brands BrandTypes[]
+  id     Int         @id @default(autoincrement())
+  type   String      @db.VarChar(255)
+  brands BrandType[]
+  model  Model?
 }
 
 model Brand {
-  id     Int          @id @default(autoincrement())
-  brand  String       @db.VarChar(255)
-  types  BrandTypes[]
+  id     Int         @id @default(autoincrement())
+  brand  String      @db.VarChar(255)
+  types  BrandType[]
   models Model[]
 }
 
-model BrandTypes {
-  typeId  Int
-  brandId Int
+model BrandType {
 
-  Type  Type  @relation(fields: [typeId], references: [id])
-  Brand Brand @relation(fields: [brandId], references: [id])
+  typeId  Int @map("type_id")
+  brandId Int @map("brand")
+
+  type  Type  @relation(fields: [typeId], references: [id])
+  brand Brand @relation(fields: [brandId], references: [id])
   @@id([typeId, brandId])
+  @@map("brand_types")
 }
 
 model Model {
-  id      Int    @id @default(autoincrement())
-  name    String @db.VarChar(255)
-  brand   Brand  @relation(fields: [brandID], references: [id])
-  brandID Int
+  id      Int     @id @default(autoincrement())
+  name    String  @db.VarChar(255)
+  brandId Int     @map("brand_id")
+  typeId  Int     @map("type_id")
+  type    Type    @relation(fields: [typeId], references: [id])
+  brand   Brand   @relation(fields: [brandId], references: [id])
+  order   Order[]
+}
+
+model Order {
+  id      Int   @id @default(autoincrement())
+  modelId Int   @map("model_id")
+  userId  Int   @map("user_id")
+  user    User  @relation(fields: [userId], references: [id])
+  model   Model @relation(fields: [modelId], references: [id])
+}
+
+model User {
+  id     Int     @id @default(autoincrement())
+  name   String  @db.VarChar(255)
+  orders Order[]
 }
