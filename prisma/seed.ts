@@ -34,7 +34,7 @@ async function main() {
           where: { name: model.title },
           create: {
             name: model.title,
-            ModelType: { create: { type: { connect: { name: type } } } },
+            Type: { connect: { name: type } },
           },
           update: {},
         });

@@ -11,16 +11,16 @@ generator client {
 }
 
 model Type {
-  id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name      String      @unique @db.VarChar(255)
-  brands    BrandType[]
-  ModelType ModelType[]
+  id     String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name   String      @unique @db.VarChar(255)
+  brands BrandType[]
+  models Model[]
 }
 
 model Brand {
-  id     String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name   String      @unique @db.VarChar(255)
-  types  BrandType[]
+  id    String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name  String      @unique @db.VarChar(255)
+  types BrandType[]
 }
 
 model BrandType {
@@ -34,24 +34,15 @@ model BrandType {
   @@map("brand_types")
 }
 
-model ModelType {
-  modelId String @map("model_id") @db.Uuid
-  typeId  String @map("type_id") @db.Uuid
-
-  type  Type  @relation(fields: [typeId], references: [id])
-  model Model @relation(fields: [modelId], references: [id])
-  @@id([typeId, modelId])
-  @@map("model_types")
-}
-
 model Model {
   id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name      String      @unique @db.VarChar(255)
   userId    String?     @map("user_id") @db.Uuid
-  user      User?       @relation(fields: [userId], references: [id])
+  typeId    String      @map("type_id") @db.Uuid
   order     Order[]
   UserModel UserModel[]
-  ModelType ModelType[]
+  user      User?       @relation(fields: [userId], references: [id])
+  Type      Type        @relation(fields: [typeId], references: [id])
 }
 
 model Order {
