@@ -21,6 +21,7 @@ model Brand {
   id    String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name  String      @unique @db.VarChar(255)
   types BrandType[]
+  Model Model[]
 }
 
 model BrandType {
@@ -37,28 +38,84 @@ model BrandType {
 model Model {
   id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name      String      @unique @db.VarChar(255)
-  userId    String?     @map("user_id") @db.Uuid
   typeId    String      @map("type_id") @db.Uuid
+  brandId   String      @map("brand_id") @db.Uuid
   order     Order[]
   UserModel UserModel[]
-  user      User?       @relation(fields: [userId], references: [id])
-  Type      Type        @relation(fields: [typeId], references: [id])
+  type      Type        @relation(fields: [typeId], references: [id])
+  brand     Brand       @relation(fields: [brandId], references: [id])
+}
+
+enum FuelType {
+  GAS
+  GASOLINE
+  DIESEL
+  ELECTRO
+  HYBRID
+}
+
+enum PartType {
+  ORIGINAL
+  NOT_ORIGINAL
+  USED
+  NOT_USED
+}
+
+enum Transmission {
+  AUTO
+  MECHANICAL
+}
+
+enum BodyType {
+  SEDAN
+  HATCHBACK
+  COUPE
+  UNIVERSAL
+  MINIVAN
+  SUV
+  PICKUP
+  CABRIOLET
+  VAN
+  LIMOUSINE
+}
+
+enum DriveType {
+  FULL
+  FRONT
+  REAR
 }
 
 model Order {
-  id      String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId  String @map("user_id") @db.Uuid
-  modelId String @map("model_id") @db.Uuid
-  user    User   @relation(fields: [userId], references: [id])
-  model   Model  @relation(fields: [modelId], references: [id])
+  id           String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String       @map("user_id") @db.Uuid
+  modelId      String       @map("model_id") @db.Uuid
+  transmission Transmission
+  bodyType     BodyType     @map("body_type")
+  drive        DriveType
+  year         String
+  engineVolume String       @map("engine_volume")
+  vin          String
+  carPart      String       @map("car_part") @db.Text
+  fuel         FuelType[]
+  part         PartType[]
+  user         User         @relation(fields: [userId], references: [id])
+  model        Model        @relation(fields: [modelId], references: [id])
 }
 
 model User {
-  id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name      String      @db.VarChar(255)
-  models    Model[]
-  orders    Order[]
-  UserModel UserModel[]
+  id                   String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  firstName            String      @db.VarChar(255)
+  lastName             String      @db.VarChar(255)
+  token                String?
+  email                String      @unique @db.VarChar(255)
+  phoneNumber          String      @unique @map("phone_number") @db.VarChar(255)
+  telegramNotification Boolean?     @map("telegram_notification")
+  viberNotification    Boolean?     @map("viber_notification")
+  phoneNotification    Boolean?     @map("phone_notification")
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+  orders               Order[]
+  UserModel            UserModel[]
 }
 
 model UserModel {

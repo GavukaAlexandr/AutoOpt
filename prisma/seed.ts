@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import axios from 'axios';
 const prisma = new PrismaClient();
-const transportTypes = ['avto', 'moto', 'bus', 'truck'];
+const transportTypes = ['auto', 'moto', 'bus', 'truck'];
 
 let allBrands = [];
 
@@ -12,11 +12,13 @@ const modelQueries = [];
 async function main() {
   for (const type of transportTypes) {
     let { data: brands } = await axios.get(
-      `http://avtoopt.com.ua/apps/get_data.php?type=brands&name=${type}`,
+      `http://avtoopt.com.ua/apps/get_data.php?type=brands&name=${
+        type === 'auto' ? 'avto' : type
+      }`,
     );
 
     brands = brands || [];
-    if (type === 'avto') brands = Object.values(brands);
+    if (type === 'auto') brands = Object.values(brands);
 
     brands = brands.map((brand) => ({ ...brand, type }));
 
@@ -24,9 +26,9 @@ async function main() {
 
     for (const brand of brands) {
       const { data: models } = await axios.get(
-        `http://avtoopt.com.ua/apps/get_data.php?type=models&name=${type}&brand=${encodeURIComponent(
-          brand.title,
-        )}`,
+        `http://avtoopt.com.ua/apps/get_data.php?type=models&name=${
+          type === 'auto' ? 'avto' : type
+        }&brand=${encodeURIComponent(brand.title)}`,
       );
 
       models.forEach((model) => {
@@ -34,7 +36,8 @@ async function main() {
           where: { name: model.title },
           create: {
             name: model.title,
-            Type: { connect: { name: type } },
+            type: { connect: { name: type } },
+            brand: { connect: { name: brand.title } },
           },
           update: {},
         });
@@ -44,6 +47,8 @@ async function main() {
   }
 
   typeQueries = transportTypes.map((transportType) => {
+    transportType = transportType === 'avto' ? 'auto' : transportType;
+
     return prisma.type.upsert({
       where: { name: transportType },
       create: { name: transportType },

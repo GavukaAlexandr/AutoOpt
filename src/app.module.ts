@@ -5,10 +5,34 @@ import { AppService } from './app.service';
 import { OrderModule } from './order/order.module';
 import { UserModule } from './user/user.module';
 import { TransportModule } from './transport/transport.module';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [OrderModule, UserModule, TransportModule],
+  imports: [
+    OrderModule,
+    UserModule,
+    AuthModule,
+    TransportModule,
+    ThrottlerModule.forRootAsync({
+      // imports: [ConfigModule],
+      // inject: [ConfigService],
+      useFactory: (/* config: ConfigService */) => ({
+        ttl: 60, //config.get('THROTTLE_TTL'),
+        limit: 60, //config.get('THROTTLE_LIMIT'),
+      }),
+    }),
+  ],
   controllers: [AppController],
-  providers: [AppService, PrismaService],
+  providers: [
+    AppService,
+    PrismaService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}

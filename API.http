@@ -1,0 +1,67 @@
+POST http://localhost:3000/order
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+    "userId": "87214869-2ae2-4179-a5d0-f1ce39e062a3",
+    "modelId": "7e07c5fc-0f50-47e1-8a7c-c51898c7274b",
+    "transmission": "AUTO",
+    "bodyType": "SEDAN",
+    "drive": "FULL",
+    "year": "2021",
+    "engineVolume": "3.3",
+    "vin": "sdgsdfgsdfgsd",
+    "carPart": "кардан",
+    "fuel": ["GASOLINE", "ELECTRO", "HYBRID"],
+    "part": "ORIGINAL"
+}
+
+###
+GET http://localhost:3000/transport
+Content-Type: application/json
+
+###
+GET http://localhost:3000/transport/brands/auto
+Content-Type: application/json
+
+###
+GET http://localhost:3000/transport/models/3db4c476-a81a-4da2-9262-dfd47479ef66/75726b82-aa27-42c9-a83b-fedd74228812
+Content-Type: application/json
+
+###
+
+@accessToken = {{login.response.body.access_token}}
+
+POST http://localhost:3000/user/register
+content-type: application/json
+
+{
+  "firstName": "Ronya",
+  "lastName": "Havuka",
+  "email": "ronyahavuka@gmail222.com",
+  "phoneNumber": "123123"
+}
+
+###
+
+# @name login
+POST http://localhost:3000/auth/login
+content-type: application/json
+
+{
+  "phoneNumber": "123123"
+}
+
+###
+
+GET http://localhost:3000/user/self
+Authorization: Bearer {{accessToken}}
+###
+
+POST http://localhost:3000/user/is-exist
+content-type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "email": "ron@gmail.com"
+}
