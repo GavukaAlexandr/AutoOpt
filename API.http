@@ -3,8 +3,7 @@ Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
 {
-    "userId": "87214869-2ae2-4179-a5d0-f1ce39e062a3",
-    "modelId": "7e07c5fc-0f50-47e1-8a7c-c51898c7274b",
+    "modelId": "0003a782-14d9-4d3f-839e-3db7f7c7f25c",
     "transmission": "AUTO",
     "bodyType": "SEDAN",
     "drive": "FULL",
@@ -36,9 +35,9 @@ POST http://localhost:3000/user/register
 content-type: application/json
 
 {
-  "firstName": "Ronya",
-  "lastName": "Havuka",
-  "email": "ronyahavuka@gmail222.com",
+  "firstName": "user",
+  "lastName": "Last Name",
+  "email": "user@gmail222.com",
   "phoneNumber": "123123"
 }
 

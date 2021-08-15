@@ -9,17 +9,17 @@ export class AuthService {
     private userService: UserService,
     private jwtService: JwtService,
   ) {}
-  async validateUser(email: string, phoneNumber: string): Promise<any> {
+  async validateUser(phoneNumber: string): Promise<any> {
     const user = await this.userService.findUniqueByPhone(phoneNumber);
+
     if (user.phoneNumber === phoneNumber) {
-      const { ...result } = user;
-      return result;
+      return user;
     }
     return null;
   }
 
   async login(user: User) {
-    const { ...payload } = user;
+    const { token, createdAt, updatedAt, id, ...payload } = user;
 
     return {
       access_token: this.jwtService.sign(payload),

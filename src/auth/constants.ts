@@ -1,3 +1,3 @@
 export const jwtConstants = {
-    secret: 'secretKey', //todo nedded add ENV!
-  };
+  secret: 'secretKey', //todo nedded add ENV!
+};
