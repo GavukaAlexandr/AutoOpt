@@ -10,9 +10,9 @@ export class TransportService {
     return this.prisma.type.findMany();
   }
 
-  async getBrands(transportType: string) {
+  async getBrands(transportId: string) {
     return this.prisma.brand.findMany({
-      where: { types: { some: { type: { name: transportType } } } },
+      where: { types: { some: { type: { id: transportId } } } },
     });
   }
 

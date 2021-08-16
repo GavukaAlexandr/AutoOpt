@@ -11,9 +11,9 @@ export class TransportController {
     return this.transportService.getTransportType();
   }
 
-  @Get('brands/:transportType')
-  async getBrands(@Param('transportType') transportType: string) {
-    return this.transportService.getBrands(transportType);
+  @Get('brands/:transportId')
+  async getBrands(@Param('transportId') transportId: string) {
+    return this.transportService.getBrands(transportId);
   }
 
   @Get('models/:transportType/:brandId')

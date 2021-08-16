@@ -1,5 +1,5 @@
 @accessToken = {{login.response.body.access_token}}
-POST http://localhost:3000/order
+POST https://auto-opt.cyber-geeks-lab.synology.me/order
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
@@ -17,21 +17,21 @@ Authorization: Bearer {{accessToken}}
 }
 
 ###
-GET http://localhost:3000/transport
+GET https://auto-opt.cyber-geeks-lab.synology.me/transport
 Content-Type: application/json
 
 ###
-GET http://localhost:3000/transport/brands/moto
+GET https://auto-opt.cyber-geeks-lab.synology.me/transport/brands/0d82be2e-44a0-4ac8-b9ab-b45cab22bf36
 Content-Type: application/json
 
 ###
-GET http://localhost:3000/transport/models/1f52a3dd-1950-4c34-910c-93f735bd95b2/b002fc00-cd72-47a7-ac70-29550bb2c2af
+GET https://auto-opt.cyber-geeks-lab.synology.me/transport/models/1f52a3dd-1950-4c34-910c-93f735bd95b2/b002fc00-cd72-47a7-ac70-29550bb2c2af
 Content-Type: application/json
 
 ###
 
 
-POST http://192.168.88.35:3000/user/register
+POST https://auto-opt.cyber-geeks-lab.synology.me/user/register
 content-type: application/json
 
 {
@@ -45,7 +45,7 @@ content-type: application/json
 ###
 
 # @name login
-POST http://192.168.88.35:3000/auth/login
+POST https://auto-opt.cyber-geeks-lab.synology.me/auth/login
 content-type: application/json
 
 {
@@ -54,11 +54,11 @@ content-type: application/json
 
 ###
 
-GET http://localhost:3000/user/self
+GET https://auto-opt.cyber-geeks-lab.synology.me/user/self
 Authorization: Bearer {{accessToken}}
 ###
 
-POST http://localhost:3000/user/is-exist
+POST https://auto-opt.cyber-geeks-lab.synology.me/user/is-exist
 content-type: application/json
 Authorization: Bearer {{accessToken}}
 
@@ -67,7 +67,7 @@ Authorization: Bearer {{accessToken}}
 }
 
 ###
-POST http://localhost:3000/transport/brand
+POST https://auto-opt.cyber-geeks-lab.synology.me/transport/brand
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
@@ -77,7 +77,7 @@ Authorization: Bearer {{accessToken}}
 }
 
 ###
-POST http://localhost:3000/transport/model
+POST https://auto-opt.cyber-geeks-lab.synology.me/transport/model
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
