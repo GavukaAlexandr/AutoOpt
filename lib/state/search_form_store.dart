@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:mobx/mobx.dart';
@@ -10,6 +11,13 @@ String getInitValueFromResponse(List listName, String type) {
   listName.forEach((element) => result.add((element['title'])));
   return result.firstWhere((element) => element == type);
 }
+
+Map<String, String> transportTranslate = {
+  'auto': 'Автомобиль',
+  'moto': 'Мотоцикл',
+  'bus': 'Автобус',
+  'truck': 'Грузовой Автомобиль'
+};
 
 class SearchFormStore = _SearchFormStore with _$SearchFormStore;
 
@@ -86,10 +94,6 @@ abstract class _SearchFormStore with Store {
   @observable
   List<dynamic> initialTransportType = [
     {'value': 'Тип транспорта:', 'title': 'Тип транспорта:'},
-    {'value': 'avto', 'title': 'Автомобиль'},
-    {'value': 'moto', 'title': 'Мотоцикл'},
-    {'value': 'bus', 'title': 'Автобус'},
-    {'value': 'truck', 'title': 'Грузовой автомобиль'}
   ];
 
   @observable
@@ -173,17 +177,36 @@ abstract class _SearchFormStore with Store {
   }
 
   @action
+  Future getTransport() async {
+    loaderStatus = true;
+    try {
+      Response<List<dynamic>> response = await Dio()
+          .get("https://auto-opt.cyber-geeks-lab.synology.me/transport");
+      var preparedTransport = response.data!.map((element) => {
+            'value': element['id'],
+            'title': transportTranslate[element['name']]
+          });
+      initialTransportType.addAll(preparedTransport);
+      print(initialTransportType);
+      loaderStatus = false;
+    } catch (e) {
+      loaderStatus = false;
+      print('Error: $e');
+    }
+  }
+
+  @action
   Future getModel(String brand) async {
     loaderStatus = true;
     try {
-      var response = await Dio().get(
-          "http://avtoopt.com.ua/apps/get_data.php?type=models&name=${valueTransportType}&brand=$brand");
+      Response<List<dynamic>> response = await Dio().get(
+          "https://auto-opt.cyber-geeks-lab.synology.me/transport/models/$valueTransportType/$brand");
+      var preparedModels = response.data!
+          .map((element) => {'value': element['id'], 'title': element['name']});
       initialModels.clear();
       initialModels.add({'value': 'Модель:', 'title': 'Модель:'});
       valueModel = getInitValueFromResponse(initialModels, 'Модель:');
-      json.decode(response.data) is List<dynamic>
-          ? initialModels.addAll(json.decode(response.data))
-          : initialModels.addAll((json.decode(response.data)).values.toList());
+      initialModels.addAll(preparedModels);
       loaderStatus = false;
     } catch (e) {
       loaderStatus = false;
@@ -195,15 +218,15 @@ abstract class _SearchFormStore with Store {
   Future getBrands(String type) async {
     loaderStatus = true;
     try {
-      var response = await Dio().get(
-          "http://avtoopt.com.ua/apps/get_data.php?type=brands&name=$type");
-
+      Response<List<dynamic>> response = await Dio().get(
+          "https://auto-opt.cyber-geeks-lab.synology.me/transport/brands/$type");
+      var preparedBrands = response.data!
+          .map((element) => {'value': element['id'], 'title': element['name']});
+      print(preparedBrands);
       initialBrands.clear();
       initialBrands.add({'value': 'Марка:', 'title': 'Марка:'});
       valueBrand = getInitValueFromResponse(initialBrands, 'Марка:');
-      json.decode(response.data) is List<dynamic>
-          ? initialBrands.addAll(json.decode(response.data))
-          : initialBrands.addAll((json.decode(response.data)).values.toList());
+      initialBrands.addAll(preparedBrands);
       loaderStatus = false;
     } catch (e) {
       loaderStatus = false;

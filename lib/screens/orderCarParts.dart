@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:avto_opt/state/search_form_store.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -20,7 +21,7 @@ class _OrderCarPartsState extends State<OrderCarParts> {
   final searchFormStore = SearchFormStore();
   var maskFormatter = new MaskTextInputFormatter(mask: "#.#");
   var currentFocus;
-  var resultFromProfile;
+  var resultFrom;
   final Connectivity connectivity = Connectivity();
   Map<String, String> networkStatus = {};
   late StreamSubscription<ConnectivityResult> subscription;
@@ -61,7 +62,7 @@ class _OrderCarPartsState extends State<OrderCarParts> {
     }
   }
 
-  dynamic checkProfileData() async {
+  void checkProfileData() async {
     final prefs = await SharedPreferences.getInstance();
     var name = prefs.getString('userName');
     var email = prefs.getString('userEmail');
@@ -74,15 +75,29 @@ class _OrderCarPartsState extends State<OrderCarParts> {
     if (phoneNumber == '') return alert();
     if (telegram == false && phone == false && viber == false) return alert();
     if (telegram == null && phone == null && viber == null) return alert();
-    resultFromProfile = {
-      'name': name,
-      'email': email,
-      'phoneNumber': phoneNumber,
-      'telegram': telegram,
-      'phone': phone,
-      'viber': viber
-    };
-    return print(resultFromProfile);
+    setState(() {
+      resultFrom= {
+        'name': 'rostyslav',
+        'email': 'ronyahavuka@gmail.com',
+        'phoneNumber': '38068565277',
+        'telegram': true,
+        'phone': false,
+        'viber': false,
+        'transportType' : searchFormStore.valueTransportType,
+        'brandName' : searchFormStore.valueBrand,
+        'modelName' : searchFormStore.valueModel,
+        'transmission' : searchFormStore.valueTransmission,
+        'bodyType' : searchFormStore.valueBodyType,
+        'drive' : searchFormStore.valueDrive,
+        'year' : searchFormStore.year,
+        'volume' : searchFormStore.volume,
+        'vin' : searchFormStore.vinNumber,
+        'carParts' : searchFormStore.carParts,
+        'fuelType' : searchFormStore.fuelType,
+        'partType' : searchFormStore.partType,
+      };
+    });
+    print(json.encode(resultFrom));
   }
 
   dynamic alert() {
@@ -106,7 +121,7 @@ class _OrderCarPartsState extends State<OrderCarParts> {
           ),
           onPressed: () => {
             Navigator.pop(context),
-            Navigator.pushNamed(context, 'userProfile')
+            Navigator.pushNamed(context, 'userProfile'),
           },
           color: Colors.green,
         )
@@ -125,6 +140,7 @@ class _OrderCarPartsState extends State<OrderCarParts> {
   void initState() {
     super.initState();
     checkConnectivity2();
+    searchFormStore.getTransport();
     searchFormStore.initialBrands.add({'value': 'Марка:', 'title': 'Марка:'});
     searchFormStore.initialModels.add({'value': 'Модель:', 'title': 'Модель:'});
     searchFormStore.valueModel =
@@ -258,8 +274,8 @@ class _OrderCarPartsState extends State<OrderCarParts> {
                                   items:
                                       searchFormStore.initialBrands.map((map) {
                                     return DropdownMenuItem<String>(
-                                        value: map['title'],
-                                        child: Text(map['value']));
+                                        value: map['value'],
+                                        child: Text(map['title']));
                                   }).toList(),
                                 ),
                               ),
@@ -624,31 +640,26 @@ class _OrderCarPartsState extends State<OrderCarParts> {
                               backgroundColor: Colors.green[300],
                               padding: EdgeInsets.only(
                                   left: 34, right: 34, top: 12, bottom: 12)),
-                          onPressed: () async {
+                          onPressed: () {
                             searchFormStore.validateAll();
-                            if (searchFormStore.error.hasErrors) {
-                              Alert(
-                                context: context,
-                                type: AlertType.error,
-                                title:
-                                    "Проверьте правильность заполненных данных",
-                                buttons: [
-                                  DialogButton(
-                                    child: Text(
-                                      "Закрыть",
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 16),
-                                    ),
-                                    onPressed: () => Navigator.pop(context),
-                                    color: Colors.red[300],
+                            if (!searchFormStore.error.hasErrors) return checkProfileData();
+                            Alert(
+                              context: context,
+                              type: AlertType.error,
+                              title:
+                                  "Проверьте правильность заполненных данных",
+                              buttons: [
+                                DialogButton(
+                                  child: Text(
+                                    "Закрыть",
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 16),
                                   ),
-                                ],
-                              ).show();
-                              return;
-                            } else {
-                              return checkProfileData();
-                            }
-                            // print(resultFromProfile);
+                                  onPressed: () => Navigator.pop(context),
+                                  color: Colors.red[300],
+                                ),
+                              ],
+                            ).show();
                           },
                           child: Text(
                             'Отправить',

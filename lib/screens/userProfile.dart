@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import './../state/user_form_store.dart';
@@ -30,7 +33,23 @@ class _UserProfile extends State<UserProfile> {
   final myUserEmailController = TextEditingController();
   final myUserPhoneController = TextEditingController();
 
+
+//! Update user when phone nubmer no changed;
+//! Register => Login;
+//! https://auto-opt.cyber-geeks-lab.synology.me/
   void setData() async {
+    // try {
+    //   var response =
+    //       await Dio().post('https://auto-opt.cyber-geeks-lab.synology.me/user/register', data: {
+    //     "firstName": userFormStore.userName,
+    //     "lastName": "Last Name",
+    //     "email": userFormStore.email,
+    //     "phoneNumber": userFormStore.numberPhone
+    //   });
+    //   print(response.data);
+    // } catch (e) {
+    //   log('Такий чувак уже є');
+    // }
     final prefs = await SharedPreferences.getInstance();
     if (userFormStore.error.hasErrors == true) return;
     prefs.setString('userName', userFormStore.userName);
