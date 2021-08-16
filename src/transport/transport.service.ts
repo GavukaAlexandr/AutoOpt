@@ -16,11 +16,11 @@ export class TransportService {
     });
   }
 
-  async getModels(transportType: string, brandId: string) {
+  async getModels(transportId: string, brandId: string) {
     return this.prisma.model.findMany({
       where: {
         brandId: brandId,
-        typeId: transportType,
+        typeId: transportId,
       },
     });
   }

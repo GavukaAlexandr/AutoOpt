@@ -16,12 +16,12 @@ export class TransportController {
     return this.transportService.getBrands(transportId);
   }
 
-  @Get('models/:transportType/:brandId')
+  @Get('models/:transportId/:brandId')
   async getModels(
-    @Param('transportType') transportType: string,
+    @Param('transportId') transportId: string,
     @Param('brandId') brandId: string,
   ) {
-    return this.transportService.getModels(transportType, brandId);
+    return this.transportService.getModels(transportId, brandId);
   }
 
   @Post('brand')

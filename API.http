@@ -21,7 +21,7 @@ GET https://auto-opt.cyber-geeks-lab.synology.me/transport
 Content-Type: application/json
 
 ###
-GET https://auto-opt.cyber-geeks-lab.synology.me/transport/brands/0d82be2e-44a0-4ac8-b9ab-b45cab22bf36
+GET https://auto-opt.cyber-geeks-lab.synology.me/transport/brands/33ad6aab-30e9-479f-8131-adf747d36d2b
 Content-Type: application/json
 
 ###
