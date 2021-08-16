@@ -1,3 +1,4 @@
+@accessToken = {{login.response.body.access_token}}
 POST http://localhost:3000/order
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
@@ -20,35 +21,35 @@ GET http://localhost:3000/transport
 Content-Type: application/json
 
 ###
-GET http://localhost:3000/transport/brands/auto
+GET http://localhost:3000/transport/brands/moto
 Content-Type: application/json
 
 ###
-GET http://localhost:3000/transport/models/3db4c476-a81a-4da2-9262-dfd47479ef66/75726b82-aa27-42c9-a83b-fedd74228812
+GET http://localhost:3000/transport/models/1f52a3dd-1950-4c34-910c-93f735bd95b2/b002fc00-cd72-47a7-ac70-29550bb2c2af
 Content-Type: application/json
 
 ###
 
-@accessToken = {{login.response.body.access_token}}
 
-POST http://localhost:3000/user/register
+POST http://192.168.88.35:3000/user/register
 content-type: application/json
 
 {
-  "firstName": "user",
-  "lastName": "Last Name",
-  "email": "user@gmail222.com",
-  "phoneNumber": "123123"
+  "firstName": "user221",
+  "lastName": "Last 221",
+  "email": "user221@gmail222.com",
+  "phoneNumber": "221",
+  "telegramNotification": true
 }
 
 ###
 
 # @name login
-POST http://localhost:3000/auth/login
+POST http://192.168.88.35:3000/auth/login
 content-type: application/json
 
 {
-  "phoneNumber": "123123"
+  "phoneNumber": "221"
 }
 
 ###
@@ -63,4 +64,25 @@ Authorization: Bearer {{accessToken}}
 
 {
   "email": "ron@gmail.com"
+}
+
+###
+POST http://localhost:3000/transport/brand
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "Samsung",
+  "type": "moto"
+}
+
+###
+POST http://localhost:3000/transport/model
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "A51",
+  "brand": "Samsung",
+  "type": "moto"
 }

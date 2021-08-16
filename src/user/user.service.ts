@@ -20,6 +20,9 @@ export class UserService {
         lastName: newUser.lastName,
         email: newUser.email,
         phoneNumber: newUser.phoneNumber,
+        telegramNotification: newUser.telegramNotification,
+        viberNotification: newUser.viberNotification,
+        phoneNotification: newUser.phoneNotification,
       },
     });
   }
