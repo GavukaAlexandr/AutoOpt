@@ -37,7 +37,9 @@ dependencies:
   mask_text_input_formatter: ^2.0.0
   rflutter_alert: ^2.0.4
   flutter_modular: ^3.3.1
-  translator: ^0.1.7
+  another_flushbar: ^1.10.24
+  localstorage: ^4.0.0+1
+  localstore: ^1.2.0
 
 dev_dependencies:
   flutter_test:

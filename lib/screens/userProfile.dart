@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:another_flushbar/flushbar.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -32,7 +33,6 @@ class _UserProfile extends State<UserProfile> {
   final myUserNameController = TextEditingController();
   final myUserEmailController = TextEditingController();
   final myUserPhoneController = TextEditingController();
-
 
 //! Update user when phone nubmer no changed;
 //! Register => Login;
@@ -247,29 +247,18 @@ class _UserProfile extends State<UserProfile> {
                                 backgroundColor: Colors.green[300],
                                 padding: EdgeInsets.only(
                                     left: 34, right: 34, top: 12, bottom: 12)),
-                            onPressed: () {
+                            onPressed: () async {
                               userFormStore.validateAll();
                               if (userFormStore.error.hasErrors) return;
                               setData();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  action: SnackBarAction(
-                                    label: 'Закрыть',
-                                    textColor: Colors.black,
-                                    onPressed: () {},
-                                  ),
-                                  content:
-                                      const Text('Профиль успешно сохранен'),
-                                  duration: const Duration(milliseconds: 2500),
-                                  width: 320.0,
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 7.0),
-                                  behavior: SnackBarBehavior.floating,
-                                  backgroundColor: Colors.green,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5.0)),
-                                ),
-                              );
+                              Navigator.pop(context);
+                              Flushbar(
+                                flushbarPosition: FlushbarPosition.TOP,
+                                message: 'Профиль успешно сохранен',
+                                duration: Duration(seconds: 3),
+                                messageSize: 17,
+                                backgroundColor: Colors.green,
+                              ).show(context);   
                             },
                             child: Text(
                               'Сохранить',

@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:loading_overlay/loading_overlay.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:localstore/localstore.dart';
 
 class OrderCarParts extends StatefulWidget {
   const OrderCarParts({Key? key}) : super(key: key);
@@ -21,7 +22,6 @@ class _OrderCarPartsState extends State<OrderCarParts> {
   final searchFormStore = SearchFormStore();
   var maskFormatter = new MaskTextInputFormatter(mask: "#.#");
   var currentFocus;
-  var resultFrom;
   final Connectivity connectivity = Connectivity();
   Map<String, String> networkStatus = {};
   late StreamSubscription<ConnectivityResult> subscription;
@@ -75,29 +75,25 @@ class _OrderCarPartsState extends State<OrderCarParts> {
     if (phoneNumber == '') return alert();
     if (telegram == false && phone == false && viber == false) return alert();
     if (telegram == null && phone == null && viber == null) return alert();
-    setState(() {
-      resultFrom= {
-        'name': 'rostyslav',
-        'email': 'ronyahavuka@gmail.com',
-        'phoneNumber': '38068565277',
-        'telegram': true,
-        'phone': false,
-        'viber': false,
-        'transportType' : searchFormStore.valueTransportType,
-        'brandName' : searchFormStore.valueBrand,
-        'modelName' : searchFormStore.valueModel,
-        'transmission' : searchFormStore.valueTransmission,
-        'bodyType' : searchFormStore.valueBodyType,
-        'drive' : searchFormStore.valueDrive,
-        'year' : searchFormStore.year,
-        'volume' : searchFormStore.volume,
-        'vin' : searchFormStore.vinNumber,
-        'carParts' : searchFormStore.carParts,
-        'fuelType' : searchFormStore.fuelType,
-        'partType' : searchFormStore.partType,
-      };
-    });
-    print(json.encode(resultFrom));
+    return alertSuccess();
+  }
+
+  dynamic alertSuccess() {
+    return Alert(
+      context: context,
+      type: AlertType.success,
+      title: "Заказ успешно принят",
+      buttons: [
+        DialogButton(
+          child: Text(
+            "Закрыть",
+            style: TextStyle(color: Colors.white, fontSize: 16),
+          ),
+          onPressed: () => Navigator.pop(context),
+          color: Colors.red[100],
+        ),
+      ],
+    ).show();
   }
 
   dynamic alert() {
@@ -642,7 +638,8 @@ class _OrderCarPartsState extends State<OrderCarParts> {
                                   left: 34, right: 34, top: 12, bottom: 12)),
                           onPressed: () {
                             searchFormStore.validateAll();
-                            if (!searchFormStore.error.hasErrors) return checkProfileData();
+                            if (!searchFormStore.error.hasErrors)
+                              return checkProfileData();
                             Alert(
                               context: context,
                               type: AlertType.error,

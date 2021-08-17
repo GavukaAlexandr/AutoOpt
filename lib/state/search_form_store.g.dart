@@ -299,6 +299,14 @@ mixin _$SearchFormStore on _SearchFormStore, Store {
     });
   }
 
+  final _$getTransportAsyncAction =
+      AsyncAction('_SearchFormStore.getTransport');
+
+  @override
+  Future<dynamic> getTransport() {
+    return _$getTransportAsyncAction.run(() => super.getTransport());
+  }
+
   final _$getModelAsyncAction = AsyncAction('_SearchFormStore.getModel');
 
   @override
