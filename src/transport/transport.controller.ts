@@ -1,4 +1,5 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { createBrandDto, createModelDto } from './dto/transport.dto';
 import { TransportService } from './transport.service';
 
 @Controller('transport')
@@ -10,16 +11,26 @@ export class TransportController {
     return this.transportService.getTransportType();
   }
 
-  @Get('brands/:transportType')
-  async getBrands(@Param('transportType') transportType: string) {
-    return this.transportService.getBrands(transportType);
+  @Get('brands/:transportId')
+  async getBrands(@Param('transportId') transportId: string) {
+    return this.transportService.getBrands(transportId);
   }
 
-  @Get('models/:transportType/:brandId')
+  @Get('models/:transportId/:brandId')
   async getModels(
-    @Param('transportType') transportType: string,
+    @Param('transportId') transportId: string,
     @Param('brandId') brandId: string,
   ) {
-    return this.transportService.getModels(transportType, brandId);
+    return this.transportService.getModels(transportId, brandId);
+  }
+
+  @Post('brand')
+  async createBrand(@Body() brand: createBrandDto) {
+    return this.transportService.createBrand(brand);
+  }
+
+  @Post('model')
+  async createModel(@Body() model: createModelDto) {
+    return this.transportService.createModel(model);
   }
 }

@@ -29,10 +29,10 @@ import { AuthModule } from './auth/auth.module';
   providers: [
     AppService,
     PrismaService,
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard,
-    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: JwtAuthGuard,
+    // },
   ],
 })
 export class AppModule {}

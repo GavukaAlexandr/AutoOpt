@@ -1,4 +1,5 @@
-POST http://localhost:3000/order
+@accessToken = {{login.response.body.access_token}}
+POST https://auto-opt.cyber-geeks-lab.synology.me/order
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
@@ -16,51 +17,72 @@ Authorization: Bearer {{accessToken}}
 }
 
 ###
-GET http://localhost:3000/transport
+GET https://auto-opt.cyber-geeks-lab.synology.me/transport
 Content-Type: application/json
 
 ###
-GET http://localhost:3000/transport/brands/auto
+GET https://auto-opt.cyber-geeks-lab.synology.me/transport/brands/33ad6aab-30e9-479f-8131-adf747d36d2b
 Content-Type: application/json
 
 ###
-GET http://localhost:3000/transport/models/3db4c476-a81a-4da2-9262-dfd47479ef66/75726b82-aa27-42c9-a83b-fedd74228812
+GET https://auto-opt.cyber-geeks-lab.synology.me/transport/models/1f52a3dd-1950-4c34-910c-93f735bd95b2/b002fc00-cd72-47a7-ac70-29550bb2c2af
 Content-Type: application/json
 
 ###
 
-@accessToken = {{login.response.body.access_token}}
 
-POST http://localhost:3000/user/register
+POST https://auto-opt.cyber-geeks-lab.synology.me/user/register
 content-type: application/json
 
 {
-  "firstName": "user",
-  "lastName": "Last Name",
-  "email": "user@gmail222.com",
-  "phoneNumber": "123123"
+  "firstName": "user221",
+  "lastName": "Last 221",
+  "email": "user221@gmail222.com",
+  "phoneNumber": "221",
+  "telegramNotification": true
 }
 
 ###
 
 # @name login
-POST http://localhost:3000/auth/login
+POST https://auto-opt.cyber-geeks-lab.synology.me/auth/login
 content-type: application/json
 
 {
-  "phoneNumber": "123123"
+  "phoneNumber": "221"
 }
 
 ###
 
-GET http://localhost:3000/user/self
+GET https://auto-opt.cyber-geeks-lab.synology.me/user/self
 Authorization: Bearer {{accessToken}}
 ###
 
-POST http://localhost:3000/user/is-exist
+POST https://auto-opt.cyber-geeks-lab.synology.me/user/is-exist
 content-type: application/json
 Authorization: Bearer {{accessToken}}
 
 {
   "email": "ron@gmail.com"
+}
+
+###
+POST https://auto-opt.cyber-geeks-lab.synology.me/transport/brand
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "Samsung",
+  "type": "moto"
+}
+
+###
+POST https://auto-opt.cyber-geeks-lab.synology.me/transport/model
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "A51",
+  "brand": "Samsung",
+  "type": "moto"
 }

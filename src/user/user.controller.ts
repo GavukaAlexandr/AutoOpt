@@ -25,8 +25,9 @@ export class UserController {
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
+      telegramNotification: user.telegramNotification,
+      viberNotification: user.viberNotification,
+      phoneNotification: user.phoneNotification,
     };
   }
 
