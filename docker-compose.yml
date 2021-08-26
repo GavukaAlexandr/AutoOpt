@@ -1,6 +1,22 @@
 version: '3.5'
 
 services:
+  api:
+    container_name: auto_opt_api
+    build:
+      context: ./
+      target: production
+    ports:
+      - 3000:3000
+    command: 
+      - node 
+      - dist/src/main
+    env_file:
+      - ./.env
+    restart: always
+    depends_on:
+      - postgres
+
   postgres:
     image: postgres:13-alpine
     environment:
@@ -12,14 +28,7 @@ services:
       - ./postgres-data:/data/postgres
     ports:
       - "5432:5432"
-    networks:
-      - postgres
-    restart: unless-stopped
-
-networks:
-  postgres:
-    driver: bridge
+    restart: always
 
 volumes:
     postgres:
-    pgadmin:
