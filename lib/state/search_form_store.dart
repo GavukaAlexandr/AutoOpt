@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:mobx/mobx.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:validators/validators.dart';
 part 'search_form_store.g.dart';
 
@@ -24,6 +25,10 @@ class SearchFormStore = _SearchFormStore with _$SearchFormStore;
 abstract class _SearchFormStore with Store {
   final SearchFormErrorState error = SearchFormErrorState();
   late List<ReactionDisposer> _disposers;
+
+  Dio dio = Dio();
+
+  
 
   @observable
   bool loaderStatus = false;
@@ -178,6 +183,35 @@ abstract class _SearchFormStore with Store {
 
   @action
   Future getTransport() async {
+
+    dio.interceptors.add(InterceptorsWrapper(onRequest: (options, h) async {
+      final prefs = await SharedPreferences.getInstance();
+      var accessToken = prefs.getString('token');
+      options.headers['Authorization'] = 'Bearer $accessToken';
+      return h.next(options);
+    }, 
+    onError: (e, handler) async {
+      if (e.response!.statusCode == 401) {
+        await login();
+        final prefs = await SharedPreferences.getInstance();
+        var _accessToken = prefs.getString('token');
+        _accessToken = null;
+        final RequestOptions options = e.response!.requestOptions;
+        try {
+          options.headers['Authorization'] = 'Bearer $_accessToken';
+          final Response response = await dio.fetch(options);
+          return handler.resolve(response);
+        } catch (e, s) {
+          print(e);
+          print(s);
+          // Refresh token expired
+          // Redirect user to login...
+        }
+      }
+
+      return handler.next(e);
+    }));
+
     loaderStatus = true;
     try {
       Response<List<dynamic>> response = await Dio()
@@ -187,7 +221,6 @@ abstract class _SearchFormStore with Store {
             'title': transportTranslate[element['name']]
           });
       initialTransportType.addAll(preparedTransport);
-      print(initialTransportType);
       loaderStatus = false;
     } catch (e) {
       loaderStatus = false;
@@ -195,12 +228,56 @@ abstract class _SearchFormStore with Store {
     }
   }
 
+  login() async {
+    final prefs = await SharedPreferences.getInstance();
+    try {
+      var response =
+          await Dio().post("http://192.168.88.30:3000/auth/login", data: {
+        "phoneNumber": prefs.getString('phone').toString(),
+        "firebaseUid": prefs.getString('user-uid').toString()
+      });
+      var result = response.data;
+      prefs.setString('token', result['access_token']);
+    } catch (e) {
+      print(e);
+    }
+  }
+
   @action
   Future getModel(String brand) async {
+
+    dio.interceptors.add(InterceptorsWrapper(onRequest: (options, h) async {
+      final prefs = await SharedPreferences.getInstance();
+      var accessToken = prefs.getString('token');
+      options.headers['Authorization'] = 'Bearer $accessToken';
+      return h.next(options);
+    }, 
+    onError: (e, handler) async {
+      if (e.response!.statusCode == 401) {
+        await login();
+        final prefs = await SharedPreferences.getInstance();
+        var _accessToken = prefs.getString('token');
+        _accessToken = null;
+        final RequestOptions options = e.response!.requestOptions;
+        try {
+          options.headers['Authorization'] = 'Bearer $_accessToken';
+          final Response response = await dio.fetch(options);
+          return handler.resolve(response);
+        } catch (e, s) {
+          print(e);
+          print(s);
+          // Refresh token expired
+          // Redirect user to login...
+        }
+      }
+
+      return handler.next(e);
+    }));
+
     loaderStatus = true;
     try {
-      Response<List<dynamic>> response = await Dio().get(
-          "https://auto-opt.cyber-geeks-lab.synology.me/transport/models/$valueTransportType/$brand");
+      Response<List<dynamic>> response = await dio.get(
+          "http://192.168.88.30:3000/transport/models/$valueTransportType/$brand");
       var preparedModels = response.data!
           .map((element) => {'value': element['id'], 'title': element['name']});
       initialModels.clear();
@@ -216,13 +293,41 @@ abstract class _SearchFormStore with Store {
 
   @action
   Future getBrands(String type) async {
+
+    dio.interceptors.add(InterceptorsWrapper(onRequest: (options, h) async {
+      final prefs = await SharedPreferences.getInstance();
+      var accessToken = prefs.getString('token');
+      options.headers['Authorization'] = 'Bearer $accessToken';
+      return h.next(options);
+    }, 
+    onError: (e, handler) async {
+      if (e.response!.statusCode == 401) {
+        await login();
+        final prefs = await SharedPreferences.getInstance();
+        var _accessToken = prefs.getString('token');
+        _accessToken = null;
+        final RequestOptions options = e.response!.requestOptions;
+        try {
+          options.headers['Authorization'] = 'Bearer $_accessToken';
+          final Response response = await dio.fetch(options);
+          return handler.resolve(response);
+        } catch (e, s) {
+          print(e);
+          print(s);
+          // Refresh token expired
+          // Redirect user to login...
+        }
+      }
+
+      return handler.next(e);
+    }));
+
     loaderStatus = true;
     try {
-      Response<List<dynamic>> response = await Dio().get(
+      Response<List<dynamic>> response = await dio.get(
           "https://auto-opt.cyber-geeks-lab.synology.me/transport/brands/$type");
       var preparedBrands = response.data!
           .map((element) => {'value': element['id'], 'title': element['name']});
-      print(preparedBrands);
       initialBrands.clear();
       initialBrands.add({'value': 'Марка:', 'title': 'Марка:'});
       valueBrand = getInitValueFromResponse(initialBrands, 'Марка:');

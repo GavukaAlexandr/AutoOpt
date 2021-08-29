@@ -75,8 +75,8 @@ class _UserProfile extends State<UserProfile> {
 
   @override
   void initState() {
-    getData();
     super.initState();
+    getData();
     userFormStore.setupValidations();
     myUserNameController.addListener(setNameValue);
     myUserEmailController.addListener(setEmailValue);

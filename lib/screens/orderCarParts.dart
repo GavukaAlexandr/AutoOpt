@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:avto_opt/state/search_form_store.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -132,9 +133,26 @@ class _OrderCarPartsState extends State<OrderCarParts> {
     }
   }
 
+
+  login() async {
+    final prefs = await SharedPreferences.getInstance();
+    try {
+      var response =
+          await Dio().post("http://192.168.88.30:3000/auth/login", data: {
+        "phoneNumber": prefs.getString('phone').toString(),
+        "firebaseUid": prefs.getString('user-uid').toString()
+      });
+      var result = response.data;
+      prefs.setString('token', result['access_token']);
+    } catch (e) {
+      print(e);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+
     checkConnectivity2();
     searchFormStore.getTransport();
     searchFormStore.initialBrands.add({'value': 'Марка:', 'title': 'Марка:'});
@@ -176,7 +194,7 @@ class _OrderCarPartsState extends State<OrderCarParts> {
           actions: [
             IconButton(
               onPressed: () {
-                Navigator.pushNamed(context, 'userProfile');
+                Navigator.pushNamed(context, 'order');
               },
               icon: Icon(Icons.person),
               iconSize: 36,
