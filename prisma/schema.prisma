@@ -107,11 +107,12 @@ model User {
   firstName            String      @db.VarChar(255)
   lastName             String      @db.VarChar(255)
   token                String?
+  firebaseUid          String      @unique @map("firebase_uid")
   email                String      @unique @db.VarChar(255)
   phoneNumber          String      @unique @map("phone_number") @db.VarChar(255)
-  telegramNotification Boolean?     @map("telegram_notification")
-  viberNotification    Boolean?     @map("viber_notification")
-  phoneNotification    Boolean?     @map("phone_notification")
+  telegramNotification Boolean?    @map("telegram_notification")
+  viberNotification    Boolean?    @map("viber_notification")
+  phoneNotification    Boolean?    @map("phone_notification")
   createdAt            DateTime    @default(now())
   updatedAt            DateTime    @updatedAt
   orders               Order[]

@@ -34,8 +34,8 @@ export class UserController {
   @Public()
   @UseGuards(ThrottlerGuard)
   @Post('/is-exist')
-  async isUserExist(@Body() body: { email: string }) {
-    const user = await this.userService.findOneByEmail(body.email);
+  async isUserExist(@Body() body: { phoneNumber: string }) {
+    const user = await this.userService.findOneByEmail(body.phoneNumber);
     return { isUserExist: !!user };
   }
 }

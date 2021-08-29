@@ -19,6 +19,7 @@ export class UserService {
         firstName: newUser.firstName,
         lastName: newUser.lastName,
         email: newUser.email,
+        firebaseUid: newUser.firebaseUid,
         phoneNumber: newUser.phoneNumber,
         telegramNotification: newUser.telegramNotification,
         viberNotification: newUser.viberNotification,
@@ -35,8 +36,8 @@ export class UserService {
     return this.prisma.user.findUnique({ where: { id } });
   }
 
-  findOneByEmail(email: User['email']): Promise<User> {
-    return this.prisma.user.findUnique({ where: { email } });
+  findOneByEmail(phoneNumber: User['phoneNumber']): Promise<User> {
+    return this.prisma.user.findUnique({ where: { phoneNumber } });
   }
 
   async remove(id: User['id']): Promise<void> {
