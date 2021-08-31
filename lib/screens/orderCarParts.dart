@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:avto_opt/screens/login.dart';
 import 'package:dio/dio.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:avto_opt/state/search_form_store.dart';
@@ -133,26 +134,22 @@ class _OrderCarPartsState extends State<OrderCarParts> {
     }
   }
 
-
-  login() async {
+  isToken() async {
     final prefs = await SharedPreferences.getInstance();
-    try {
-      var response =
-          await Dio().post("http://192.168.88.30:3000/auth/login", data: {
-        "phoneNumber": prefs.getString('phone').toString(),
-        "firebaseUid": prefs.getString('user-uid').toString()
-      });
-      var result = response.data;
-      prefs.setString('token', result['access_token']);
-    } catch (e) {
-      print(e);
-    }
+    var token = prefs.getString('token');
+    
+    if (token != null) return;
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => Login()),
+      (Route<dynamic> route) => false,
+    );
   }
 
   @override
   void initState() {
     super.initState();
-
+    isToken();
     checkConnectivity2();
     searchFormStore.getTransport();
     searchFormStore.initialBrands.add({'value': 'Марка:', 'title': 'Марка:'});
@@ -193,8 +190,8 @@ class _OrderCarPartsState extends State<OrderCarParts> {
           centerTitle: true,
           actions: [
             IconButton(
-              onPressed: () {
-                Navigator.pushNamed(context, 'order');
+              onPressed: () async {
+                Navigator.pushNamed(context, 'userProfile');
               },
               icon: Icon(Icons.person),
               iconSize: 36,

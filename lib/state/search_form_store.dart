@@ -26,10 +26,6 @@ abstract class _SearchFormStore with Store {
   final SearchFormErrorState error = SearchFormErrorState();
   late List<ReactionDisposer> _disposers;
 
-  Dio dio = Dio();
-
-  
-
   @observable
   bool loaderStatus = false;
 
@@ -183,14 +179,14 @@ abstract class _SearchFormStore with Store {
 
   @action
   Future getTransport() async {
+    Dio dio = Dio();
 
     dio.interceptors.add(InterceptorsWrapper(onRequest: (options, h) async {
       final prefs = await SharedPreferences.getInstance();
       var accessToken = prefs.getString('token');
       options.headers['Authorization'] = 'Bearer $accessToken';
       return h.next(options);
-    }, 
-    onError: (e, handler) async {
+    }, onError: (e, handler) async {
       if (e.response!.statusCode == 401) {
         await login();
         final prefs = await SharedPreferences.getInstance();
@@ -214,7 +210,7 @@ abstract class _SearchFormStore with Store {
 
     loaderStatus = true;
     try {
-      Response<List<dynamic>> response = await Dio()
+      Response<List<dynamic>> response = await dio
           .get("https://auto-opt.cyber-geeks-lab.synology.me/transport");
       var preparedTransport = response.data!.map((element) => {
             'value': element['id'],
@@ -231,11 +227,12 @@ abstract class _SearchFormStore with Store {
   login() async {
     final prefs = await SharedPreferences.getInstance();
     try {
-      var response =
-          await Dio().post("http://192.168.88.30:3000/auth/login", data: {
-        "phoneNumber": prefs.getString('phone').toString(),
-        "firebaseUid": prefs.getString('user-uid').toString()
-      });
+      var response = await Dio().post(
+          "https://auto-opt.cyber-geeks-lab.synology.me/auth/login",
+          data: {
+            "phoneNumber": prefs.getString('phone').toString(),
+            "firebaseUid": prefs.getString('user-uid').toString()
+          });
       var result = response.data;
       prefs.setString('token', result['access_token']);
     } catch (e) {
@@ -245,14 +242,14 @@ abstract class _SearchFormStore with Store {
 
   @action
   Future getModel(String brand) async {
+    Dio dio = Dio();
 
     dio.interceptors.add(InterceptorsWrapper(onRequest: (options, h) async {
       final prefs = await SharedPreferences.getInstance();
       var accessToken = prefs.getString('token');
       options.headers['Authorization'] = 'Bearer $accessToken';
       return h.next(options);
-    }, 
-    onError: (e, handler) async {
+    }, onError: (e, handler) async {
       if (e.response!.statusCode == 401) {
         await login();
         final prefs = await SharedPreferences.getInstance();
@@ -277,7 +274,7 @@ abstract class _SearchFormStore with Store {
     loaderStatus = true;
     try {
       Response<List<dynamic>> response = await dio.get(
-          "http://192.168.88.30:3000/transport/models/$valueTransportType/$brand");
+          "https://auto-opt.cyber-geeks-lab.synology.me/transport/models/$valueTransportType/$brand");
       var preparedModels = response.data!
           .map((element) => {'value': element['id'], 'title': element['name']});
       initialModels.clear();
@@ -293,14 +290,14 @@ abstract class _SearchFormStore with Store {
 
   @action
   Future getBrands(String type) async {
+    Dio dio = Dio();
 
     dio.interceptors.add(InterceptorsWrapper(onRequest: (options, h) async {
       final prefs = await SharedPreferences.getInstance();
       var accessToken = prefs.getString('token');
       options.headers['Authorization'] = 'Bearer $accessToken';
       return h.next(options);
-    }, 
-    onError: (e, handler) async {
+    }, onError: (e, handler) async {
       if (e.response!.statusCode == 401) {
         await login();
         final prefs = await SharedPreferences.getInstance();

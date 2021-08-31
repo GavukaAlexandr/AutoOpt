@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:another_flushbar/flushbar.dart';
+import 'package:avto_opt/screens/login.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -73,9 +74,22 @@ class _UserProfile extends State<UserProfile> {
     myUserPhoneController.text = userFormStore.numberPhone;
   }
 
+  isToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    var token = prefs.getString('token');
+
+    if (token != null) return;
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => Login()),
+      (Route<dynamic> route) => false,
+    );
+  }
+
   @override
   void initState() {
     super.initState();
+    isToken();
     getData();
     userFormStore.setupValidations();
     myUserNameController.addListener(setNameValue);
@@ -258,10 +272,38 @@ class _UserProfile extends State<UserProfile> {
                                 duration: Duration(seconds: 3),
                                 messageSize: 17,
                                 backgroundColor: Colors.green,
-                              ).show(context);   
+                              ).show(context);
                             },
                             child: Text(
                               'Сохранить',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 19,
+                                  fontWeight: FontWeight.w300),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.62,
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                                backgroundColor: Colors.red[700],
+                                padding: EdgeInsets.only(
+                                    left: 34, right: 34, top: 12, bottom: 12)),
+                            onPressed: () async {
+
+                              final prefs = await SharedPreferences.getInstance();
+
+                              prefs.clear();
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Login()),
+                                (Route<dynamic> route) => false,
+                              );
+                            },
+                            child: Text(
+                              'Выйти',
                               style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 19,
