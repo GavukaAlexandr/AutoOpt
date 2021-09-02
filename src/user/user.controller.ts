@@ -37,6 +37,7 @@ export class UserController {
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
+      phoneNumber: user.phoneNumber,
       telegramNotification: user.telegramNotification,
       viberNotification: user.viberNotification,
       phoneNotification: user.phoneNotification,
