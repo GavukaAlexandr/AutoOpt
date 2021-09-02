@@ -1,5 +1,15 @@
 import { Public } from './../auth/decorators';
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './user.decorator';
 import { CreateUserDto } from './dto/CreateUserDto';
@@ -19,7 +29,9 @@ export class UserController {
 
   @Get('/self')
   async getUser(@Param() params, @User() currentUser: CreateUserDto) {
-    const user = await this.userService.findOneByEmail(currentUser.email);
+    const user = await this.userService.findUniqueByPhone(
+      currentUser.phoneNumber,
+    );
     return {
       id: user.id,
       firstName: user.firstName,
@@ -31,11 +43,33 @@ export class UserController {
     };
   }
 
+  @Put('notifications')
+  async changeNotifications(
+    @Body()
+    notifications: {
+      telegramNotification: boolean;
+      viberNotification: boolean;
+      phoneNotification: boolean;
+    },
+    @User() user: CreateUserDto,
+  ) {
+    if (this.userService.isOneOfNotificationsActive({ user, notifications }))
+      return this.userService.changeNotificationsById(
+        notifications,
+        user.phoneNumber,
+      );
+    else
+      throw new HttpException(
+        'at least one notification channel must be active',
+        HttpStatus.BAD_REQUEST,
+      );
+  }
+
   @Public()
   @UseGuards(ThrottlerGuard)
   @Post('/is-exist')
   async isUserExist(@Body() body: { phoneNumber: string }) {
-    const user = await this.userService.findOneByEmail(body.phoneNumber);
+    const user = await this.userService.findUniqueByPhone(body.phoneNumber);
     return { isUserExist: !!user };
   }
 }

@@ -40,7 +40,29 @@ export class UserService {
     return this.prisma.user.findUnique({ where: { phoneNumber } });
   }
 
-  async remove(id: User['id']): Promise<void> {
-    await this.prisma.user.delete({ where: { id } });
+  isOneOfNotificationsActive({ user, notifications }) {
+    const { telegramNotification, phoneNotification, viberNotification } = user;
+    const mergedNotifications = {
+      telegramNotification,
+      phoneNotification,
+      viberNotification,
+      ...notifications,
+    };
+
+    return Object.values(mergedNotifications).includes(true);
+  }
+
+  async changeNotificationsById(notifications, userPhoneNumber) {
+    const { telegramNotification, phoneNotification, viberNotification } =
+      notifications;
+
+    return this.prisma.user.update({
+      where: { phoneNumber: userPhoneNumber },
+      data: {
+        telegramNotification,
+        phoneNotification,
+        viberNotification,
+      },
+    });
   }
 }
