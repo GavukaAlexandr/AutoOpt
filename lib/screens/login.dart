@@ -8,7 +8,6 @@ import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
-import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum MobileVereficationState { SHOW_MOBILE_FORM_STATE, SHOW_OTP_FORM_STATE }
@@ -186,6 +185,13 @@ class _Login extends State<Login> with TickerProviderStateMixin {
           });
       var result = response.data;
       prefs.setString('token', result['access_token']);
+      prefs.remove('firstName');
+      prefs.remove('lastName');
+      prefs.remove('email');
+      prefs.remove('firebaseUid');
+      prefs.remove('telegramNotification');
+      prefs.remove('viberNotification');
+      prefs.remove('phoneNotification');
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => OrderCarParts()),
@@ -209,7 +215,7 @@ class _Login extends State<Login> with TickerProviderStateMixin {
             "firebaseUid": prefs.getString('user-uid'),
             "telegramNotification": prefs.getBool('notif-telegram'),
             "viberNotification": prefs.getBool('notif-viber'),
-            "phoneNotification": prefs.getBool('notif-phone') 
+            "phoneNotification": prefs.getBool('notif-phone')
           });
       login();
     } catch (e) {
@@ -290,249 +296,259 @@ class _Login extends State<Login> with TickerProviderStateMixin {
   }
 
   getRegisterFields(context) {
-    return Form(
-      key: registerGlobalKey,
-      child: Column(
-        children: [
-          Container(
-            padding: EdgeInsets.only(bottom: 10.0),
-            child: TextFormField(
-                keyboardType: TextInputType.emailAddress,
-                autofocus: false,
-                controller: firstNameController,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                ),
-                validator: (firstName) {
-                  if (firstName == null || firstName.isEmpty) {
-                    return 'Введите имя';
-                  }
-                },
-                onChanged: (fistName) {
-                  if (fistName != '')
-                    registerGlobalKey.currentState!.validate();
-                },
-                decoration: InputDecoration(
-                  labelText: 'Имя',
-                  contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(32.0),
-                      borderSide: BorderSide(
-                        color: Colors.white,
-                      )),
-                  enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(32.0),
-                      borderSide: BorderSide(color: Colors.white)),
-                  focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(32.0),
-                      borderSide: BorderSide(color: Colors.white)),
-                  labelStyle: TextStyle(color: Colors.white70),
-                )),
-          ),
-          Container(
-            padding: EdgeInsets.only(bottom: 10.0),
-            child: TextFormField(
-                keyboardType: TextInputType.emailAddress,
-                autofocus: false,
-                controller: lastNameController,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                ),
-                validator: (lastName) {
-                  if (lastName == null || lastName.isEmpty) {
-                    return 'Введите фамилию';
-                  }
-                },
-                onChanged: (lastName) {
-                  if (lastName != '')
-                    registerGlobalKey.currentState!.validate();
-                },
-                decoration: InputDecoration(
-                  labelText: 'Фамилия',
-                  contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(32.0),
-                      borderSide: BorderSide(
-                        color: Colors.white,
-                      )),
-                  enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(32.0),
-                      borderSide: BorderSide(color: Colors.white)),
-                  focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(32.0),
-                      borderSide: BorderSide(color: Colors.white)),
-                  labelStyle: TextStyle(color: Colors.white70),
-                )),
-          ),
-          Container(
-            padding: EdgeInsets.only(bottom: 10.0),
-            child: TextFormField(
-                keyboardType: TextInputType.emailAddress,
-                autofocus: false,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                ),
-                controller: emailController,
-                validator: (email) {
-                  if (isEmailValid(email))
-                    return null;
-                  else {
-                    return 'неверный электронный адрес';
-                  }
-                },
-                onChanged: (email) {
-                  if (email != '') registerGlobalKey.currentState!.validate();
-                },
-                decoration: InputDecoration(
-                  labelText: 'Почта',
-                  contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(32.0),
-                      borderSide: BorderSide(
-                        color: Colors.white,
-                      )),
-                  enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(32.0),
-                      borderSide: BorderSide(color: Colors.white)),
-                  focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(32.0),
-                      borderSide: BorderSide(color: Colors.white)),
-                  labelStyle: TextStyle(color: Colors.white70),
-                )),
-          ),
-          Container(
-            width: double.infinity,
-            child: RaisedButton(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+    return ScaleTransition(
+        scale: _animationRegister,
+        alignment: Alignment.center,
+        child: Form(
+          key: registerGlobalKey,
+          child: Column(
+            children: [
+              Container(
+                padding: EdgeInsets.only(bottom: 10.0),
+                child: TextFormField(
+                    keyboardType: TextInputType.emailAddress,
+                    autofocus: false,
+                    controller: firstNameController,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                    ),
+                    validator: (firstName) {
+                      if (firstName == null || firstName.isEmpty) {
+                        return 'Введите имя';
+                      }
+                    },
+                    onChanged: (fistName) {
+                      if (fistName != '')
+                        registerGlobalKey.currentState!.validate();
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'Имя',
+                      contentPadding:
+                          EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(32.0),
+                          borderSide: BorderSide(
+                            color: Colors.white,
+                          )),
+                      enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(32.0),
+                          borderSide: BorderSide(color: Colors.white)),
+                      focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(32.0),
+                          borderSide: BorderSide(color: Colors.white)),
+                      labelStyle: TextStyle(color: Colors.white70),
+                    )),
               ),
-              onPressed: () {
-                if (registerGlobalKey.currentState!.validate()) {
-                  showDialog<String>(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return StatefulBuilder(builder: (context, setState) {
-                          return AlertDialog(
-                            shape: const RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(20.0))),
-                            title: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.notifications,
-                                    color: Colors.blueAccent, size: 40),
-                                SizedBox(
-                                  height: 5,
-                                ),
-                                Text(
-                                  'Обратная связь',
-                                  style: TextStyle(
-                                      color: Colors.black87, fontSize: 18),
-                                )
-                              ],
-                            ),
-                            content: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+              Container(
+                padding: EdgeInsets.only(bottom: 10.0),
+                child: TextFormField(
+                    keyboardType: TextInputType.emailAddress,
+                    autofocus: false,
+                    controller: lastNameController,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                    ),
+                    validator: (lastName) {
+                      if (lastName == null || lastName.isEmpty) {
+                        return 'Введите фамилию';
+                      }
+                    },
+                    onChanged: (lastName) {
+                      if (lastName != '')
+                        registerGlobalKey.currentState!.validate();
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'Фамилия',
+                      contentPadding:
+                          EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(32.0),
+                          borderSide: BorderSide(
+                            color: Colors.white,
+                          )),
+                      enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(32.0),
+                          borderSide: BorderSide(color: Colors.white)),
+                      focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(32.0),
+                          borderSide: BorderSide(color: Colors.white)),
+                      labelStyle: TextStyle(color: Colors.white70),
+                    )),
+              ),
+              Container(
+                padding: EdgeInsets.only(bottom: 10.0),
+                child: TextFormField(
+                    keyboardType: TextInputType.emailAddress,
+                    autofocus: false,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                    ),
+                    controller: emailController,
+                    validator: (email) {
+                      if (isEmailValid(email))
+                        return null;
+                      else {
+                        return 'неверный электронный адрес';
+                      }
+                    },
+                    onChanged: (email) {
+                      if (email != '')
+                        registerGlobalKey.currentState!.validate();
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'Почта',
+                      contentPadding:
+                          EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(32.0),
+                          borderSide: BorderSide(
+                            color: Colors.white,
+                          )),
+                      enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(32.0),
+                          borderSide: BorderSide(color: Colors.white)),
+                      focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(32.0),
+                          borderSide: BorderSide(color: Colors.white)),
+                      labelStyle: TextStyle(color: Colors.white70),
+                    )),
+              ),
+              Container(
+                width: double.infinity,
+                child: RaisedButton(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  onPressed: () {
+                    if (registerGlobalKey.currentState!.validate()) {
+                      showDialog<String>(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return StatefulBuilder(
+                                builder: (context, setState) {
+                              return AlertDialog(
+                                shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.all(
+                                        Radius.circular(20.0))),
+                                title: Column(
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    IconButton(
-                                      icon: const Icon(
-                                        MyFlutterApp.local_phone,
-                                        size: 35,
-                                      ),
-                                      color: notifications['phone']
-                                          ? Colors.green
-                                          : Colors.black45,
-                                      onPressed: () {
-                                        setState(() {
-                                          notifications['phone'] =
-                                              !notifications['phone'];
-                                        });
-                                      },
+                                    Icon(Icons.notifications,
+                                        color: Colors.blueAccent, size: 40),
+                                    SizedBox(
+                                      height: 5,
                                     ),
-                                    IconButton(
-                                      icon: const Icon(
-                                        MyFlutterApp.telegram_plane,
-                                        size: 35,
-                                      ),
-                                      color: notifications['telegram']
-                                          ? Colors.blue
-                                          : Colors.black45,
-                                      onPressed: () {
-                                        setState(() {
-                                          notifications['telegram'] =
-                                              !notifications['telegram'];
-                                        });
-                                      },
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(
-                                        MyFlutterApp.viber,
-                                        size: 35,
-                                      ),
-                                      color: notifications['viber']
-                                          ? Colors.purple
-                                          : Colors.black45,
-                                      onPressed: () {
-                                        setState(() {
-                                          notifications['viber'] =
-                                              !notifications['viber'];
-                                        });
-                                      },
+                                    Text(
+                                      'Обратная связь',
+                                      style: TextStyle(
+                                          color: Colors.black87, fontSize: 18),
+                                    )
+                                  ],
+                                ),
+                                content: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(
+                                            MyFlutterApp.local_phone,
+                                            size: 35,
+                                          ),
+                                          color: notifications['phone']
+                                              ? Colors.green
+                                              : Colors.black45,
+                                          onPressed: () {
+                                            setState(() {
+                                              notifications['phone'] =
+                                                  !notifications['phone'];
+                                            });
+                                          },
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(
+                                            MyFlutterApp.telegram_plane,
+                                            size: 35,
+                                          ),
+                                          color: notifications['telegram']
+                                              ? Colors.blue
+                                              : Colors.black45,
+                                          onPressed: () {
+                                            setState(() {
+                                              notifications['telegram'] =
+                                                  !notifications['telegram'];
+                                            });
+                                          },
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(
+                                            MyFlutterApp.viber,
+                                            size: 35,
+                                          ),
+                                          color: notifications['viber']
+                                              ? Colors.purple
+                                              : Colors.black45,
+                                          onPressed: () {
+                                            setState(() {
+                                              notifications['viber'] =
+                                                  !notifications['viber'];
+                                            });
+                                          },
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
-                              ],
-                            ),
-                            actions: <Widget>[
-                              TextButton(
-                                onPressed: notifications.values.contains(true)
-                                    ? () async {
-                                        final prefs = await SharedPreferences
-                                            .getInstance();
-                                        prefs.setBool('notif-viber',
-                                            notifications['viber']);
-                                        prefs.setBool('notif-telegram',
-                                            notifications['telegram']);
-                                        prefs.setBool('notif-phone',
-                                            notifications['phone']);
-                                        prepareRegister();
-                                      // return Navigator.pop(context);
-                                      }
-                                    : null,
-                                child: const Text(
-                                  'Продолжить',
-                                  style: TextStyle(fontSize: 16),
-                                ),
-                              ),
-                            ],
-                          );
-                        });
-                      });
-                } else {
-                  registerGlobalKey.currentState!.validate();
-                }
-              },
-              padding: EdgeInsets.all(12),
-              color: Color(0xff1573B4),
-              child: Text('Зарегестрироваться',
-                  style: TextStyle(color: Colors.white)),
-            ),
+                                actions: <Widget>[
+                                  TextButton(
+                                    onPressed:
+                                        notifications.values.contains(true)
+                                            ? () async {
+                                                final prefs =
+                                                    await SharedPreferences
+                                                        .getInstance();
+                                                prefs.setBool('notif-viber',
+                                                    notifications['viber']);
+                                                prefs.setBool('notif-telegram',
+                                                    notifications['telegram']);
+                                                prefs.setBool('notif-phone',
+                                                    notifications['phone']);
+                                                Navigator.pop(context);
+                                                return prepareRegister();
+                                              }
+                                            : null,
+                                    child: const Text(
+                                      'Продолжить',
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            });
+                          });
+                    } else {
+                      registerGlobalKey.currentState!.validate();
+                    }
+                  },
+                  padding: EdgeInsets.all(12),
+                  color: Color(0xff1573B4),
+                  child: Text('Зарегестрироваться',
+                      style: TextStyle(color: Colors.white)),
+                ),
+              ),
+              Text(
+                'текущий пользователь не найден зарегестрируйтесь пожалуйста',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white54),
+              ),
+            ],
           ),
-          Text(
-            'текущий пользователь не найден зарегестрируйтесь пожалуйста',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white54),
-          ),
-        ],
-      ),
-    );
+        ));
   }
 
   getMobileFormWidget(context) {
@@ -635,10 +651,7 @@ class _Login extends State<Login> with TickerProviderStateMixin {
               ],
             ),
           if (currentStateRegisterFields == RegisterFields.SHOW_REGISTER_FIELDS)
-            ScaleTransition(
-                scale: _animationRegister,
-                alignment: Alignment.center,
-                child: getRegisterFields(context)),
+            getRegisterFields(context),
           if (currentStateRegisterFields == RegisterFields.HIDE_REGISTER_FIELDS)
             ScaleTransition(
                 scale: _animationSuccess,
