@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:avto_opt/generated/l10n.dart';
 import 'package:avto_opt/my_flutter_app_icons.dart';
 import 'package:avto_opt/screens/login.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +7,6 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:loading_overlay/loading_overlay.dart';
 import './../state/user_form_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 class UserProfile extends StatefulWidget {
   const UserProfile({Key? key}) : super(key: key);
 
@@ -76,7 +76,7 @@ class _UserProfile extends State<UserProfile> {
     return new Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
-          title: Text('Профиль'),
+          // title: Text(S.of(context)),
           centerTitle: true,
           backgroundColor: Color(0xff2e3094).withOpacity(0.9),
           elevation: 0.0,

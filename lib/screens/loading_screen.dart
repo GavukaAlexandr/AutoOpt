@@ -20,19 +20,11 @@ class _LoadingScreen extends State<LoadingScreen> {
 
     if (token != null) {
       return _debouncer.run(() {
-        Navigator.pushAndRemoveUntil(
-          context, 
-          MaterialPageRoute(builder: (context) => OrderCarParts()),
-          (Route<dynamic> route) => false,
-        );
+        Navigator.pushNamed(context, 'order');
       });
     } else {
       return _debouncer.run(() {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => Login()),
-          (Route<dynamic> route) => false,
-        );
+        Navigator.pushNamed(context, 'login');
       });
     }
   }
