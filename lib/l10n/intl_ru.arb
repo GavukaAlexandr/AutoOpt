@@ -3,5 +3,6 @@
     "profile_feedback": "Обратная связь",
     "profile_order_history_btn": "История заказов",
     "profile_exit_btn": "Выйти",
-    "profile_save_btn": "Сохранить"
+    "profile_save_btn": "Сохранить",
+    "profile_error_notification": "Выберите хотя бы один способ обратной связи"
 }

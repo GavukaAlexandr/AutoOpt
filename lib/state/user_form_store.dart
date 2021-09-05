@@ -10,6 +10,10 @@ part 'user_form_store.g.dart';
 class UserFormStore = _UserFormStore with _$UserFormStore;
 
 abstract class _UserFormStore with Store {
+
+  @observable
+  bool isEditing = false;
+
   @observable
   User user = User(
       email: '',
@@ -22,6 +26,11 @@ abstract class _UserFormStore with Store {
 
   @observable
   bool loaderStatus = false;
+
+  @action
+  changeEditing(value) {
+    isEditing = value;
+  }
 
   login() async {
     final prefs = await SharedPreferences.getInstance();

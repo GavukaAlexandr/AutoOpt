@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class LoadingScreen extends StatefulWidget {
   @override
@@ -48,15 +49,14 @@ class _LoadingScreen extends State<LoadingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Color(0xff2e3094),
-        body: Container(
-            child: Center(
+        body: Center(
           child: Hero(
               tag: 'logo',
               child: CircleAvatar(
                 backgroundColor: Colors.transparent,
-                radius: 200.0,
-                child: Image.asset('assets/background-loading.jpg'),
+                radius: 200.r,
+                child: Image.asset('assets/background-loading.jpg', fit: BoxFit.cover,),
               )),
-        )));
+        ));
   }
 }

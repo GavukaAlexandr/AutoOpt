@@ -99,6 +99,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Choose at least one feedback method`
+  String get profile_error_notification {
+    return Intl.message(
+      'Choose at least one feedback method',
+      name: 'profile_error_notification',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
