@@ -1,3 +1,7 @@
 {
-    "profile_app_Bar": "Profile"
+    "profile_app_bar": "Profile",
+    "profile_feedback": "Feedback",
+    "profile_order_history_btn": "History of orders",
+    "profile_exit_btn": "Exit",
+    "profile_save_btn": "Save"
 }

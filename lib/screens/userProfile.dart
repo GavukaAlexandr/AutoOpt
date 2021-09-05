@@ -61,7 +61,7 @@ class _UserProfile extends State<UserProfile> {
           backgroundColor: Colors.red,
         ));
     } else {
-      
+      userFormStore.changeNotification();
     }
   }
 
@@ -76,7 +76,7 @@ class _UserProfile extends State<UserProfile> {
     return new Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
-          // title: Text(S.of(context)),
+          title: Text(S.of(context).profile_app_bar),
           centerTitle: true,
           backgroundColor: Color(0xff2e3094).withOpacity(0.9),
           elevation: 0.0,
@@ -172,7 +172,7 @@ class _UserProfile extends State<UserProfile> {
                             ),
                             SizedBox(height: 25.0),
                             Text(
-                              'Обратная связь',
+                              S.of(context).profile_feedback,
                               style: TextStyle(
                                   fontSize: 17.0,
                                   color: Color(0xff2e3094),
@@ -260,7 +260,7 @@ class _UserProfile extends State<UserProfile> {
                                     onPressed: () {},
                                     child: Center(
                                       child: Text(
-                                        'История заказов',
+                                        S.of(context).profile_order_history_btn,
                                         style: TextStyle(
                                             color: Colors.white,
                                             fontFamily: 'Montserrat'),
@@ -283,7 +283,7 @@ class _UserProfile extends State<UserProfile> {
                                         },
                                         child: Center(
                                           child: Text(
-                                            'Сохранить',
+                                            S.of(context).profile_save_btn,
                                             style: TextStyle(
                                                 color: Colors.white,
                                                 fontFamily: 'Montserrat'),
@@ -312,7 +312,7 @@ class _UserProfile extends State<UserProfile> {
                                         },
                                         child: Center(
                                           child: Text(
-                                            'Выйти',
+                                            S.of(context).profile_exit_btn,
                                             style: TextStyle(
                                                 color: Colors.white,
                                                 fontFamily: 'Montserrat'),

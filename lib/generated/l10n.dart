@@ -51,10 +51,50 @@ class S {
   }
 
   /// `Profile`
-  String get profile_app_Bar {
+  String get profile_app_bar {
     return Intl.message(
       'Profile',
-      name: 'profile_app_Bar',
+      name: 'profile_app_bar',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Feedback`
+  String get profile_feedback {
+    return Intl.message(
+      'Feedback',
+      name: 'profile_feedback',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `History of orders`
+  String get profile_order_history_btn {
+    return Intl.message(
+      'History of orders',
+      name: 'profile_order_history_btn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Exit`
+  String get profile_exit_btn {
+    return Intl.message(
+      'Exit',
+      name: 'profile_exit_btn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save`
+  String get profile_save_btn {
+    return Intl.message(
+      'Save',
+      name: 'profile_save_btn',
       desc: '',
       args: [],
     );

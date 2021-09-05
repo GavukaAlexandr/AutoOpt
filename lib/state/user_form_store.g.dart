@@ -39,10 +39,19 @@ mixin _$UserFormStore on _UserFormStore, Store {
     });
   }
 
+  final _$changeNotificationAsyncAction =
+      AsyncAction('_UserFormStore.changeNotification');
+
+  @override
+  Future<dynamic> changeNotification() {
+    return _$changeNotificationAsyncAction
+        .run(() => super.changeNotification());
+  }
+
   final _$getSelfAsyncAction = AsyncAction('_UserFormStore.getSelf');
 
   @override
-  Future getSelf() {
+  Future<dynamic> getSelf() {
     return _$getSelfAsyncAction.run(() => super.getSelf());
   }
 

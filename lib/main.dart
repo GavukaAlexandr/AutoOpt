@@ -25,7 +25,6 @@ class MyApp extends StatelessWidget {
       ],
       supportedLocales: S.delegate.supportedLocales,
       initialRoute: '/',
-      // title: Text(S.of(context),
       routes: {
         '/': (context) => LoadingScreen(),
         'login': (context) => Login(),

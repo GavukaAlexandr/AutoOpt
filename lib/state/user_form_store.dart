@@ -10,7 +10,6 @@ part 'user_form_store.g.dart';
 class UserFormStore = _UserFormStore with _$UserFormStore;
 
 abstract class _UserFormStore with Store {
-
   @observable
   User user = User(
       email: '',
@@ -40,15 +39,16 @@ abstract class _UserFormStore with Store {
     }
   }
 
-  @action setNotification(name, value) {
+  @action
+  setNotification(name, value) {
     switch (name) {
       case 'telegram':
         user.notificationTelegram = value;
         break;
-        case 'viber':
+      case 'viber':
         user.notificationViber = value;
         break;
-        case 'phone':
+      case 'phone':
         user.notificationPhone = value;
         break;
       default:
@@ -56,7 +56,50 @@ abstract class _UserFormStore with Store {
   }
 
   @action
-  dynamic getSelf() async {
+  Future changeNotification() async {
+    Dio dio = Dio();
+
+    dio.interceptors.add(InterceptorsWrapper(onRequest: (options, h) async {
+      final prefs = await SharedPreferences.getInstance();
+      var accessToken = prefs.getString('token');
+      options.headers['Authorization'] = 'Bearer $accessToken';
+      return h.next(options);
+    }, onError: (e, handler) async {
+      if (e.response!.statusCode == 401) {
+        await login();
+        final prefs = await SharedPreferences.getInstance();
+        var _accessToken = prefs.getString('token');
+        _accessToken = null;
+        final RequestOptions options = e.response!.requestOptions;
+        try {
+          options.headers['Authorization'] = 'Bearer $_accessToken';
+          final Response response = await dio.fetch(options);
+          return handler.resolve(response);
+        } catch (e, s) {
+          print(e);
+          print(s);
+        }
+      }
+
+      return handler.next(e);
+    }));
+    loaderStatus = true;
+    try {
+      Response response = await dio
+          .put("https://auto-opt.cyber-geeks-lab.synology.me/user/notifications", data: {
+        "telegramNotification": user.notificationTelegram,
+        "viberNotification": user.notificationViber,
+        "phoneNotification": user.notificationPhone
+      });
+      loaderStatus = false;
+    } catch (e) {
+      loaderStatus = false;
+      print('Error: $e');
+    }
+  }
+
+  @action
+  Future getSelf() async {
     Dio dio = Dio();
 
     dio.interceptors.add(InterceptorsWrapper(onRequest: (options, h) async {
@@ -124,4 +167,13 @@ class User {
         notificationTelegram: jsonMap['telegramNotification'] ?? false,
         notificationPhone: jsonMap['phoneNotification'] ?? false);
   }
+
+  Map<String, dynamic> toJson() => {
+        'firstName': firstName,
+        'lastName': lastName,
+        'phoneNumber': phoneNumber,
+        'notificationViber': notificationViber,
+        'notificationTelegram': notificationTelegram,
+        'notificationPhone': notificationPhone
+      };
 }
