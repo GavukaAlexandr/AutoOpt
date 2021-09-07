@@ -194,13 +194,13 @@ mixin _$SearchFormStore on _SearchFormStore, Store {
   final _$initialBrandsAtom = Atom(name: '_SearchFormStore.initialBrands');
 
   @override
-  List<dynamic> get initialBrands {
+  ObservableFuture<List<dynamic>>? get initialBrands {
     _$initialBrandsAtom.reportRead();
     return super.initialBrands;
   }
 
   @override
-  set initialBrands(List<dynamic> value) {
+  set initialBrands(ObservableFuture<List<dynamic>>? value) {
     _$initialBrandsAtom.reportWrite(value, super.initialBrands, () {
       super.initialBrands = value;
     });
@@ -256,13 +256,13 @@ mixin _$SearchFormStore on _SearchFormStore, Store {
       Atom(name: '_SearchFormStore.initialTransportType');
 
   @override
-  List<dynamic> get initialTransportType {
+  ObservableFuture<List<dynamic>>? get initialTransportType {
     _$initialTransportTypeAtom.reportRead();
     return super.initialTransportType;
   }
 
   @override
-  set initialTransportType(List<dynamic> value) {
+  set initialTransportType(ObservableFuture<List<dynamic>>? value) {
     _$initialTransportTypeAtom.reportWrite(value, super.initialTransportType,
         () {
       super.initialTransportType = value;
@@ -299,26 +299,11 @@ mixin _$SearchFormStore on _SearchFormStore, Store {
     });
   }
 
-  final _$getTransportAsyncAction =
-      AsyncAction('_SearchFormStore.getTransport');
-
-  @override
-  Future<dynamic> getTransport() {
-    return _$getTransportAsyncAction.run(() => super.getTransport());
-  }
-
   final _$getModelAsyncAction = AsyncAction('_SearchFormStore.getModel');
 
   @override
   Future<dynamic> getModel(String brand) {
     return _$getModelAsyncAction.run(() => super.getModel(brand));
-  }
-
-  final _$getBrandsAsyncAction = AsyncAction('_SearchFormStore.getBrands');
-
-  @override
-  Future<dynamic> getBrands(String type) {
-    return _$getBrandsAsyncAction.run(() => super.getBrands(type));
   }
 
   final _$_SearchFormStoreActionController =
@@ -407,6 +392,28 @@ mixin _$SearchFormStore on _SearchFormStore, Store {
         name: '_SearchFormStore.transportTypeSetValue');
     try {
       return super.transportTypeSetValue(value);
+    } finally {
+      _$_SearchFormStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  Future<dynamic> getTransport() {
+    final _$actionInfo = _$_SearchFormStoreActionController.startAction(
+        name: '_SearchFormStore.getTransport');
+    try {
+      return super.getTransport();
+    } finally {
+      _$_SearchFormStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  Future<dynamic> getBrands(String type) {
+    final _$actionInfo = _$_SearchFormStoreActionController.startAction(
+        name: '_SearchFormStore.getBrands');
+    try {
+      return super.getBrands(type);
     } finally {
       _$_SearchFormStoreActionController.endAction(_$actionInfo);
     }

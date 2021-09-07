@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:avto_opt/generated/l10n.dart';
 import 'package:avto_opt/screens/login.dart';
+import 'package:avto_opt/state/user_form_store.dart';
 import 'package:dio/dio.dart';
+import 'package:mobx/mobx.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:avto_opt/state/search_form_store.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -109,22 +111,21 @@ class _OrderCarPartsState extends State<OrderCarParts> {
     checkConnectivity2();
 
     searchFormStore.getTransport();
-    searchFormStore.initialBrands.add({'value': 'Марка:', 'title': 'Марка:'});
     searchFormStore.initialModels.add({'value': 'Модель:', 'title': 'Модель:'});
     searchFormStore.valueModel =
         getInitValueFromResponse(searchFormStore.initialModels, 'Модель:');
-    searchFormStore.valueBrand =
-        getInitValueFromResponse(searchFormStore.initialBrands, 'Марка:');
     searchFormStore.valueDrive =
         getInitValueFromResponse(searchFormStore.initialDrive, 'Привод:');
-    searchFormStore.valueTransportType = getInitValueFromResponse(
-        searchFormStore.initialTransportType, 'Тип транспорта:');
+    // searchFormStore.valueTransportType = getInitValueFromResponse(
+    //     searchFormStore.initialTransportType, 'Тип транспорта:');
     searchFormStore.valueTransmission = getInitValueFromResponse(
         searchFormStore.initialTransmission, 'Коробка передач:');
     searchFormStore.valueBodyType = getInitValueFromResponse(
         searchFormStore.initialBodyType, 'Тип кузова:');
     searchFormStore.setupValidations();
   }
+
+  Future _refresh() => searchFormStore.getTransport();
 
   @override
   void dispose() {
@@ -170,53 +171,94 @@ class _OrderCarPartsState extends State<OrderCarParts> {
                       left: 10.0, right: 10.0, top: 10, bottom: 10),
                   child: Column(
                     children: [
-                      Observer(
-                        builder: (_) => Container(
-                          child: DropdownButtonFormField(
-                            decoration: InputDecoration(
-                                labelText: 'Тип транспорта:',
-                                labelStyle: TextStyle(
-                                    fontFamily: 'Montserrat',
-                                    letterSpacing: 1,
-                                    fontSize: 16.sp),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(18.0),
+                      Observer(builder: (_) {
+                        final future = searchFormStore.initialTransportType;
+
+                        if (future == null) {
+                          return const CircularProgressIndicator();
+                        }
+
+                        switch (future.status) {
+                          case FutureStatus.pending:
+                            return Column(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: const [
+                                CircularProgressIndicator(),
+                                Text('Loading items...'),
+                              ],
+                            );
+
+                          case FutureStatus.rejected:
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                const Text(
+                                  'Failed to load items.',
+                                  style: TextStyle(color: Colors.red),
                                 ),
-                                contentPadding:
-                                    EdgeInsets.fromLTRB(10.0, 0, 10.0, 0),
-                                errorText:
-                                    searchFormStore.error.valueTransportType),
-                            value: searchFormStore.valueTransportType,
-                            style: TextStyle(
-                                letterSpacing: 1,
-                                fontWeight: FontWeight.w400,
-                                fontSize: 16.sp,
-                                fontFamily: 'Montserrat',
-                                color: Theme.of(context)
-                                    .textTheme
-                                    .bodyText1
-                                    ?.color),
-                            onChanged: (value) {
-                              searchFormStore
-                                  .transportTypeSetValue(value.toString());
-                            },
-                            icon: Icon(
-                              Icons.keyboard_arrow_down_outlined,
-                            ),
-                            items:
-                                searchFormStore.initialTransportType.map((map) {
-                              return DropdownMenuItem<String>(
-                                  value: map['value'],
-                                  child: Text(map['title']));
-                            }).toList(),
-                          ),
-                        ),
-                      ),
+                                ElevatedButton(
+                                  child: const Text('Tap to try again'),
+                                  onPressed: _refresh,
+                                )
+                              ],
+                            );
+
+                          case FutureStatus.fulfilled:
+                            final List<dynamic> items = future.result;
+                            searchFormStore.valueTransportType =
+                                items[0]['value'];
+                            return Container(
+                              child: DropdownButtonFormField(
+                                decoration: InputDecoration(
+                                  labelText: 'Тип транспорта:',
+                                  hintText: 'Выберите тип транспорта',
+                                  labelStyle: TextStyle(
+                                      fontFamily: 'Montserrat',
+                                      letterSpacing: 1,
+                                      fontSize: 16.sp),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(18.0),
+                                  ),
+                                  contentPadding:
+                                      EdgeInsets.fromLTRB(10.0, 0, 10.0, 0),
+                                ),
+                                value: searchFormStore.valueTransportType,
+                                style: TextStyle(
+                                    letterSpacing: 1,
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 16.sp,
+                                    fontFamily: 'Montserrat',
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodyText1
+                                        ?.color),
+                                onTap: () {
+                                  print('open');
+                                },
+                                onChanged: (value) {
+                                  searchFormStore
+                                      .transportTypeSetValue(value.toString());
+                                },
+                                icon: Icon(
+                                  Icons.keyboard_arrow_down_outlined,
+                                ),
+                                items: items.map((map) {
+                                  return DropdownMenuItem<String>(
+                                      value: map['value'],
+                                      child: Text(map['title']));
+                                }).toList(),
+                              ),
+                            );
+                        }
+                      }),
                       SizedBox(height: 10),
-                      Observer(
-                        builder: (_) => Container(
-                          child: DropdownButtonFormField(
-                            decoration: InputDecoration(
+                      Observer(builder: (_) {
+                        final future = searchFormStore.initialBrands;
+
+                        if (future == null) {
+                          return Container(
+                            child: DropdownButtonFormField(
+                              decoration: InputDecoration(
                                 labelText: 'Марка:',
                                 labelStyle: TextStyle(
                                     fontFamily: 'Montserrat',
@@ -227,31 +269,102 @@ class _OrderCarPartsState extends State<OrderCarParts> {
                                 ),
                                 contentPadding:
                                     EdgeInsets.fromLTRB(10.0, 0, 10.0, 0),
-                                errorText: searchFormStore.error.valueBrand),
-                            value: searchFormStore.valueBrand,
-                            style: TextStyle(
-                                letterSpacing: 1,
-                                fontWeight: FontWeight.w400,
-                                fontSize: 16.sp,
-                                fontFamily: 'Montserrat',
-                                color: Theme.of(context)
-                                    .textTheme
-                                    .bodyText1
-                                    ?.color),
-                            onChanged: (value) {
-                              searchFormStore.brandSetValue(value.toString());
-                            },
-                            icon: Icon(
-                              Icons.keyboard_arrow_down_outlined,
+                              ),
+                              value: 'Выберите тип транспорта',
+                              style: TextStyle(
+                                  letterSpacing: 1,
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 16.sp,
+                                  fontFamily: 'Montserrat',
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .bodyText1
+                                      ?.color),
+                              icon: Icon(
+                                Icons.keyboard_arrow_down_outlined,
+                              ),
+                              items: <dynamic>[
+                                {
+                                  'value': 'Выберите тип транспорта',
+                                  'title': 'Выберите тип транспорта'
+                                }
+                              ].map((map) {
+                                return DropdownMenuItem<String>(
+                                    value: map['value'],
+                                    child: Text(map['title']));
+                              }).toList(),
                             ),
-                            items: searchFormStore.initialBrands.map((map) {
-                              return DropdownMenuItem<String>(
-                                  value: map['value'],
-                                  child: Text(map['title']));
-                            }).toList(),
-                          ),
-                        ),
-                      ),
+                          );
+                        }
+
+                        switch (future.status) {
+                          case FutureStatus.pending:
+                            return Column(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: const [
+                                CircularProgressIndicator(),
+                                Text('Loading items...'),
+                              ],
+                            );
+
+                          case FutureStatus.rejected:
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                const Text(
+                                  'Failed to load items.',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                                ElevatedButton(
+                                  child: const Text('Tap to try again'),
+                                  onPressed: _refresh,
+                                )
+                              ],
+                            );
+
+                          case FutureStatus.fulfilled:
+                            final List<dynamic> items = future.result;
+                            searchFormStore.valueBrand = items[0]['value'];
+                            return Container(
+                              child: DropdownButtonFormField(
+                                decoration: InputDecoration(
+                                  labelText: 'Марка:',
+                                  labelStyle: TextStyle(
+                                      fontFamily: 'Montserrat',
+                                      letterSpacing: 1,
+                                      fontSize: 16.sp),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(18.0),
+                                  ),
+                                  contentPadding:
+                                      EdgeInsets.fromLTRB(10.0, 0, 10.0, 0),
+                                ),
+                                value: searchFormStore.valueBrand,
+                                style: TextStyle(
+                                    letterSpacing: 1,
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 16.sp,
+                                    fontFamily: 'Montserrat',
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodyText1
+                                        ?.color),
+                                onChanged: (value) {
+                                  searchFormStore
+                                      .brandSetValue(value.toString());
+                                },
+                                icon: Icon(
+                                  Icons.keyboard_arrow_down_outlined,
+                                ),
+                                items: items.map((map) {
+                                  return DropdownMenuItem<String>(
+                                      value: map['value'],
+                                      child: Text(map['title']));
+                                }).toList(),
+                              ),
+                            );
+                        }
+                      }),
                       SizedBox(height: 10),
                       Observer(
                         builder: (_) => Container(

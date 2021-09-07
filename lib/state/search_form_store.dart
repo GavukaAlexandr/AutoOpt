@@ -1,4 +1,3 @@
-
 import 'package:avto_opt/api_client/api_client.dart';
 import 'package:avto_opt/api_client/endpoints/brands_endpoint.dart';
 import 'package:avto_opt/api_client/endpoints/models_endpoint.dart';
@@ -63,7 +62,7 @@ abstract class _SearchFormStore with Store {
   List<dynamic> initialModels = [];
 
   @observable
-  List<dynamic> initialBrands = [];
+  ObservableFuture<List<dynamic>>? initialBrands;
 
   @observable
   List<dynamic> initialDrive = [
@@ -93,10 +92,8 @@ abstract class _SearchFormStore with Store {
     {'value': 'Автомат', 'title': 'Автомат'}
   ];
   @observable
-  List<dynamic> initialTransportType = [
-    {'value': 'Тип транспорта:', 'title': 'Тип транспорта:'},
-  ];
-
+  ObservableFuture<List<dynamic>>?
+      initialTransportType; // todo change dynamic to nedded type
   @observable
   ObservableMap<dynamic, dynamic> fuelType = ObservableMap.of({
     'Бензин': false,
@@ -128,10 +125,7 @@ abstract class _SearchFormStore with Store {
   @action
   void brandSetValue(String value) {
     valueBrand = value;
-    if (initialBrands.length > 1) {
-      getModel(value.toString());
-      initialBrands.removeWhere((item) => item['value'] == 'Марка:');
-    }
+    getModel(value.toString());
   }
 
   @action
@@ -170,50 +164,48 @@ abstract class _SearchFormStore with Store {
   @action
   void transportTypeSetValue(String value) {
     valueTransportType = value;
-    if (value != 'Тип транспорта:') {
-      getBrands(value.toString());
-      initialTransportType
-          .removeWhere((item) => item['value'] == 'Тип транспорта:');
-    }
+    getBrands(value.toString());
+  }
+
+  Future<List<dynamic>> getTransportByHttp() async {
+    Client _client = new Client();
+    var _endpointProvider = new EndpointTransportProvider(_client.init());
+    List<dynamic> data = await _endpointProvider.getTransport();
+    return data;
   }
 
   @action
-  Future getTransport() async {
-    loaderStatus = true;
-    Client _client = new Client();
-    var _endpointProvider = new EndpointTransportProvider(_client.init());
-    var data = await _endpointProvider.getTransport();
-    initialTransportType.addAll(data);
-    loaderStatus = false;
-
-  }
+  Future getTransport() =>
+      initialTransportType = ObservableFuture(getTransportByHttp());
 
   @action
   Future getModel(String brand) async {
     loaderStatus = true;
-      Client _client = new Client();
-      var _endpointProvider = new EndpointModelsProvider(_client.init());
-      var data = await _endpointProvider.getModels(valueTransportType, brand);
-      var preparedModels = data.map((element) => {'value': element['id'], 'title': element['name']});
-      initialModels.clear();
-      initialModels.add({'value': 'Модель:', 'title': 'Модель:'});
-      valueModel = getInitValueFromResponse(initialModels, 'Модель:');
-      initialModels.addAll(preparedModels);
-      loaderStatus = false;
+    Client _client = new Client();
+    var _endpointProvider = new EndpointModelsProvider(_client.init());
+    var data = await _endpointProvider.getModels(valueTransportType, brand);
+    var preparedModels = data
+        .map((element) => {'value': element['id'], 'title': element['name']});
+    initialModels.clear();
+    initialModels.add({'value': 'Модель:', 'title': 'Модель:'});
+    valueModel = getInitValueFromResponse(initialModels, 'Модель:');
+    initialModels.addAll(preparedModels);
+    loaderStatus = false;
   }
 
   @action
-  Future getBrands(String type) async {
-    loaderStatus = true;
+  Future getBrands(String type) =>
+      initialBrands = ObservableFuture(getBrandsByHttp(type));
+
+  Future<List<dynamic>> getBrandsByHttp(String type) async {
     Client _client = new Client();
     var _endpointProvider = new EndpointBrandsProvider(_client.init());
-    var data = await _endpointProvider.getBrands(type);
-    var preparedBrands = data.map((element) => {'value': element['id'], 'title': element['name']});
-      initialBrands.clear();
-      initialBrands.add({'value': 'Марка:', 'title': 'Марка:'});
-      valueBrand = getInitValueFromResponse(initialBrands, 'Марка:');
-      initialBrands.addAll(preparedBrands);
-      loaderStatus = false;
+    List<dynamic> data = await _endpointProvider.getBrands(type);
+    data = data
+        .map((element) => {'value': element['id'], 'title': element['name']})
+        .toList();
+    // initialBrands.clear();
+    return data;
   }
 
   void dispose() {

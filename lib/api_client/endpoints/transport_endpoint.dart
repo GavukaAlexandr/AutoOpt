@@ -5,19 +5,20 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class EndpointTransportProvider {
   Dio _client;
-  
+
   EndpointTransportProvider(this._client);
-  
+
   Future getTransport() async {
-  try {
+    try {
       Response<List<dynamic>> response = await _client.get("/transport");
-      var preparedTransport = response.data!.map((element) => {
-            'value': element['id'],
-            'title': transportTranslate[element['name']]
-          });
+      var preparedTransport = response.data!
+          .map((element) => {
+                'value': element['id'],
+                'title': transportTranslate[element['name']]
+              })
+          .toList();
       return preparedTransport;
-    }
-    on DioError catch(ex){
+    } on DioError catch (ex) {
       String errorMessage = json.decode(ex.response.toString())["errorMessage"];
       throw new Exception(errorMessage);
     }
