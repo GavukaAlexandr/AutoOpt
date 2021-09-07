@@ -21,11 +21,19 @@ class _LoadingScreen extends State<LoadingScreen> {
 
     if (token != null) {
       return _debouncer.run(() {
-        Navigator.pushNamed(context, 'order');
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => OrderCarParts()),
+          (Route<dynamic> route) => false,
+        );
       });
     } else {
       return _debouncer.run(() {
-        Navigator.pushNamed(context, 'login');
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => Login()),
+          (Route<dynamic> route) => false,
+        );
       });
     }
   }
@@ -55,7 +63,10 @@ class _LoadingScreen extends State<LoadingScreen> {
               child: CircleAvatar(
                 backgroundColor: Colors.transparent,
                 radius: 200.r,
-                child: Image.asset('assets/background-loading.jpg', fit: BoxFit.cover,),
+                child: Image.asset(
+                  'assets/background-loading.jpg',
+                  fit: BoxFit.cover,
+                ),
               )),
         ));
   }

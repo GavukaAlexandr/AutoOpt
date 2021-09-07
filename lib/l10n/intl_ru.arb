@@ -4,5 +4,7 @@
     "profile_order_history_btn": "История заказов",
     "profile_exit_btn": "Выйти",
     "profile_save_btn": "Сохранить",
-    "profile_error_notification": "Выберите хотя бы один способ обратной связи"
+    "profile_error_notification": "Выберите хотя бы один способ обратной связи",
+
+    "order_app_bar": "Поиск запчастей"
 }

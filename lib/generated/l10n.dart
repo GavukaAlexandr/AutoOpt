@@ -109,6 +109,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Parts search`
+  String get order_app_bar {
+    return Intl.message(
+      'Parts search',
+      name: 'order_app_bar',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

@@ -4,5 +4,7 @@
     "profile_order_history_btn": "History of orders",
     "profile_exit_btn": "Exit",
     "profile_save_btn": "Save",
-    "profile_error_notification": "Choose at least one feedback method"
+    "profile_error_notification": "Choose at least one feedback method",
+
+    "order_app_bar": "Parts search"
 }

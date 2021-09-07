@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:avto_opt/api_client/api_client.dart';
+import 'package:avto_opt/api_client/endpoints/login_endpoint.dart';
 import 'package:avto_opt/debounce.dart';
 import 'package:avto_opt/my_flutter_app_icons.dart';
 import 'package:avto_opt/screens/orderCarParts.dart';
@@ -175,16 +177,11 @@ class _Login extends State<Login> with TickerProviderStateMixin {
   }
 
   login() async {
+    Client _client = new Client();
     final prefs = await SharedPreferences.getInstance();
-    try {
-      var response = await Dio().post(
-          "https://auto-opt.cyber-geeks-lab.synology.me/auth/login",
-          data: {
-            "phoneNumber": prefs.getString('phone').toString(),
-            "firebaseUid": prefs.getString('user-uid').toString()
-          });
-      var result = response.data;
-      prefs.setString('token', result['access_token']);
+    var _endpointProvider = new EndpointLoginProvider(_client.init());
+    var data = await _endpointProvider.login();
+    prefs.setString('token', data['access_token']);
       prefs.remove('firstName');
       prefs.remove('lastName');
       prefs.remove('email');
@@ -192,14 +189,11 @@ class _Login extends State<Login> with TickerProviderStateMixin {
       prefs.remove('telegramNotification');
       prefs.remove('viberNotification');
       prefs.remove('phoneNotification');
-      Navigator.pushAndRemoveUntil(
+    return Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => OrderCarParts()),
         (Route<dynamic> route) => false,
       );
-    } catch (e) {
-      print(e);
-    }
   }
 
   register() async {

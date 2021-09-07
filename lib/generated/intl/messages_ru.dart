@@ -21,6 +21,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+        "order_app_bar":
+            MessageLookupByLibrary.simpleMessage("Поиск запчастей"),
         "profile_app_bar": MessageLookupByLibrary.simpleMessage("Профиль"),
         "profile_error_notification": MessageLookupByLibrary.simpleMessage(
             "Выберите хотя бы один способ обратной связи"),

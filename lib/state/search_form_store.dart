@@ -1,9 +1,9 @@
-import 'dart:convert';
-import 'dart:developer';
 
-import 'package:dio/dio.dart';
+import 'package:avto_opt/api_client/api_client.dart';
+import 'package:avto_opt/api_client/endpoints/brands_endpoint.dart';
+import 'package:avto_opt/api_client/endpoints/models_endpoint.dart';
+import 'package:avto_opt/api_client/endpoints/transport_endpoint.dart';
 import 'package:mobx/mobx.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:validators/validators.dart';
 part 'search_form_store.g.dart';
 
@@ -179,161 +179,41 @@ abstract class _SearchFormStore with Store {
 
   @action
   Future getTransport() async {
-    Dio dio = Dio();
-
-    dio.interceptors.add(InterceptorsWrapper(onRequest: (options, h) async {
-      final prefs = await SharedPreferences.getInstance();
-      var accessToken = prefs.getString('token');
-      options.headers['Authorization'] = 'Bearer $accessToken';
-      return h.next(options);
-    }, onError: (e, handler) async {
-      if (e.response!.statusCode == 401) {
-        await login();
-        final prefs = await SharedPreferences.getInstance();
-        var _accessToken = prefs.getString('token');
-        _accessToken = null;
-        final RequestOptions options = e.response!.requestOptions;
-        try {
-          options.headers['Authorization'] = 'Bearer $_accessToken';
-          final Response response = await dio.fetch(options);
-          return handler.resolve(response);
-        } catch (e, s) {
-          print(e);
-          print(s);
-          // Refresh token expired
-          // Redirect user to login...
-        }
-      }
-
-      return handler.next(e);
-    }));
-
     loaderStatus = true;
-    try {
-      Response<List<dynamic>> response = await dio
-          .get("https://auto-opt.cyber-geeks-lab.synology.me/transport");
-      var preparedTransport = response.data!.map((element) => {
-            'value': element['id'],
-            'title': transportTranslate[element['name']]
-          });
-      initialTransportType.addAll(preparedTransport);
-      loaderStatus = false;
-    } catch (e) {
-      loaderStatus = false;
-      print('Error: $e');
-    }
-  }
+    Client _client = new Client();
+    var _endpointProvider = new EndpointTransportProvider(_client.init());
+    var data = await _endpointProvider.getTransport();
+    initialTransportType.addAll(data);
+    loaderStatus = false;
 
-  login() async {
-    final prefs = await SharedPreferences.getInstance();
-    try {
-      var response = await Dio().post(
-          "https://auto-opt.cyber-geeks-lab.synology.me/auth/login",
-          data: {
-            "phoneNumber": prefs.getString('phone').toString(),
-            "firebaseUid": prefs.getString('user-uid').toString()
-          });
-      var result = response.data;
-      prefs.setString('token', result['access_token']);
-    } catch (e) {
-      print(e);
-    }
   }
 
   @action
   Future getModel(String brand) async {
-    Dio dio = Dio();
-
-    dio.interceptors.add(InterceptorsWrapper(onRequest: (options, h) async {
-      final prefs = await SharedPreferences.getInstance();
-      var accessToken = prefs.getString('token');
-      options.headers['Authorization'] = 'Bearer $accessToken';
-      return h.next(options);
-    }, onError: (e, handler) async {
-      if (e.response!.statusCode == 401) {
-        await login();
-        final prefs = await SharedPreferences.getInstance();
-        var _accessToken = prefs.getString('token');
-        _accessToken = null;
-        final RequestOptions options = e.response!.requestOptions;
-        try {
-          options.headers['Authorization'] = 'Bearer $_accessToken';
-          final Response response = await dio.fetch(options);
-          return handler.resolve(response);
-        } catch (e, s) {
-          print(e);
-          print(s);
-          // Refresh token expired
-          // Redirect user to login...
-        }
-      }
-
-      return handler.next(e);
-    }));
-
     loaderStatus = true;
-    try {
-      Response<List<dynamic>> response = await dio.get(
-          "https://auto-opt.cyber-geeks-lab.synology.me/transport/models/$valueTransportType/$brand");
-      var preparedModels = response.data!
-          .map((element) => {'value': element['id'], 'title': element['name']});
+      Client _client = new Client();
+      var _endpointProvider = new EndpointModelsProvider(_client.init());
+      var data = await _endpointProvider.getModels(valueTransportType, brand);
+      var preparedModels = data.map((element) => {'value': element['id'], 'title': element['name']});
       initialModels.clear();
       initialModels.add({'value': 'Модель:', 'title': 'Модель:'});
       valueModel = getInitValueFromResponse(initialModels, 'Модель:');
       initialModels.addAll(preparedModels);
       loaderStatus = false;
-    } catch (e) {
-      loaderStatus = false;
-      print('Error: $e');
-    }
   }
 
   @action
   Future getBrands(String type) async {
-    Dio dio = Dio();
-
-    dio.interceptors.add(InterceptorsWrapper(onRequest: (options, h) async {
-      final prefs = await SharedPreferences.getInstance();
-      var accessToken = prefs.getString('token');
-      options.headers['Authorization'] = 'Bearer $accessToken';
-      return h.next(options);
-    }, onError: (e, handler) async {
-      if (e.response!.statusCode == 401) {
-        await login();
-        final prefs = await SharedPreferences.getInstance();
-        var _accessToken = prefs.getString('token');
-        _accessToken = null;
-        final RequestOptions options = e.response!.requestOptions;
-        try {
-          options.headers['Authorization'] = 'Bearer $_accessToken';
-          final Response response = await dio.fetch(options);
-          return handler.resolve(response);
-        } catch (e, s) {
-          print(e);
-          print(s);
-          // Refresh token expired
-          // Redirect user to login...
-        }
-      }
-
-      return handler.next(e);
-    }));
-
     loaderStatus = true;
-    try {
-      Response<List<dynamic>> response = await dio.get(
-          "https://auto-opt.cyber-geeks-lab.synology.me/transport/brands/$type");
-      var preparedBrands = response.data!
-          .map((element) => {'value': element['id'], 'title': element['name']});
+    Client _client = new Client();
+    var _endpointProvider = new EndpointBrandsProvider(_client.init());
+    var data = await _endpointProvider.getBrands(type);
+    var preparedBrands = data.map((element) => {'value': element['id'], 'title': element['name']});
       initialBrands.clear();
       initialBrands.add({'value': 'Марка:', 'title': 'Марка:'});
       valueBrand = getInitValueFromResponse(initialBrands, 'Марка:');
       initialBrands.addAll(preparedBrands);
       loaderStatus = false;
-    } catch (e) {
-      loaderStatus = false;
-      print('Error: $e');
-    }
   }
 
   void dispose() {
