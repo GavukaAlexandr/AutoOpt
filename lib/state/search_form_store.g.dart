@@ -179,13 +179,13 @@ mixin _$SearchFormStore on _SearchFormStore, Store {
   final _$initialModelsAtom = Atom(name: '_SearchFormStore.initialModels');
 
   @override
-  List<dynamic> get initialModels {
+  ObservableFuture<List<dynamic>>? get initialModels {
     _$initialModelsAtom.reportRead();
     return super.initialModels;
   }
 
   @override
-  set initialModels(List<dynamic> value) {
+  set initialModels(ObservableFuture<List<dynamic>>? value) {
     _$initialModelsAtom.reportWrite(value, super.initialModels, () {
       super.initialModels = value;
     });
@@ -299,11 +299,12 @@ mixin _$SearchFormStore on _SearchFormStore, Store {
     });
   }
 
-  final _$getModelAsyncAction = AsyncAction('_SearchFormStore.getModel');
+  final _$getModelByHttpAsyncAction =
+      AsyncAction('_SearchFormStore.getModelByHttp');
 
   @override
-  Future<dynamic> getModel(String brand) {
-    return _$getModelAsyncAction.run(() => super.getModel(brand));
+  Future<List<dynamic>> getModelByHttp(String brand) {
+    return _$getModelByHttpAsyncAction.run(() => super.getModelByHttp(brand));
   }
 
   final _$_SearchFormStoreActionController =
@@ -403,6 +404,17 @@ mixin _$SearchFormStore on _SearchFormStore, Store {
         name: '_SearchFormStore.getTransport');
     try {
       return super.getTransport();
+    } finally {
+      _$_SearchFormStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  Future<dynamic> getModel(String brand) {
+    final _$actionInfo = _$_SearchFormStoreActionController.startAction(
+        name: '_SearchFormStore.getModel');
+    try {
+      return super.getModel(brand);
     } finally {
       _$_SearchFormStoreActionController.endAction(_$actionInfo);
     }

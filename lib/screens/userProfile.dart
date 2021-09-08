@@ -111,7 +111,7 @@ class _UserProfile extends State<UserProfile> {
                         ClipPath(
                           child:
                               Container(color: Theme.of(context).primaryColor),
-                          clipper: getClipper(),
+                          clipper: GetClipper(),
                         ),
                         Positioned(
                             width: 1.sw,
@@ -206,13 +206,13 @@ class _UserProfile extends State<UserProfile> {
                                   ),
                                 ),
                                 SizedBox(
-                                  height: 30.h,
+                                  height: 25.h,
                                 ),
                                 Container(
                                     height: 35.h,
                                     width: 160.w,
                                     child: Material(
-                                      borderRadius: BorderRadius.circular(20.0),
+                                      borderRadius: BorderRadius.circular(20.r),
                                       color: Theme.of(context).accentColor,
                                       elevation: 7.0,
                                       child: TextButton(
@@ -239,7 +239,7 @@ class _UserProfile extends State<UserProfile> {
                                         width: 160.w,
                                         child: Material(
                                           borderRadius:
-                                              BorderRadius.circular(20.0),
+                                              BorderRadius.circular(20.r),
                                           color: Colors.green,
                                           elevation: 7.0,
                                           child: TextButton(
@@ -260,11 +260,12 @@ class _UserProfile extends State<UserProfile> {
                                           ),
                                         ))
                                     : Container(
+                                      padding: EdgeInsets.only(bottom: 5.sp),
                                         height: 35.h,
                                         width: 160.w,
                                         child: Material(
                                           borderRadius:
-                                              BorderRadius.circular(20.0),
+                                              BorderRadius.circular(20.r),
                                           color: Colors.red,
                                           elevation: 7.0,
                                           child: TextButton(
@@ -281,21 +282,20 @@ class _UserProfile extends State<UserProfile> {
                                                 (Route<dynamic> route) => false,
                                               );
                                             },
-                                            child: Center(
-                                              child: Text(
-                                                S.of(context).profile_exit_btn,
-                                                style: TextStyle(
-                                                    fontSize: 14.sp,
-                                                    letterSpacing: 4,
-                                                    fontWeight: FontWeight.w400,
-                                                    color: Colors.white,
-                                                    fontFamily: 'Montserrat'),
-                                              ),
+                                            child: Text(
+                                              S.of(context).profile_exit_btn,
+                                              style: TextStyle(
+                                                  fontSize: 14.sp,
+                                                  letterSpacing: 2.sp,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Colors.white,
+                                                  fontFamily: 'Montserrat'),
                                             ),
                                           ),
-                                        ))
+                                        ),
+                                      ),
                               ],
-                            ))
+                            )),
                       ],
                     ),
                   ),
@@ -432,19 +432,10 @@ class _AvatarWidget extends StatelessWidget {
         color: Colors.black45,
       ),
     );
-    // (
-    //   width: 120.w,
-    //   height: 120.h,
-    //   decoration: BoxDecoration(
-    //     color: Theme.of(context).backgroundColor,
-    //     borderRadius: BorderRadius.all(Radius.circular(75.r)),
-    //     boxShadow: [BoxShadow(blurRadius: 8.r, color: Colors.black)],
-    //   ),
-    // );
   }
 }
 
-class getClipper extends CustomClipper<Path> {
+class GetClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     var path = new Path();

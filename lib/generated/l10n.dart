@@ -110,11 +110,51 @@ class S {
     );
   }
 
+  /// `Internet connection not found`
+  String get connection_status_failed {
+    return Intl.message(
+      'Internet connection not found',
+      name: 'connection_status_failed',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Parts search`
   String get order_app_bar {
     return Intl.message(
       'Parts search',
       name: 'order_app_bar',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failed to load data`
+  String get order_dropdown_error {
+    return Intl.message(
+      'Failed to load data',
+      name: 'order_dropdown_error',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Loading`
+  String get order_loading {
+    return Intl.message(
+      'Loading',
+      name: 'order_loading',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tap to try again`
+  String get order_button_retry_request {
+    return Intl.message(
+      'Tap to try again',
+      name: 'order_button_retry_request',
       desc: '',
       args: [],
     );

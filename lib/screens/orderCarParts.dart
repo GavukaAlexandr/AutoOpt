@@ -31,6 +31,7 @@ class _OrderCarPartsState extends State<OrderCarParts> {
   Map<String, String> networkStatus = {};
   late StreamSubscription<ConnectivityResult> subscription;
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  bool currentConnectionStatus = false;
   void checkConnectivity2() async {
     subscription =
         connectivity.onConnectivityChanged.listen((ConnectivityResult result) {
@@ -38,7 +39,7 @@ class _OrderCarPartsState extends State<OrderCarParts> {
     });
   }
 
-  dynamic getConnectionValue(var connectivityResult) {
+  getConnectionValue(var connectivityResult) {
     String status = '';
     switch (connectivityResult) {
       case ConnectivityResult.mobile:
@@ -55,15 +56,14 @@ class _OrderCarPartsState extends State<OrderCarParts> {
         break;
     }
     if (status == 'None') {
-      return ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          key: scaffoldKey,
-          content: const Text('Интернет соединение отсутствует'),
-          duration: const Duration(days: 365),
-        ),
-      );
+      setState(() {
+        currentConnectionStatus = false;
+      });
     } else {
-      return ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      setState(() {
+        currentConnectionStatus = true;
+        searchFormStore.getTransport();
+      });
     }
   }
 
@@ -92,36 +92,10 @@ class _OrderCarPartsState extends State<OrderCarParts> {
     }
   }
 
-  isToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    var token = prefs.getString('token');
-
-    if (token != null) return;
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => Login()),
-      (Route<dynamic> route) => false,
-    );
-  }
-
   @override
   void initState() {
     super.initState();
-    isToken();
     checkConnectivity2();
-
-    searchFormStore.getTransport();
-    searchFormStore.initialModels.add({'value': 'Модель:', 'title': 'Модель:'});
-    searchFormStore.valueModel =
-        getInitValueFromResponse(searchFormStore.initialModels, 'Модель:');
-    searchFormStore.valueDrive =
-        getInitValueFromResponse(searchFormStore.initialDrive, 'Привод:');
-    // searchFormStore.valueTransportType = getInitValueFromResponse(
-    //     searchFormStore.initialTransportType, 'Тип транспорта:');
-    searchFormStore.valueTransmission = getInitValueFromResponse(
-        searchFormStore.initialTransmission, 'Коробка передач:');
-    searchFormStore.valueBodyType = getInitValueFromResponse(
-        searchFormStore.initialBodyType, 'Тип кузова:');
     searchFormStore.setupValidations();
   }
 
@@ -142,11 +116,13 @@ class _OrderCarPartsState extends State<OrderCarParts> {
     ]);
     return GestureDetector(
       onTap: unfocus,
-      child: Scaffold(
+      child: currentConnectionStatus ? Scaffold(
         appBar: AppBar(
           title: Text(S.of(context).order_app_bar,
               style: TextStyle(
-                  letterSpacing: 1, fontFamily: 'Montserrat', fontSize: 18.sp)),
+                  letterSpacing: 1.sp,
+                  fontFamily: 'Montserrat',
+                  fontSize: 18.sp)),
           centerTitle: true,
           backgroundColor: Theme.of(context).primaryColor,
           elevation: 0.0,
@@ -156,19 +132,15 @@ class _OrderCarPartsState extends State<OrderCarParts> {
                 Navigator.pushNamed(context, 'userProfile');
               },
               icon: Icon(Icons.person_outline_outlined),
-              iconSize: 36.sp,
+              iconSize: 30.sp,
             )
           ],
         ),
-        body: Observer(
-          builder: (_) => LoadingOverlay(
-              color: Colors.black54,
-              isLoading: searchFormStore.loaderStatus,
-              child: Center(
+        body: SingleChildScrollView(
                 child: Container(
                   width: 1.sw,
                   padding: EdgeInsets.only(
-                      left: 10.0, right: 10.0, top: 10, bottom: 10),
+                      left: 10.sp, right: 10.sp, top: 10.sp, bottom: 10.sp),
                   child: Column(
                     children: [
                       Observer(builder: (_) {
@@ -182,128 +154,85 @@ class _OrderCarPartsState extends State<OrderCarParts> {
                           case FutureStatus.pending:
                             return Column(
                               mainAxisAlignment: MainAxisAlignment.end,
-                              children: const [
-                                CircularProgressIndicator(),
-                                Text('Loading items...'),
+                              children: [
+                                const CircularProgressIndicator(),
+                                Text(S.of(context).order_loading),
                               ],
                             );
-
                           case FutureStatus.rejected:
                             return Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: <Widget>[
-                                const Text(
-                                  'Failed to load items.',
+                                Text(
+                                  S.of(context).order_dropdown_error,
                                   style: TextStyle(color: Colors.red),
                                 ),
                                 ElevatedButton(
-                                  child: const Text('Tap to try again'),
+                                  child: Text(
+                                      S.of(context).order_button_retry_request),
                                   onPressed: _refresh,
                                 )
                               ],
                             );
-
                           case FutureStatus.fulfilled:
                             final List<dynamic> items = future.result;
-                            searchFormStore.valueTransportType =
-                                items[0]['value'];
-                            return Container(
-                              child: DropdownButtonFormField(
-                                decoration: InputDecoration(
-                                  labelText: 'Тип транспорта:',
-                                  hintText: 'Выберите тип транспорта',
-                                  labelStyle: TextStyle(
-                                      fontFamily: 'Montserrat',
-                                      letterSpacing: 1,
-                                      fontSize: 16.sp),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(18.0),
+                            return Column(
+                              children: [
+                                DropdownButtonFormField(
+                                  decoration: InputDecoration(
+                                    labelText: 'Тип транспорта:',
+                                    hintText: 'Выберите тип транспорта',
+                                    labelStyle: TextStyle(
+                                        fontFamily: 'Montserrat',
+                                        letterSpacing: 1.sp,
+                                        fontSize: 16.sp),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(18.r),
+                                    ),
+                                    contentPadding: EdgeInsets.fromLTRB(
+                                        5.sp, 5.sp, 5.sp, 5.sp),
                                   ),
-                                  contentPadding:
-                                      EdgeInsets.fromLTRB(10.0, 0, 10.0, 0),
+                                  style: TextStyle(
+                                      letterSpacing: 1.sp,
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 16.sp,
+                                      fontFamily: 'Montserrat',
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .bodyText1
+                                          ?.color),
+                                  onChanged: (value) {
+                                    searchFormStore.transportTypeSetValue(
+                                        value.toString());
+                                  },
+                                  icon: Icon(
+                                    Icons.keyboard_arrow_down_outlined,
+                                  ),
+                                  items: items.map((map) {
+                                    return DropdownMenuItem<String>(
+                                        value: map['value'],
+                                        child: Text(map['title']));
+                                  }).toList(),
                                 ),
-                                value: searchFormStore.valueTransportType,
-                                style: TextStyle(
-                                    letterSpacing: 1,
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 16.sp,
-                                    fontFamily: 'Montserrat',
-                                    color: Theme.of(context)
-                                        .textTheme
-                                        .bodyText1
-                                        ?.color),
-                                onTap: () {
-                                  print('open');
-                                },
-                                onChanged: (value) {
-                                  searchFormStore
-                                      .transportTypeSetValue(value.toString());
-                                },
-                                icon: Icon(
-                                  Icons.keyboard_arrow_down_outlined,
-                                ),
-                                items: items.map((map) {
-                                  return DropdownMenuItem<String>(
-                                      value: map['value'],
-                                      child: Text(map['title']));
-                                }).toList(),
-                              ),
+                                SizedBox(height: 10.h),
+                              ],
                             );
                         }
                       }),
-                      SizedBox(height: 10),
                       Observer(builder: (_) {
                         final future = searchFormStore.initialBrands;
 
                         if (future == null) {
-                          return Container(
-                            child: DropdownButtonFormField(
-                              decoration: InputDecoration(
-                                labelText: 'Марка:',
-                                labelStyle: TextStyle(
-                                    fontFamily: 'Montserrat',
-                                    letterSpacing: 1,
-                                    fontSize: 16.sp),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(18.0),
-                                ),
-                                contentPadding:
-                                    EdgeInsets.fromLTRB(10.0, 0, 10.0, 0),
-                              ),
-                              value: 'Выберите тип транспорта',
-                              style: TextStyle(
-                                  letterSpacing: 1,
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 16.sp,
-                                  fontFamily: 'Montserrat',
-                                  color: Theme.of(context)
-                                      .textTheme
-                                      .bodyText1
-                                      ?.color),
-                              icon: Icon(
-                                Icons.keyboard_arrow_down_outlined,
-                              ),
-                              items: <dynamic>[
-                                {
-                                  'value': 'Выберите тип транспорта',
-                                  'title': 'Выберите тип транспорта'
-                                }
-                              ].map((map) {
-                                return DropdownMenuItem<String>(
-                                    value: map['value'],
-                                    child: Text(map['title']));
-                              }).toList(),
-                            ),
-                          );
+                          return SizedBox.shrink();
                         }
 
                         switch (future.status) {
                           case FutureStatus.pending:
                             return Column(
                               mainAxisAlignment: MainAxisAlignment.end,
-                              children: const [
-                                CircularProgressIndicator(),
-                                Text('Loading items...'),
+                              children: [
+                                const CircularProgressIndicator(),
+                                Text(S.of(context).order_loading),
                               ],
                             );
 
@@ -311,101 +240,137 @@ class _OrderCarPartsState extends State<OrderCarParts> {
                             return Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: <Widget>[
-                                const Text(
-                                  'Failed to load items.',
+                                Text(
+                                  S.of(context).order_dropdown_error,
                                   style: TextStyle(color: Colors.red),
                                 ),
                                 ElevatedButton(
-                                  child: const Text('Tap to try again'),
+                                  child: Text(
+                                      S.of(context).order_button_retry_request),
                                   onPressed: _refresh,
                                 )
                               ],
                             );
-
                           case FutureStatus.fulfilled:
                             final List<dynamic> items = future.result;
-                            searchFormStore.valueBrand = items[0]['value'];
-                            return Container(
-                              child: DropdownButtonFormField(
-                                decoration: InputDecoration(
-                                  labelText: 'Марка:',
-                                  labelStyle: TextStyle(
-                                      fontFamily: 'Montserrat',
-                                      letterSpacing: 1,
-                                      fontSize: 16.sp),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(18.0),
+                            return Column(
+                              children: [
+                                DropdownButtonFormField(
+                                  decoration: InputDecoration(
+                                    labelText: 'Марка:',
+                                    labelStyle: TextStyle(
+                                        fontFamily: 'Montserrat',
+                                        letterSpacing: 1.sp,
+                                        fontSize: 16.sp),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(18.r),
+                                    ),
+                                    contentPadding: EdgeInsets.fromLTRB(
+                                        10.sp, 5.sp, 10.sp, 5.sp),
                                   ),
-                                  contentPadding:
-                                      EdgeInsets.fromLTRB(10.0, 0, 10.0, 0),
+                                  style: TextStyle(
+                                      letterSpacing: 1.sp,
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 16.sp,
+                                      fontFamily: 'Montserrat',
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .bodyText1
+                                          ?.color),
+                                  onChanged: (value) {
+                                    searchFormStore
+                                        .brandSetValue(value.toString());
+                                  },
+                                  icon: Icon(
+                                    Icons.keyboard_arrow_down_outlined,
+                                  ),
+                                  items: items.map((map) {
+                                    return DropdownMenuItem<String>(
+                                        value: map['value'],
+                                        child: Text(map['title']));
+                                  }).toList(),
                                 ),
-                                value: searchFormStore.valueBrand,
-                                style: TextStyle(
-                                    letterSpacing: 1,
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 16.sp,
-                                    fontFamily: 'Montserrat',
-                                    color: Theme.of(context)
-                                        .textTheme
-                                        .bodyText1
-                                        ?.color),
-                                onChanged: (value) {
-                                  searchFormStore
-                                      .brandSetValue(value.toString());
-                                },
-                                icon: Icon(
-                                  Icons.keyboard_arrow_down_outlined,
-                                ),
-                                items: items.map((map) {
-                                  return DropdownMenuItem<String>(
-                                      value: map['value'],
-                                      child: Text(map['title']));
-                                }).toList(),
-                              ),
+                                SizedBox(height: 10.h),
+                              ],
                             );
                         }
                       }),
-                      SizedBox(height: 10),
-                      Observer(
-                        builder: (_) => Container(
-                          child: DropdownButtonFormField(
-                            decoration: InputDecoration(
-                                labelText: 'Модель:',
-                                labelStyle: TextStyle(
-                                    fontFamily: 'Montserrat',
-                                    letterSpacing: 1,
-                                    fontSize: 16.sp),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(18.0),
+                      Observer(builder: (_) {
+                        final future = searchFormStore.initialModels;
+
+                        if (future == null) {
+                          return SizedBox.shrink();
+                        }
+
+                        switch (future.status) {
+                          case FutureStatus.pending:
+                            return Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const CircularProgressIndicator(),
+                                Text(S.of(context).order_loading),
+                              ],
+                            );
+
+                          case FutureStatus.rejected:
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Text(
+                                  S.of(context).order_dropdown_error,
+                                  style: TextStyle(color: Colors.red),
                                 ),
-                                contentPadding:
-                                    EdgeInsets.fromLTRB(10.0, 0, 10.0, 0),
-                                errorText: searchFormStore.error.valueModel),
-                            value: searchFormStore.valueModel,
-                            style: TextStyle(
-                                letterSpacing: 1,
-                                fontWeight: FontWeight.w400,
-                                fontSize: 16.sp,
-                                fontFamily: 'Montserrat',
-                                color: Theme.of(context)
-                                    .textTheme
-                                    .bodyText1
-                                    ?.color),
-                            onChanged: (value) {
-                              searchFormStore.modelSetValue(value.toString());
-                            },
-                            icon: Icon(
-                              Icons.keyboard_arrow_down,
-                            ),
-                            items: searchFormStore.initialModels.map((map) {
-                              return DropdownMenuItem<String>(
-                                  value: map['value'],
-                                  child: Text(map['title']));
-                            }).toList(),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 10),
+                                ElevatedButton(
+                                  child: Text(
+                                      S.of(context).order_button_retry_request),
+                                  onPressed: _refresh,
+                                )
+                              ],
+                            );
+                          case FutureStatus.fulfilled:
+                            final List<dynamic> items = future.result;
+                            return Column(
+                              children: [
+                                DropdownButtonFormField(
+                                  decoration: InputDecoration(
+                                    labelText: 'Модель:',
+                                    labelStyle: TextStyle(
+                                        fontFamily: 'Montserrat',
+                                        letterSpacing: 1.sp,
+                                        fontSize: 16.sp),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(18.r),
+                                    ),
+                                    contentPadding: EdgeInsets.fromLTRB(
+                                        10.sp, 5.sp, 10.sp, 5.sp),
+                                  ),
+                                  style: TextStyle(
+                                      letterSpacing: 1.sp,
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 16.sp,
+                                      fontFamily: 'Montserrat',
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .bodyText1
+                                          ?.color),
+                                  onChanged: (value) {
+                                    searchFormStore
+                                        .modelSetValue(value.toString());
+                                  },
+                                  icon: Icon(
+                                    Icons.keyboard_arrow_down_outlined,
+                                  ),
+                                  items: items.map((map) {
+                                    return DropdownMenuItem<String>(
+                                        value: map['value'],
+                                        child: Text(map['title']));
+                                  }).toList(),
+                                ),
+                                SizedBox(height: 10.h),
+                              ],
+                            );
+                        }
+                      }),
                       Observer(
                         builder: (_) => Container(
                           child: DropdownButtonFormField(
@@ -413,18 +378,17 @@ class _OrderCarPartsState extends State<OrderCarParts> {
                                 labelText: 'Коробка передач:',
                                 labelStyle: TextStyle(
                                     fontFamily: 'Montserrat',
-                                    letterSpacing: 1,
+                                    letterSpacing: 1.sp,
                                     fontSize: 16.sp),
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(18.0),
+                                  borderRadius: BorderRadius.circular(18.r),
                                 ),
-                                contentPadding:
-                                    EdgeInsets.fromLTRB(10.0, 0, 10.0, 0),
+                                contentPadding: EdgeInsets.fromLTRB(
+                                    10.sp, 5.sp, 10.sp, 5.sp),
                                 errorText:
                                     searchFormStore.error.valueTransmission),
-                            value: searchFormStore.valueTransmission,
                             style: TextStyle(
-                                letterSpacing: 1,
+                                letterSpacing: 1.sp,
                                 fontWeight: FontWeight.w400,
                                 fontSize: 16.sp,
                                 fontFamily: 'Montserrat',
@@ -450,7 +414,7 @@ class _OrderCarPartsState extends State<OrderCarParts> {
                           ),
                         ),
                       ),
-                      SizedBox(height: 10),
+                      SizedBox(height: 10.h),
                       Observer(
                         builder: (_) => Container(
                           child: DropdownButtonFormField(
@@ -461,13 +425,13 @@ class _OrderCarPartsState extends State<OrderCarParts> {
                                     letterSpacing: 1,
                                     fontSize: 16.sp),
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(18.0),
+                                  borderRadius: BorderRadius.circular(18.r),
                                 ),
-                                contentPadding:
-                                    EdgeInsets.fromLTRB(10.0, 0, 10.0, 0),
+                                contentPadding: EdgeInsets.fromLTRB(
+                                    10.sp, 5.sp, 10.sp, 5.sp),
                                 errorText: searchFormStore.error.valueBodyType),
                             style: TextStyle(
-                                letterSpacing: 1,
+                                letterSpacing: 1.sp,
                                 fontWeight: FontWeight.w400,
                                 fontSize: 16.sp,
                                 fontFamily: 'Montserrat',
@@ -475,7 +439,6 @@ class _OrderCarPartsState extends State<OrderCarParts> {
                                     .textTheme
                                     .bodyText1
                                     ?.color),
-                            value: searchFormStore.valueBodyType,
                             onChanged: (value) {
                               searchFormStore
                                   .bodyTypeSetValue(value.toString());
@@ -491,7 +454,7 @@ class _OrderCarPartsState extends State<OrderCarParts> {
                           ),
                         ),
                       ),
-                      SizedBox(height: 10),
+                      SizedBox(height: 10.h),
                       Observer(
                         builder: (_) => Container(
                           child: DropdownButtonFormField(
@@ -499,15 +462,14 @@ class _OrderCarPartsState extends State<OrderCarParts> {
                                 labelText: 'Привод:',
                                 labelStyle: TextStyle(
                                     fontFamily: 'Montserrat',
-                                    letterSpacing: 1,
+                                    letterSpacing: 1.sp,
                                     fontSize: 16.sp),
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(18.0),
+                                  borderRadius: BorderRadius.circular(18.r),
                                 ),
-                                contentPadding:
-                                    EdgeInsets.fromLTRB(10.0, 0, 10.0, 0),
+                                contentPadding: EdgeInsets.fromLTRB(
+                                    10.sp, 5.sp, 10.sp, 5.sp),
                                 errorText: searchFormStore.error.valueDrive),
-                            value: searchFormStore.valueDrive,
                             style: TextStyle(
                                 letterSpacing: 1,
                                 fontWeight: FontWeight.w400,
@@ -531,11 +493,201 @@ class _OrderCarPartsState extends State<OrderCarParts> {
                           ),
                         ),
                       ),
+                      SizedBox(height: 10.h),
+                      Row(children: [
+                        Expanded(
+                          child: TextFormField(
+                              keyboardType: TextInputType.number,
+                              autofocus: false,
+                              //! controller:,
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                              ),
+                              onChanged: (lastName) {},
+                              decoration: InputDecoration(
+                                labelText: 'Год выпуска:',
+                                labelStyle: TextStyle(
+                                    fontFamily: 'Montserrat', letterSpacing: 1),
+                                contentPadding: EdgeInsets.fromLTRB(
+                                    10.sp, 15.sp, 10.sp, 15.sp),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(18.r),
+                                ),
+                              )),
+                        ),
+                        SizedBox(width: 10.w),
+                        Expanded(
+                          child: TextFormField(
+                            keyboardType: TextInputType.number,
+                            autofocus: false,
+                            //! controller:,
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                            ),
+                            onChanged: (lastName) {},
+                            decoration: InputDecoration(
+                              labelText: 'Объем двигателя:',
+                              labelStyle: TextStyle(
+                                  fontFamily: 'Montserrat', letterSpacing: 1),
+                              contentPadding: EdgeInsets.fromLTRB(
+                                  10.sp, 15.sp, 10.sp, 15.sp),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(18.r),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ]),
+                      SizedBox(height: 10.h),
+                      TextFormField(
+                          keyboardType: TextInputType.number,
+                          autofocus: false,
+                          //! controller:,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                          ),
+                          onChanged: (lastName) {},
+                          decoration: InputDecoration(
+                            labelText: 'V I N - номер:',
+                            labelStyle: TextStyle(
+                                fontFamily: 'Montserrat', letterSpacing: 1),
+                            contentPadding:
+                                EdgeInsets.fromLTRB(10.sp, 15.sp, 10.sp, 15.sp),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(18.r),
+                            ),
+                          )),
+                      Observer(
+                        builder: (_) => GridView.count(
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                          childAspectRatio: 4,
+                          physics: NeverScrollableScrollPhysics(),
+                          crossAxisCount: 2,
+                          children: searchFormStore.fuelType.keys.map(
+                            (key) {
+                              return Container(
+                                  child: SwitchListTile(
+                                contentPadding: EdgeInsets.zero,
+                                inactiveTrackColor:
+                                    searchFormStore.error.fuel != null
+                                        ? Colors.red[300]
+                                        : Colors.grey[200],
+                                title: Text(
+                                  key,
+                                  style: TextStyle(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.w400,
+                                      fontFamily: 'Montserrat',
+                                      letterSpacing: 1.sp),
+                                ),
+                                value: searchFormStore.fuelType[key],
+                                onChanged: (value) {
+                                  searchFormStore.changeFuelType(key, value);
+                                },
+                              ));
+                            },
+                          ).toList(),
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      TextFormField(
+                          keyboardType: TextInputType.number,
+                          autofocus: false,
+                          maxLines: null,
+                          //! controller:,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                          ),
+                          onChanged: (lastName) {},
+                          decoration: InputDecoration(
+                            labelText: 'Запчасти (наим/кат.номер)',
+                            labelStyle: TextStyle(
+                                fontFamily: 'Montserrat', letterSpacing: 1),
+                            contentPadding:
+                                EdgeInsets.fromLTRB(10.sp, 15.sp, 10.sp, 15.sp),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(18.r),
+                            ),
+                          )),
+                      Observer(
+                        builder: (_) => GridView.count(
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          childAspectRatio: 4,
+                          crossAxisCount: 2,
+                          children: searchFormStore.partType.keys.map((key) {
+                            return Container(
+                                child: SwitchListTile(
+                              contentPadding: EdgeInsets.zero,
+                              inactiveTrackColor:
+                                  searchFormStore.error.partType != null
+                                      ? Colors.red[300]
+                                      : Colors.grey[200],
+                              title: Text(
+                                key,
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w400,
+                                  fontFamily: 'Montserrat',
+                                ),
+                              ),
+                              value: searchFormStore.partType[key],
+                              onChanged: (value) {
+                                searchFormStore.changePartType(key, value);
+                              },
+                            ));
+                          }).toList(),
+                        ),
+                      ),
+                      SizedBox(height: 15.h),
+                      Container(
+                          height: 40.h,
+                          width: 0.8.sw,
+                          child: Material(
+                            borderRadius: BorderRadius.circular(18.0),
+                            color: Colors.green,
+                            elevation: 7.0,
+                            child: TextButton(
+                              onPressed: () {},
+                              child: Center(
+                                child: Text(
+                                  S.of(context).profile_save_btn,
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14.sp,
+                                      letterSpacing: 1.sp,
+                                      fontWeight: FontWeight.w400,
+                                      fontFamily: 'Montserrat'),
+                                ),
+                              ),
+                            ),
+                          ))
                     ],
                   ),
                 ),
-              )),
-        ),
+              )
+      ) : Scaffold(
+        body: Center(
+                  child: Container(
+                    padding: EdgeInsets.only(right: 10.sp, left: 10.sp),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.wifi_off_outlined, size: 60.sp),
+                        SizedBox(height: 10.h),
+                        Text(S.of(context).connection_status_failed,
+                            style: TextStyle(
+                                fontSize: 16.sp,
+                                letterSpacing: 1.sp,
+                                fontWeight: FontWeight.w400,
+                                fontFamily: 'Montserrat')),
+                      ],
+                    ),
+                  ),
+                ),
       ),
     );
   }
@@ -698,35 +850,7 @@ class _OrderCarPartsState extends State<OrderCarParts> {
 //                                 )),
 //                         ),
 //                       ),
-//                       Observer(
-//                         builder: (_) => GridView.count(
-//                           shrinkWrap: true,
-//                           physics: NeverScrollableScrollPhysics(),
-//                           childAspectRatio: 8,
-//                           crossAxisCount: 1,
-//                           children: searchFormStore.fuelType.keys.map(
-//                             (key) {
-//                               return Container(
-//                                   child: SwitchListTile(
-//                                 inactiveTrackColor:
-//                                     searchFormStore.error.fuel != null
-//                                         ? Colors.red[300]
-//                                         : Colors.grey[200],
-//                                 title: Text(
-//                                   key,
-//                                   style: TextStyle(
-//                                       fontSize: 20,
-//                                       fontWeight: FontWeight.w300),
-//                                 ),
-//                                 value: searchFormStore.fuelType[key],
-//                                 onChanged: (value) {
-//                                   searchFormStore.changeFuelType(key, value);
-//                                 },
-//                               ));
-//                             },
-//                           ).toList(),
-//                         ),
-//                       ),
+                      
 //                       SizedBox(
 //                         height: 5,
 //                       ),

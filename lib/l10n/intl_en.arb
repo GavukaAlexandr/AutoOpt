@@ -6,5 +6,10 @@
     "profile_save_btn": "Save",
     "profile_error_notification": "Choose at least one feedback method",
 
-    "order_app_bar": "Parts search"
+    "connection_status_failed": "Internet connection not found",
+
+    "order_app_bar": "Parts search",
+    "order_dropdown_error": "Failed to load data",
+    "order_loading": "Loading",
+    "order_button_retry_request": "Tap to try again"
 }

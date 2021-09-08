@@ -24,7 +24,7 @@ class SearchFormStore = _SearchFormStore with _$SearchFormStore;
 abstract class _SearchFormStore with Store {
   final SearchFormErrorState error = SearchFormErrorState();
   late List<ReactionDisposer> _disposers;
-
+  
   @observable
   bool loaderStatus = false;
 
@@ -59,21 +59,19 @@ abstract class _SearchFormStore with Store {
   String valueBodyType = '';
 
   @observable
-  List<dynamic> initialModels = [];
+  ObservableFuture<List<dynamic>>? initialModels;
 
   @observable
   ObservableFuture<List<dynamic>>? initialBrands;
 
   @observable
   List<dynamic> initialDrive = [
-    {'value': 'Привод:', 'title': 'Привод:'},
     {'value': 'Полный', 'title': 'Полный'},
     {'value': 'Передний', 'title': 'Передний'},
     {'value': 'Задний', 'title': 'Задний'}
   ];
   @observable
   List<dynamic> initialBodyType = [
-    {'value': 'Тип кузова:', 'title': 'Тип кузова:'},
     {'value': 'Седан', 'title': 'Седан'},
     {'value': 'Хэтчбэк', 'title': 'Хэтчбэк'},
     {'value': 'Купе', 'title': 'Купе'},
@@ -87,7 +85,6 @@ abstract class _SearchFormStore with Store {
   ];
   @observable
   List<dynamic> initialTransmission = [
-    {'value': 'Коробка передач:', 'title': 'Коробка передач:'},
     {'value': 'Механика', 'title': 'Механика'},
     {'value': 'Автомат', 'title': 'Автомат'}
   ];
@@ -111,9 +108,7 @@ abstract class _SearchFormStore with Store {
   @observable
   ObservableMap partType = ObservableMap.of({
     'Оригинал': false,
-    'Не оригинал': false,
-    'Б/У': false,
-    'Не Б/У': false,
+    'Аналог': false,
   });
 
   @action
@@ -131,34 +126,21 @@ abstract class _SearchFormStore with Store {
   @action
   void modelSetValue(String value) {
     valueModel = value;
-    if (initialModels.length > 1) {
-      initialModels.removeWhere((item) => item['value'] == 'Модель:');
-    }
   }
 
   @action
   void transmissionSetValue(String value) {
     valueTransmission = value;
-    if (value != 'Коробка передач:') {
-      initialTransmission
-          .removeWhere((item) => item['value'] == 'Коробка передач:');
-    }
   }
 
   @action
   void bodyTypeSetValue(String value) {
     valueBodyType = value;
-    if (value != 'Тип кузова:') {
-      initialBodyType.removeWhere((item) => item['value'] == 'Тип кузова:');
-    }
   }
 
   @action
   void driveSetValue(String value) {
     valueDrive = value;
-    if (value != 'Привод:') {
-      initialDrive.removeWhere((item) => item['value'] == 'Привод:');
-    }
   }
 
   @action
@@ -175,22 +157,18 @@ abstract class _SearchFormStore with Store {
   }
 
   @action
-  Future getTransport() =>
-      initialTransportType = ObservableFuture(getTransportByHttp());
+  Future getTransport() => initialTransportType = ObservableFuture(getTransportByHttp());
+  
+  @action
+  Future getModel(String brand) => initialModels = ObservableFuture(getModelByHttp(brand));
 
   @action
-  Future getModel(String brand) async {
-    loaderStatus = true;
+  Future<List<dynamic>> getModelByHttp(String brand) async {
     Client _client = new Client();
     var _endpointProvider = new EndpointModelsProvider(_client.init());
-    var data = await _endpointProvider.getModels(valueTransportType, brand);
-    var preparedModels = data
-        .map((element) => {'value': element['id'], 'title': element['name']});
-    initialModels.clear();
-    initialModels.add({'value': 'Модель:', 'title': 'Модель:'});
-    valueModel = getInitValueFromResponse(initialModels, 'Модель:');
-    initialModels.addAll(preparedModels);
-    loaderStatus = false;
+    List<dynamic> data = await _endpointProvider.getModels(valueTransportType, brand);
+    data = data.map((element) => {'value': element['id'], 'title': element['name']}).toList();
+    return data;
   }
 
   @action
@@ -204,7 +182,6 @@ abstract class _SearchFormStore with Store {
     data = data
         .map((element) => {'value': element['id'], 'title': element['name']})
         .toList();
-    // initialBrands.clear();
     return data;
   }
 

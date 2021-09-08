@@ -6,5 +6,10 @@
     "profile_save_btn": "Сохранить",
     "profile_error_notification": "Выберите хотя бы один способ обратной связи",
 
-    "order_app_bar": "Поиск запчастей"
+    "connection_status_failed": "Интернет-соединение не найдено",
+
+    "order_app_bar": "Поиск запчастей",
+    "order_dropdown_error": "Не удалось загрузить данные",
+    "order_loading": "Загрузка",
+    "order_button_retry_request": "Нажмите чтобы повторить"
 }

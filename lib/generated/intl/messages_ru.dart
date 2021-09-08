@@ -21,8 +21,15 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+        "connection_status_failed": MessageLookupByLibrary.simpleMessage(
+            "Интернет-соединение не найдено"),
         "order_app_bar":
             MessageLookupByLibrary.simpleMessage("Поиск запчастей"),
+        "order_button_retry_request":
+            MessageLookupByLibrary.simpleMessage("Нажмите чтобы повторить"),
+        "order_dropdown_error":
+            MessageLookupByLibrary.simpleMessage("Не удалось загрузить данные"),
+        "order_loading": MessageLookupByLibrary.simpleMessage("Загрузка"),
         "profile_app_bar": MessageLookupByLibrary.simpleMessage("Профиль"),
         "profile_error_notification": MessageLookupByLibrary.simpleMessage(
             "Выберите хотя бы один способ обратной связи"),
