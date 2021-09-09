@@ -56,14 +56,14 @@ enum FuelType {
 
 enum PartType {
   ORIGINAL
-  NOT_ORIGINAL
-  USED
-  NOT_USED
+  ANALOGUE
 }
 
 enum Transmission {
   AUTO
   MECHANICAL
+  VARIABLE
+  ROBOT
 }
 
 enum BodyType {

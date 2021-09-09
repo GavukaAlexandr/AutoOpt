@@ -1,4 +1,10 @@
-import { BodyType } from '@prisma/client';
+import {
+  BodyType,
+  DriveType,
+  FuelType,
+  PartType,
+  Transmission,
+} from '@prisma/client';
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { createBrandDto, createModelDto } from './dto/transport.dto';
 import { TransportService } from './transport.service';
@@ -38,5 +44,25 @@ export class TransportController {
   @Get('body-types')
   async getBodyTypes() {
     return Object.values(BodyType);
+  }
+
+  @Get('drive-types')
+  async getDriveTypes() {
+    return Object.values(DriveType);
+  }
+
+  @Get('transmission-types')
+  async getTransmissionTypes() {
+    return Object.values(Transmission);
+  }
+
+  @Get('part-types')
+  async getPartTypes() {
+    return Object.values(PartType);
+  }
+
+  @Get('fuel-types')
+  async getFuelTypes() {
+    return Object.values(FuelType);
   }
 }
