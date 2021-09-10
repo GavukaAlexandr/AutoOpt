@@ -47,7 +47,6 @@ model Model {
 }
 
 enum FuelType {
-  GAS
   GASOLINE
   DIESEL
   ELECTRO
