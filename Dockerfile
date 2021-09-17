@@ -25,6 +25,7 @@ RUN npm ci --production
 RUN npm cache clean --force
 
 COPY --from=development /usr/src/api/dist ./dist
+COPY --from=development /usr/src/api/public ./public
 COPY --from=development /usr/src/api/node_modules/.prisma ./node_modules/.prisma
 
 CMD ["node", "dist/src/main"]
