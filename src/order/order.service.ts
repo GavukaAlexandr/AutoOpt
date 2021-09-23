@@ -17,4 +17,20 @@ export class OrderService {
       include: { user: true, model: { include: { brand: true, type: true } } },
     });
   }
+
+  async getLastOrder(user) {
+    return this.prisma.order.findFirst({
+      where: { userId: user.id },
+      orderBy: { createdAt: 'desc' },
+      take: 1,
+      include: { model: { include: { brand: true, type: true } } },
+    });
+  }
+
+  async getOrders(user) {
+    return this.prisma.order.findMany({
+      where: { userId: user.id },
+      include: { model: { include: { brand: true, type: true } } },
+    });
+  }
 }

@@ -18,8 +18,9 @@ export class AppController {
     return this.authService.login(req.user);
   }
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  @Public()
+  @Get('health')
+  checkHealth(): string {
+    return this.appService.getHealth();
   }
 }
