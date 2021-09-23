@@ -5,9 +5,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class Client {
   Dio init() {
-    Dio _dio = new Dio();
-    _dio.interceptors.add(new ApiInterceptors(dio: _dio));
-    _dio.options.baseUrl = "https://auto-opt.cyber-geeks-lab.synology.me";
+    Dio _dio = Dio();
+    _dio.interceptors.add(ApiInterceptors(dio: _dio));
+    _dio.options = BaseOptions(
+        baseUrl: "https://auto-opt.cyber-geeks-lab.synology.me",
+        receiveDataWhenStatusError: true,
+        connectTimeout: 30000,
+        receiveTimeout: 30000 
+        );
+    //! DEV http://192.168.88.30:3000
+    //! PROD https://auto-opt.cyber-geeks-lab.synology.me
     return _dio;
   }
 }
@@ -27,28 +34,23 @@ class ApiInterceptors extends Interceptor {
 
   @override
   Future<dynamic> onError(e, handler) async {
-    Client _client = new Client();
-    final prefs = await SharedPreferences.getInstance();
-    var _endpointProvider = new EndpointLoginProvider(_client.init());
-    _endpointProvider.login();
+      Client _client = Client();
+      var _endpointProvider = EndpointLoginProvider(_client.init());
       if (e.response!.statusCode == 401) {
         await _endpointProvider.login();
         final prefs = await SharedPreferences.getInstance();
         var _accessToken = prefs.getString('token');
-        _accessToken = null;
         final RequestOptions options = e.response!.requestOptions;
         try {
           options.headers['Authorization'] = 'Bearer $_accessToken';
           final Response response = await dio.fetch(options);
           return handler.resolve(response);
-        } catch (e, s) {
-          print(e);
-          print(s);
+        } catch (e) {
+          throw Exception(e);
         }
       }
-
-      return handler.next(e);
-    }
+    return handler.next(e);
+  }
 
   // @override
   // Future<dynamic> onResponse(Response response) async {

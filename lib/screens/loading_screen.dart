@@ -1,13 +1,14 @@
 import 'package:avto_opt/debounce.dart';
 import 'package:avto_opt/screens/login.dart';
-import 'package:avto_opt/screens/orderCarParts.dart';
+import 'package:avto_opt/screens/order_car_parts.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class LoadingScreen extends StatefulWidget {
+  const LoadingScreen({Key? key}) : super(key: key);
+
   @override
   _LoadingScreen createState() => _LoadingScreen();
 }
@@ -23,7 +24,7 @@ class _LoadingScreen extends State<LoadingScreen> {
       return _debouncer.run(() {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => OrderCarParts()),
+          MaterialPageRoute(builder: (context) => const OrderCarParts()),
           (Route<dynamic> route) => false,
         );
       });
@@ -38,17 +39,9 @@ class _LoadingScreen extends State<LoadingScreen> {
     }
   }
 
-  Route _createRoute() {
-    return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => Login(),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        return child;
-      },
-    );
-  }
-
   @override
   void initState() {
+    // healthCheck();
     isToken();
     super.initState();
   }
@@ -56,7 +49,7 @@ class _LoadingScreen extends State<LoadingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Color(0xff2e3094),
+        backgroundColor: const Color(0xff2e3094),
         body: Center(
           child: Hero(
               tag: 'logo',

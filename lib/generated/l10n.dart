@@ -49,116 +49,6 @@ class S {
   static S? maybeOf(BuildContext context) {
     return Localizations.of<S>(context, S);
   }
-
-  /// `Profile`
-  String get profile_app_bar {
-    return Intl.message(
-      'Profile',
-      name: 'profile_app_bar',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Feedback`
-  String get profile_feedback {
-    return Intl.message(
-      'Feedback',
-      name: 'profile_feedback',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `History of orders`
-  String get profile_order_history_btn {
-    return Intl.message(
-      'History of orders',
-      name: 'profile_order_history_btn',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Exit`
-  String get profile_exit_btn {
-    return Intl.message(
-      'Exit',
-      name: 'profile_exit_btn',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Save`
-  String get profile_save_btn {
-    return Intl.message(
-      'Save',
-      name: 'profile_save_btn',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Choose at least one feedback method`
-  String get profile_error_notification {
-    return Intl.message(
-      'Choose at least one feedback method',
-      name: 'profile_error_notification',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Internet connection not found`
-  String get connection_status_failed {
-    return Intl.message(
-      'Internet connection not found',
-      name: 'connection_status_failed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Parts search`
-  String get order_app_bar {
-    return Intl.message(
-      'Parts search',
-      name: 'order_app_bar',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Failed to load data`
-  String get order_dropdown_error {
-    return Intl.message(
-      'Failed to load data',
-      name: 'order_dropdown_error',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Loading`
-  String get order_loading {
-    return Intl.message(
-      'Loading',
-      name: 'order_loading',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Tap to try again`
-  String get order_button_retry_request {
-    return Intl.message(
-      'Tap to try again',
-      name: 'order_button_retry_request',
-      desc: '',
-      args: [],
-    );
-  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
@@ -167,7 +57,6 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
   List<Locale> get supportedLocales {
     return const <Locale>[
       Locale.fromSubtags(languageCode: 'en'),
-      Locale.fromSubtags(languageCode: 'ru'),
     ];
   }
 

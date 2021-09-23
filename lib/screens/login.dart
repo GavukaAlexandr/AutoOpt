@@ -1,21 +1,23 @@
-import 'dart:convert';
-import 'dart:developer';
-
 import 'package:avto_opt/api_client/api_client.dart';
 import 'package:avto_opt/api_client/endpoints/login_endpoint.dart';
+import 'package:avto_opt/api_client/endpoints/number_exist_endpoint.dart';
+import 'package:avto_opt/api_client/endpoints/register_endpoint.dart';
 import 'package:avto_opt/debounce.dart';
 import 'package:avto_opt/my_flutter_app_icons.dart';
-import 'package:avto_opt/screens/orderCarParts.dart';
-import 'package:dio/dio.dart';
+import 'package:avto_opt/screens/order_car_parts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 enum MobileVereficationState { SHOW_MOBILE_FORM_STATE, SHOW_OTP_FORM_STATE }
 enum RegisterFields { SHOW_REGISTER_FIELDS, HIDE_REGISTER_FIELDS }
 
 class Login extends StatefulWidget {
+  const Login({Key? key}) : super(key: key);
+
   @override
   _Login createState() => _Login();
 }
@@ -34,7 +36,7 @@ class _Login extends State<Login> with TickerProviderStateMixin {
   TextEditingController emailController = TextEditingController();
   TextEditingController otpController = TextEditingController();
 
-  FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   late String verificationId;
   final _debouncer = Debouncer(milliseconds: 300);
   late AnimationController _controllerSuccess;
@@ -45,6 +47,7 @@ class _Login extends State<Login> with TickerProviderStateMixin {
   bool loaderStatusForm = false;
   final formGlobalKey = GlobalKey<FormState>();
   final registerGlobalKey = GlobalKey<FormState>();
+  final Client _client = Client();
   late AnimationController controller;
   bool isLoginText = true;
   var currentFocus;
@@ -63,11 +66,11 @@ class _Login extends State<Login> with TickerProviderStateMixin {
     }
   }
 
+  @override
   initState() {
     super.initState();
-    phoneController
-      ..selection = TextSelection.fromPosition(
-          TextPosition(offset: phoneController.text.length));
+    phoneController.selection = TextSelection.fromPosition(
+        TextPosition(offset: phoneController.text.length));
     controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 1),
@@ -88,14 +91,14 @@ class _Login extends State<Login> with TickerProviderStateMixin {
 
   isNumberValid(number) {
     String pattern = r'^(?:[+0][1-9])?[0-9]{11,12}$';
-    RegExp regExp = new RegExp(pattern);
+    RegExp regExp = RegExp(pattern);
     return regExp.hasMatch(number);
   }
 
   isEmailValid(email) {
     String pattern =
         r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+";
-    RegExp regExp = new RegExp(pattern);
+    RegExp regExp = RegExp(pattern);
     return regExp.hasMatch(email);
   }
 
@@ -119,17 +122,17 @@ class _Login extends State<Login> with TickerProviderStateMixin {
       try {
         final authCredential =
             await _auth.signInWithCredential(phoneAuthCredential);
-        if (authCredential.user != null)
+        if (authCredential.user != null) {
           prefs.setString('user-uid', authCredential.user!.uid);
+        }
         register();
         setState(() {
           loaderStatusOtp = false;
         });
       } on FirebaseAuthException catch (e) {
         _scaffoldKey.currentState!.showSnackBar(SnackBar(
-          content: Text(
-              'Код подтверждения sms недействителен. Пожалуйста, повторно отправьте смс с кодом подтверждения и обязательно используйте правильный код подтверждения'),
-          duration: Duration(milliseconds: 6000),
+          content: Text('error_sms'.tr()),
+          duration: const Duration(milliseconds: 6000),
           backgroundColor: Colors.redAccent,
         ));
 
@@ -143,17 +146,17 @@ class _Login extends State<Login> with TickerProviderStateMixin {
       try {
         final authCredential =
             await _auth.signInWithCredential(phoneAuthCredential);
-        if (authCredential.user != null)
+        if (authCredential.user != null) {
           prefs.setString('user-uid', authCredential.user!.uid);
+        }
         login();
         setState(() {
           loaderStatusOtp = false;
         });
       } on FirebaseAuthException catch (e) {
         _scaffoldKey.currentState!.showSnackBar(SnackBar(
-          content: Text(
-              'Код подтверждения sms недействителен. Пожалуйста, повторно отправьте смс с кодом и обязательно используйте правильный код подтверждения'),
-          duration: Duration(milliseconds: 7500),
+          content: Text('error_sms'.tr()),
+          duration: const Duration(milliseconds: 7500),
           backgroundColor: Colors.redAccent,
         ));
         setState(() {
@@ -163,57 +166,57 @@ class _Login extends State<Login> with TickerProviderStateMixin {
     }
   }
 
-  isNumberExist(number) async {
-    try {
-      var response = await Dio().post(
-          "https://auto-opt.cyber-geeks-lab.synology.me/user/is-exist",
-          data: {"phoneNumber": number.toString()});
-      var result = response.data;
-
-      return result['isUserExist'];
-    } catch (e) {
-      return false;
-    }
+  Future<bool> isNumberExist(number) async {
+    var _endpointProvider = EndpointNumberExistProvider(_client.init());
+    bool result = await _endpointProvider.isNumberExist(number);
+    return result;
   }
 
   login() async {
-    Client _client = new Client();
     final prefs = await SharedPreferences.getInstance();
-    var _endpointProvider = new EndpointLoginProvider(_client.init());
-    var data = await _endpointProvider.login();
-    prefs.setString('token', data['access_token']);
-      prefs.remove('firstName');
-      prefs.remove('lastName');
-      prefs.remove('email');
-      prefs.remove('firebaseUid');
-      prefs.remove('telegramNotification');
-      prefs.remove('viberNotification');
-      prefs.remove('phoneNotification');
+    var _endpointProvider = EndpointLoginProvider(_client.init());
+    await _endpointProvider.login();
+    prefs.remove('firstName');
+    prefs.remove('lastName');
+    prefs.remove('email');
+    prefs.remove('telegramNotification');
+    prefs.remove('viberNotification');
+    prefs.remove('phoneNotification');
     return Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => OrderCarParts()),
-        (Route<dynamic> route) => false,
-      );
+      context,
+      MaterialPageRoute(builder: (context) => const OrderCarParts()),
+      (Route<dynamic> route) => false,
+    );
   }
 
   register() async {
     final prefs = await SharedPreferences.getInstance();
-    try {
-      var response = await Dio().post(
-          "https://auto-opt.cyber-geeks-lab.synology.me/user/register",
-          data: {
-            "firstName": prefs.getString('first-name'),
-            "lastName": prefs.getString('last-name'),
-            "email": prefs.getString('email'),
-            "phoneNumber": prefs.getString('phone'),
-            "firebaseUid": prefs.getString('user-uid'),
-            "telegramNotification": prefs.getBool('notif-telegram'),
-            "viberNotification": prefs.getBool('notif-viber'),
-            "phoneNotification": prefs.getBool('notif-phone')
-          });
-      login();
-    } catch (e) {
-      print(e);
+    var _endpointProvider = EndpointRegisterProvider(_client.init());
+    var preparedRegisterData = {
+      "firstName": prefs.getString('first-name'),
+      "lastName": prefs.getString('last-name'),
+      "email": prefs.getString('email'),
+      "phoneNumber": prefs.getString('phone'),
+      "firebaseUid": prefs.getString('user-uid'),
+      "telegramNotification": prefs.getBool('notif-telegram'),
+      "viberNotification": prefs.getBool('notif-viber'),
+      "phoneNotification": prefs.getBool('notif-phone')
+    };
+    var status = await _endpointProvider.register(preparedRegisterData);
+    if (status == 201) {
+      return login();
+    } else {
+      setState(() {
+        otpController.text = '';
+        currentState = MobileVereficationState.SHOW_MOBILE_FORM_STATE;
+        currentStateRegisterFields = RegisterFields.SHOW_REGISTER_FIELDS;
+        loaderStatusForm = false;
+      });
+      _scaffoldKey.currentState!.showSnackBar(SnackBar(
+        content: Text('email_exist'.tr()),
+        duration: const Duration(seconds: 30),
+        backgroundColor: Colors.redAccent,
+      ));
     }
   }
 
@@ -273,9 +276,8 @@ class _Login extends State<Login> with TickerProviderStateMixin {
             loaderStatusForm = false;
           });
           _scaffoldKey.currentState!.showSnackBar(SnackBar(
-            content: Text(
-                'Неправильный формат номера телефона. Пожалуйста, введите номер телефона в правильном формате'),
-            duration: Duration(milliseconds: 6000),
+            content: Text('uncorrect_phone_sms'.tr()),
+            duration: const Duration(milliseconds: 6000),
             backgroundColor: Colors.redAccent,
           ));
         },
@@ -298,125 +300,129 @@ class _Login extends State<Login> with TickerProviderStateMixin {
           child: Column(
             children: [
               Container(
-                padding: EdgeInsets.only(bottom: 10.0),
+                padding: const EdgeInsets.only(bottom: 10.0),
                 child: TextFormField(
                     keyboardType: TextInputType.emailAddress,
                     autofocus: false,
                     controller: firstNameController,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 15,
+                      fontSize: 15.sp,
                     ),
                     validator: (firstName) {
                       if (firstName == null || firstName.isEmpty) {
-                        return 'Введите имя';
+                        return 'write_name_error'.tr();
                       }
                     },
                     onChanged: (fistName) {
-                      if (fistName != '')
+                      if (fistName != '') {
                         registerGlobalKey.currentState!.validate();
+                      }
                     },
                     decoration: InputDecoration(
-                      labelText: 'Имя',
+                      labelText: 'first_name_label'.tr(),
                       contentPadding:
-                          EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+                          const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
                       border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(32.0),
-                          borderSide: BorderSide(
+                          borderRadius: BorderRadius.circular(18.r),
+                          borderSide: const BorderSide(
                             color: Colors.white,
                           )),
                       enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(32.0),
-                          borderSide: BorderSide(color: Colors.white)),
+                          borderRadius: BorderRadius.circular(18.r),
+                          borderSide: const BorderSide(color: Colors.white)),
                       focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(32.0),
-                          borderSide: BorderSide(color: Colors.white)),
-                      labelStyle: TextStyle(color: Colors.white70),
+                          borderRadius: BorderRadius.circular(18.r),
+                          borderSide: const BorderSide(color: Colors.white)),
+                      labelStyle: const TextStyle(color: Colors.white70),
                     )),
               ),
               Container(
-                padding: EdgeInsets.only(bottom: 10.0),
+                padding: const EdgeInsets.only(bottom: 10.0),
                 child: TextFormField(
                     keyboardType: TextInputType.emailAddress,
                     autofocus: false,
                     controller: lastNameController,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 15,
+                      fontSize: 15.sp,
                     ),
                     validator: (lastName) {
                       if (lastName == null || lastName.isEmpty) {
-                        return 'Введите фамилию';
+                        return 'writre_last_name_error'.tr();
                       }
                     },
                     onChanged: (lastName) {
-                      if (lastName != '')
+                      if (lastName != '') {
                         registerGlobalKey.currentState!.validate();
+                      }
                     },
                     decoration: InputDecoration(
-                      labelText: 'Фамилия',
+                      labelText: 'last_name_label'.tr(),
                       contentPadding:
-                          EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+                          const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
                       border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(32.0),
-                          borderSide: BorderSide(
+                          borderRadius: BorderRadius.circular(18.r),
+                          borderSide: const BorderSide(
                             color: Colors.white,
                           )),
                       enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(32.0),
-                          borderSide: BorderSide(color: Colors.white)),
+                          borderRadius: BorderRadius.circular(18.r),
+                          borderSide: const BorderSide(color: Colors.white)),
                       focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(32.0),
-                          borderSide: BorderSide(color: Colors.white)),
-                      labelStyle: TextStyle(color: Colors.white70),
+                          borderRadius: BorderRadius.circular(18.r),
+                          borderSide: const BorderSide(color: Colors.white)),
+                      labelStyle: const TextStyle(color: Colors.white70),
                     )),
               ),
               Container(
-                padding: EdgeInsets.only(bottom: 10.0),
+                padding: const EdgeInsets.only(bottom: 10.0),
                 child: TextFormField(
                     keyboardType: TextInputType.emailAddress,
                     autofocus: false,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 15,
+                      fontSize: 15.sp,
                     ),
                     controller: emailController,
                     validator: (email) {
-                      if (isEmailValid(email))
+                      if (isEmailValid(email)) {
                         return null;
-                      else {
-                        return 'неверный электронный адрес';
+                      } else {
+                        return 'email';
                       }
                     },
                     onChanged: (email) {
-                      if (email != '')
+                      if (email != '') {
                         registerGlobalKey.currentState!.validate();
+                      }
                     },
                     decoration: InputDecoration(
-                      labelText: 'Почта',
+                      labelText: 'email_label'.tr(),
                       contentPadding:
-                          EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+                          const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
                       border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(32.0),
-                          borderSide: BorderSide(
+                          borderRadius: BorderRadius.circular(18.r),
+                          borderSide: const BorderSide(
                             color: Colors.white,
                           )),
                       enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(32.0),
-                          borderSide: BorderSide(color: Colors.white)),
+                          borderRadius: BorderRadius.circular(18.r),
+                          borderSide: const BorderSide(color: Colors.white)),
                       focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(32.0),
-                          borderSide: BorderSide(color: Colors.white)),
-                      labelStyle: TextStyle(color: Colors.white70),
+                          borderRadius: BorderRadius.circular(18.r),
+                          borderSide: const BorderSide(color: Colors.white)),
+                      labelStyle: const TextStyle(color: Colors.white70),
                     )),
               ),
-              Container(
-                width: double.infinity,
+              SizedBox(
+                width: 1.sw,
                 child: RaisedButton(
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(18.r),
                   ),
                   onPressed: () {
+                    unfocus();
                     if (registerGlobalKey.currentState!.validate()) {
                       showDialog<String>(
                           context: context,
@@ -424,21 +430,23 @@ class _Login extends State<Login> with TickerProviderStateMixin {
                             return StatefulBuilder(
                                 builder: (context, setState) {
                               return AlertDialog(
-                                shape: const RoundedRectangleBorder(
+                                backgroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.all(
-                                        Radius.circular(20.0))),
+                                        Radius.circular(18.r))),
                                 title: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(Icons.notifications,
-                                        color: Colors.blueAccent, size: 40),
+                                        color: Colors.blueAccent, size: 40.sp),
                                     SizedBox(
-                                      height: 5,
+                                      height: 5.h,
                                     ),
                                     Text(
-                                      'Обратная связь',
+                                      'feedback'.tr(),
                                       style: TextStyle(
-                                          color: Colors.black87, fontSize: 18),
+                                          color: Colors.black87,
+                                          fontSize: 18.sp),
                                     )
                                   ],
                                 ),
@@ -450,9 +458,9 @@ class _Login extends State<Login> with TickerProviderStateMixin {
                                           MainAxisAlignment.spaceBetween,
                                       children: [
                                         IconButton(
-                                          icon: const Icon(
+                                          icon: Icon(
                                             MyFlutterApp.local_phone,
-                                            size: 35,
+                                            size: 35.sp,
                                           ),
                                           color: notifications['phone']
                                               ? Colors.green
@@ -465,9 +473,9 @@ class _Login extends State<Login> with TickerProviderStateMixin {
                                           },
                                         ),
                                         IconButton(
-                                          icon: const Icon(
+                                          icon: Icon(
                                             MyFlutterApp.telegram_plane,
-                                            size: 35,
+                                            size: 35.sp,
                                           ),
                                           color: notifications['telegram']
                                               ? Colors.blue
@@ -480,9 +488,9 @@ class _Login extends State<Login> with TickerProviderStateMixin {
                                           },
                                         ),
                                         IconButton(
-                                          icon: const Icon(
+                                          icon: Icon(
                                             MyFlutterApp.viber,
-                                            size: 35,
+                                            size: 35.sp,
                                           ),
                                           color: notifications['viber']
                                               ? Colors.purple
@@ -516,9 +524,9 @@ class _Login extends State<Login> with TickerProviderStateMixin {
                                                 return prepareRegister();
                                               }
                                             : null,
-                                    child: const Text(
-                                      'Продолжить',
-                                      style: TextStyle(fontSize: 16),
+                                    child: Text(
+                                      'next_btn'.tr(),
+                                      style: TextStyle(fontSize: 16.sp),
                                     ),
                                   ),
                                 ],
@@ -529,16 +537,16 @@ class _Login extends State<Login> with TickerProviderStateMixin {
                       registerGlobalKey.currentState!.validate();
                     }
                   },
-                  padding: EdgeInsets.all(12),
-                  color: Color(0xff1573B4),
-                  child: Text('Зарегестрироваться',
-                      style: TextStyle(color: Colors.white)),
+                  padding: const EdgeInsets.all(12),
+                  color: const Color(0xff1573B4),
+                  child: Text('register_btn'.tr(),
+                      style: const TextStyle(color: Colors.white)),
                 ),
               ),
               Text(
-                'текущий пользователь не найден зарегестрируйтесь пожалуйста',
+                'user_not_exist'.tr(),
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white54),
+                style: const TextStyle(color: Colors.white54),
               ),
             ],
           ),
@@ -556,17 +564,17 @@ class _Login extends State<Login> with TickerProviderStateMixin {
                 backgroundColor: Colors.transparent,
                 radius: currentStateRegisterFields ==
                         RegisterFields.HIDE_REGISTER_FIELDS
-                    ? 100.0
-                    : 75.0,
+                    ? 100.r
+                    : 75.r,
                 child: Image.asset('assets/bg-1.png'),
               )),
           Container(
-            padding: EdgeInsets.only(bottom: 10.0),
+            padding: const EdgeInsets.only(bottom: 10.0),
             child: TextFormField(
               validator: (number) {
-                if (isNumberValid(number) || number == '')
+                if (isNumberValid(number) || number == '') {
                   return null;
-                else {
+                } else {
                   return 'неверный телефон';
                 }
               },
@@ -600,30 +608,32 @@ class _Login extends State<Login> with TickerProviderStateMixin {
               controller: phoneController,
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 15,
+                fontSize: 15.sp,
               ),
               decoration: InputDecoration(
-                contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+                contentPadding:
+                    const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
                 border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(32.0),
-                    borderSide: BorderSide(
+                    borderRadius: BorderRadius.circular(18.r),
+                    borderSide: const BorderSide(
                       color: Colors.white,
                     )),
                 enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(32.0),
-                    borderSide: BorderSide(color: Colors.white)),
+                    borderRadius: BorderRadius.circular(18.r),
+                    borderSide: const BorderSide(color: Colors.white)),
                 focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(32.0),
-                    borderSide: BorderSide(color: Colors.white)),
+                    borderRadius: BorderRadius.circular(18.r),
+                    borderSide: const BorderSide(color: Colors.white)),
                 focusedErrorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(32.0),
-                    borderSide: BorderSide(
+                    borderRadius: BorderRadius.circular(18.r),
+                    borderSide: const BorderSide(
                       color: Color(0xffEC1C24),
                     )),
-                errorStyle: TextStyle(color: Color(0xffEC1C24), fontSize: 16),
-                labelStyle: TextStyle(color: Colors.white70, fontSize: 17),
-                hintStyle: TextStyle(color: Colors.white),
-                labelText: 'Номер телефона',
+                errorStyle:
+                    TextStyle(color: const Color(0xffEC1C24), fontSize: 16.sp),
+                labelStyle: TextStyle(color: Colors.white70, fontSize: 17.sp),
+                hintStyle: const TextStyle(color: Colors.white),
+                labelText: 'phone_number_label'.tr(),
               ),
             ),
           ),
@@ -631,17 +641,17 @@ class _Login extends State<Login> with TickerProviderStateMixin {
             Column(
               children: [
                 SizedBox(
-                  height: 10,
+                  height: 10.h,
                 ),
                 Text(
-                  'Введите номер телефона чтобы войти',
-                  style: TextStyle(color: Colors.white54),
+                  'write_phone_number'.tr(),
+                  style: const TextStyle(color: Colors.white54),
                 ),
                 SizedBox(
-                  height: 10,
+                  height: 10.h,
                 ),
-                Text('Пример: +380 ( ## ) ### - ## - ##',
-                    style: TextStyle(color: Colors.white60))
+                Text('example_phone_number'.tr(),
+                    style: const TextStyle(color: Colors.white60))
               ],
             ),
           if (currentStateRegisterFields == RegisterFields.SHOW_REGISTER_FIELDS)
@@ -651,11 +661,11 @@ class _Login extends State<Login> with TickerProviderStateMixin {
                 scale: _animationSuccess,
                 alignment: Alignment.center,
                 child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 5.0),
-                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 5.0),
+                  width: 1.sw,
                   child: RaisedButton(
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(20.r),
                     ),
                     onPressed: () async {
                       unfocus();
@@ -687,16 +697,16 @@ class _Login extends State<Login> with TickerProviderStateMixin {
                           },
                           codeAutoRetrievalTimeout: (vereficationId) async {});
                     },
-                    padding: EdgeInsets.all(12),
-                    color: Color(0xff1573B4),
-                    child: Text('Отправить код',
+                    padding: const EdgeInsets.all(12),
+                    color: const Color(0xff1573B4),
+                    child: const Text('Отправить код',
                         style: TextStyle(color: Colors.white)),
                   ),
                 )),
           if (loaderStatusForm)
-            Container(
-              width: 40,
-              height: 40,
+            SizedBox(
+              width: 40.w,
+              height: 40.h,
               child: LoadingIndicator(
                   indicatorType: Indicator.ballPulse,
                   colors: const [Colors.white70],
@@ -716,42 +726,43 @@ class _Login extends State<Login> with TickerProviderStateMixin {
             tag: 'logo',
             child: CircleAvatar(
               backgroundColor: Colors.transparent,
-              radius: 100.0,
+              radius: 100.r,
               child: Image.asset('assets/bg-1.png'),
             )),
         Container(
-          padding: EdgeInsets.only(bottom: 10.0),
+          padding: const EdgeInsets.only(bottom: 10.0),
           child: TextFormField(
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 15,
+                fontSize: 15.sp,
               ),
               keyboardType: TextInputType.emailAddress,
               autofocus: false,
               controller: otpController,
               decoration: InputDecoration(
-                labelText: 'Код подтверждения',
-                contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+                labelText: 'confirm_code_label'.tr(),
+                contentPadding:
+                    const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
                 border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(32.0),
-                    borderSide: BorderSide(
+                    borderRadius: BorderRadius.circular(18.r),
+                    borderSide: const BorderSide(
                       color: Colors.white,
                     )),
                 enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(32.0),
-                    borderSide: BorderSide(color: Colors.white)),
+                    borderRadius: BorderRadius.circular(18.r),
+                    borderSide: const BorderSide(color: Colors.white)),
                 focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(32.0),
-                    borderSide: BorderSide(color: Colors.white)),
-                labelStyle: TextStyle(color: Colors.white70, fontSize: 17),
+                    borderRadius: BorderRadius.circular(18.r),
+                    borderSide: const BorderSide(color: Colors.white)),
+                labelStyle: TextStyle(color: Colors.white70, fontSize: 17.sp),
               )),
         ),
         Container(
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(vertical: 1.0),
+          width: 1.sw,
+          padding: const EdgeInsets.symmetric(vertical: 1.0),
           child: RaisedButton(
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(18.r),
             ),
             onPressed: () async {
               unfocus();
@@ -761,21 +772,45 @@ class _Login extends State<Login> with TickerProviderStateMixin {
                       smsCode: otpController.text);
               signInWithPhoneAuthCredentional(phoneAuthCredential);
             },
-            padding: EdgeInsets.all(12),
-            color: Color(0xff1573B4),
-            child: Text('Продолжить', style: TextStyle(color: Colors.white)),
+            padding: const EdgeInsets.all(12),
+            color: const Color(0xff1573B4),
+            child: Text('next_btn'.tr(),
+                style: const TextStyle(color: Colors.white)),
           ),
         ),
-        SizedBox(height: 24.0),
+        Container(
+          width: 1.sw,
+          padding: const EdgeInsets.symmetric(vertical: 1.0),
+          child: RaisedButton(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18.r),
+            ),
+            onPressed: () async {
+              unfocus();
+              setState(() {
+                currentState = MobileVereficationState.SHOW_MOBILE_FORM_STATE;
+                currentStateRegisterFields =
+                    RegisterFields.SHOW_REGISTER_FIELDS;
+                loaderStatusForm = false;
+              });
+              await prepareFields(phoneController.text);
+            },
+            padding: const EdgeInsets.all(12),
+            color: const Color(0xff1573B4).withOpacity(0.6),
+            child: Text('back_btn'.tr(),
+                style: const TextStyle(color: Colors.white)),
+          ),
+        ),
+        SizedBox(height: 10.h),
         Text(
-          'Введите код подтверждения который мы отправили вам на телефон',
+          'write_sms_code'.tr(),
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.white54),
+          style: const TextStyle(color: Colors.white54),
         ),
         if (loaderStatusOtp)
-          Container(
-            width: 40,
-            height: 40,
+          SizedBox(
+            width: 40.w,
+            height: 40.h,
             child: LoadingIndicator(
                 indicatorType: Indicator.ballPulse,
                 colors: const [Colors.white70],
@@ -793,10 +828,10 @@ class _Login extends State<Login> with TickerProviderStateMixin {
       onTap: unfocus,
       child: Scaffold(
         key: _scaffoldKey,
-        backgroundColor: Color(0xff2e3094),
+        backgroundColor: const Color(0xff2e3094),
         body: Center(
           child: ListView(
-            padding: EdgeInsets.only(left: 24.0, right: 24.0),
+            padding: const EdgeInsets.only(left: 24.0, right: 24.0),
             shrinkWrap: true,
             children: [
               currentState == MobileVereficationState.SHOW_MOBILE_FORM_STATE

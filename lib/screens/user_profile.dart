@@ -1,6 +1,4 @@
-import 'dart:developer';
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:avto_opt/generated/l10n.dart';
 import 'package:avto_opt/my_flutter_app_icons.dart';
 import 'package:avto_opt/screens/login.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +7,7 @@ import 'package:loading_overlay/loading_overlay.dart';
 import './../state/user_form_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class UserProfile extends StatefulWidget {
   const UserProfile({Key? key}) : super(key: key);
@@ -19,27 +18,14 @@ class UserProfile extends StatefulWidget {
 
 class _UserProfile extends State<UserProfile> {
   var currentFocus;
-  Icon iconTheme = Icon(Icons.light_mode);
+  Icon iconTheme = const Icon(Icons.light_mode);
   final userFormStore = UserFormStore();
   final formKey = GlobalKey<FormState>();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
-  isToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    var token = prefs.getString('token');
-
-    if (token != null) return;
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => Login()),
-      (Route<dynamic> route) => false,
-    );
-  }
-
   @override
   void initState() {
     super.initState();
-    isToken();
     userFormStore.getSelf();
   }
 
@@ -55,8 +41,8 @@ class _UserProfile extends State<UserProfile> {
         !userFormStore.user.notificationTelegram &&
         !userFormStore.user.notificationViber) {
       _scaffoldKey.currentState!.showSnackBar(SnackBar(
-        content: Text(S.of(context).profile_error_notification),
-        duration: Duration(milliseconds: 4000),
+        content: Text('profile_error_notification'.tr()),
+        duration: const Duration(milliseconds: 4000),
         backgroundColor: Colors.red,
       ));
     } else {
@@ -76,7 +62,7 @@ class _UserProfile extends State<UserProfile> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
+    return Scaffold(
         key: _scaffoldKey,
         floatingActionButton: FloatingActionButton(
             backgroundColor:
@@ -84,17 +70,17 @@ class _UserProfile extends State<UserProfile> {
             onPressed: () async {
               if (await getCurrentTheme() == AdaptiveThemeMode.light) {
                 AdaptiveTheme.of(context).setDark();
-                iconTheme = Icon(Icons.light_mode);
+                iconTheme = const Icon(Icons.light_mode);
                 return setState(() {});
               } else {
                 AdaptiveTheme.of(context).setLight();
-                iconTheme = Icon(Icons.dark_mode);
+                iconTheme = const Icon(Icons.dark_mode);
                 return setState(() {});
               }
             },
             child: iconTheme),
         appBar: AppBar(
-          title: Text(S.of(context).profile_app_bar),
+          title: Text('profile_app_bar'.tr()),
           centerTitle: true,
           backgroundColor: Theme.of(context).primaryColor,
           elevation: 0.0,
@@ -104,7 +90,7 @@ class _UserProfile extends State<UserProfile> {
                 color: Colors.black54,
                 isLoading: userFormStore.loaderStatus,
                 child: Center(
-                  child: Container(
+                  child: SizedBox(
                     width: double.infinity,
                     child: Stack(
                       children: <Widget>[
@@ -118,7 +104,7 @@ class _UserProfile extends State<UserProfile> {
                             top: 0.1.sh,
                             child: Column(
                               children: <Widget>[
-                                _AvatarWidget(),
+                                const _AvatarWidget(),
                                 SizedBox(height: 50.h),
                                 _UserNameWidget(userFormStore: userFormStore),
                                 SizedBox(height: 10.h),
@@ -126,117 +112,91 @@ class _UserProfile extends State<UserProfile> {
                                 SizedBox(height: 10.h),
                                 _UserPhoneWidget(userFormStore: userFormStore),
                                 SizedBox(height: 15.h),
-                                _FeedbackTitleWidget(),
+                                const _FeedbackTitleWidget(),
                                 SizedBox(height: 10.h),
-                                Container(
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      Observer(
-                                        builder: (_) => SizedBox(
-                                          width: 60.w,
-                                          height: 60.h,
-                                          child: IconButton(
-                                            icon: Icon(
-                                              MyFlutterApp.local_phone,
-                                              size: 40.sp,
-                                            ),
-                                            color: userFormStore
-                                                    .user.notificationPhone
-                                                ? Colors.green
-                                                : Colors.grey,
-                                            onPressed: () {
-                                              userFormStore.setNotification(
-                                                  'phone',
-                                                  !userFormStore
-                                                      .user.notificationPhone);
-                                              userFormStore.changeEditing(true);
-                                            },
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Observer(
+                                      builder: (_) => SizedBox(
+                                        width: 60.w,
+                                        height: 60.h,
+                                        child: IconButton(
+                                          icon: Icon(
+                                            MyFlutterApp.local_phone,
+                                            size: 40.sp,
                                           ),
+                                          color: userFormStore
+                                                  .user.notificationPhone
+                                              ? Colors.green
+                                              : Colors.grey,
+                                          onPressed: () {
+                                            userFormStore.setNotification(
+                                                'phone',
+                                                !userFormStore
+                                                    .user.notificationPhone);
+                                            userFormStore.changeEditing(true);
+                                          },
                                         ),
                                       ),
-                                      Observer(
-                                        builder: (_) => SizedBox(
-                                          width: 60.w,
-                                          height: 60.h,
-                                          child: IconButton(
-                                            icon: Icon(
-                                              MyFlutterApp.telegram_plane,
-                                              size: 40.sp,
-                                            ),
-                                            color: userFormStore
-                                                    .user.notificationTelegram
-                                                ? Colors.blue
-                                                : Colors.grey,
-                                            onPressed: () {
-                                              userFormStore.setNotification(
-                                                  'telegram',
-                                                  !userFormStore.user
-                                                      .notificationTelegram);
-                                              userFormStore.changeEditing(true);
-                                            },
+                                    ),
+                                    Observer(
+                                      builder: (_) => SizedBox(
+                                        width: 60.w,
+                                        height: 60.h,
+                                        child: IconButton(
+                                          icon: Icon(
+                                            MyFlutterApp.telegram_plane,
+                                            size: 40.sp,
                                           ),
+                                          color: userFormStore
+                                                  .user.notificationTelegram
+                                              ? Colors.blue
+                                              : Colors.grey,
+                                          onPressed: () {
+                                            userFormStore.setNotification(
+                                                'telegram',
+                                                !userFormStore
+                                                    .user.notificationTelegram);
+                                            userFormStore.changeEditing(true);
+                                          },
                                         ),
                                       ),
-                                      Observer(
-                                        builder: (_) => SizedBox(
-                                          width: 60.w,
-                                          height: 60.h,
-                                          child: IconButton(
-                                            icon: Icon(
-                                              MyFlutterApp.viber,
-                                              size: 40.sp,
-                                            ),
-                                            color: userFormStore
-                                                    .user.notificationViber
-                                                ? Colors.purple
-                                                : Colors.grey,
-                                            onPressed: () {
-                                              userFormStore.setNotification(
-                                                  'viber',
-                                                  !userFormStore
-                                                      .user.notificationViber);
-                                              userFormStore.changeEditing(true);
-                                            },
+                                    ),
+                                    Observer(
+                                      builder: (_) => SizedBox(
+                                        width: 60.w,
+                                        height: 60.h,
+                                        child: IconButton(
+                                          icon: Icon(
+                                            MyFlutterApp.viber,
+                                            size: 40.sp,
                                           ),
+                                          color: userFormStore
+                                                  .user.notificationViber
+                                              ? Colors.purple
+                                              : Colors.grey,
+                                          onPressed: () {
+                                            userFormStore.setNotification(
+                                                'viber',
+                                                !userFormStore
+                                                    .user.notificationViber);
+                                            userFormStore.changeEditing(true);
+                                          },
                                         ),
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
                                 SizedBox(
                                   height: 25.h,
                                 ),
-                                Container(
-                                    height: 35.h,
-                                    width: 160.w,
-                                    child: Material(
-                                      borderRadius: BorderRadius.circular(20.r),
-                                      color: Theme.of(context).accentColor,
-                                      elevation: 7.0,
-                                      child: TextButton(
-                                        onPressed: () {},
-                                        child: Center(
-                                          child: Text(
-                                            S
-                                                .of(context)
-                                                .profile_order_history_btn,
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 14.sp,
-                                                letterSpacing: 1,
-                                                fontWeight: FontWeight.w400,
-                                                fontFamily: 'Montserrat'),
-                                          ),
-                                        ),
-                                      ),
-                                    )),
                                 SizedBox(height: 20.h),
                                 userFormStore.isEditing
-                                    ? Container(
-                                        height: 35.h,
-                                        width: 160.w,
+                                    ? SizedBox(
+                                        height: 45.h,
+                                        width: 200.w,
                                         child: Material(
                                           borderRadius:
                                               BorderRadius.circular(20.r),
@@ -245,10 +205,12 @@ class _UserProfile extends State<UserProfile> {
                                           child: TextButton(
                                             onPressed: () {
                                               save();
+                                              userFormStore
+                                                  .changeEditing(false);
                                             },
                                             child: Center(
                                               child: Text(
-                                                S.of(context).profile_save_btn,
+                                                'profile_save_btn'.tr(),
                                                 style: TextStyle(
                                                     color: Colors.white,
                                                     fontSize: 14.sp,
@@ -260,9 +222,9 @@ class _UserProfile extends State<UserProfile> {
                                           ),
                                         ))
                                     : Container(
-                                      padding: EdgeInsets.only(bottom: 5.sp),
-                                        height: 35.h,
-                                        width: 160.w,
+                                        padding: EdgeInsets.only(bottom: 5.sp),
+                                        height: 45.h,
+                                        width: 200.w,
                                         child: Material(
                                           borderRadius:
                                               BorderRadius.circular(20.r),
@@ -278,12 +240,12 @@ class _UserProfile extends State<UserProfile> {
                                                 context,
                                                 MaterialPageRoute(
                                                     builder: (context) =>
-                                                        Login()),
+                                                        const Login()),
                                                 (Route<dynamic> route) => false,
                                               );
                                             },
                                             child: Text(
-                                              S.of(context).profile_exit_btn,
+                                              'exit_btn'.tr(),
                                               style: TextStyle(
                                                   fontSize: 14.sp,
                                                   letterSpacing: 2.sp,
@@ -311,11 +273,11 @@ class _FeedbackTitleWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(
-      S.of(context).profile_feedback,
+      'feedback'.tr(),
       style: TextStyle(
-          fontSize: 19.sp,
+          fontSize: 18.sp,
           letterSpacing: 2,
-          color: Theme.of(context).accentColor,
+          color: Theme.of(context).primaryColor,
           fontWeight: FontWeight.bold,
           fontFamily: 'Montserrat'),
     );
@@ -336,7 +298,7 @@ class _UserPhoneWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(
+        const Icon(
           Icons.phone_enabled_outlined,
           size: 24,
         ),
@@ -345,9 +307,9 @@ class _UserPhoneWidget extends StatelessWidget {
         ),
         Observer(
           builder: (_) => Text(
-            '${userFormStore.user.phoneNumber}',
+            userFormStore.user.phoneNumber,
             style: TextStyle(
-                fontSize: 18.sp,
+                fontSize: 16.sp,
                 letterSpacing: 1,
                 fontWeight: FontWeight.w300,
                 fontFamily: 'Montserrat'),
@@ -372,7 +334,7 @@ class _UserEmailWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(
+        const Icon(
           Icons.email_outlined,
           size: 24,
         ),
@@ -383,7 +345,7 @@ class _UserEmailWidget extends StatelessWidget {
           builder: (_) => Text(
             '${userFormStore.user.email} ',
             style: TextStyle(
-                fontSize: 18.sp,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w300,
                 fontFamily: 'Montserrat'),
           ),
@@ -407,7 +369,7 @@ class _UserNameWidget extends StatelessWidget {
       builder: (_) => Text(
         '${userFormStore.user.firstName} ${userFormStore.user.lastName}',
         style: TextStyle(
-            fontSize: 26.sp,
+            fontSize: 18.sp,
             letterSpacing: 1,
             fontWeight: FontWeight.w400,
             fontFamily: 'Montserrat'),
@@ -438,7 +400,7 @@ class _AvatarWidget extends StatelessWidget {
 class GetClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
-    var path = new Path();
+    var path = Path();
 
     path.lineTo(0.0.h, 0.4.sh);
     path.lineTo(1.sw, 0.0.w);

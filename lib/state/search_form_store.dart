@@ -1,30 +1,38 @@
+import 'dart:convert';
 import 'package:avto_opt/api_client/api_client.dart';
+import 'package:avto_opt/api_client/endpoints/body_type_endpoint%20.dart';
 import 'package:avto_opt/api_client/endpoints/brands_endpoint.dart';
+import 'package:avto_opt/api_client/endpoints/car_part_type_endpoint.dart';
+import 'package:avto_opt/api_client/endpoints/drive_type_endpoint%20.dart';
+import 'package:avto_opt/api_client/endpoints/fuel_type_endpoint%20.dart';
 import 'package:avto_opt/api_client/endpoints/models_endpoint.dart';
+import 'package:avto_opt/api_client/endpoints/order_endpoint.dart';
+import 'package:avto_opt/api_client/endpoints/transmission_endpoint.dart';
 import 'package:avto_opt/api_client/endpoints/transport_endpoint.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:mobx/mobx.dart';
 import 'package:validators/validators.dart';
+import 'package:easy_localization/easy_localization.dart';
 part 'search_form_store.g.dart';
-
-String getInitValueFromResponse(List listName, String type) {
-  var result = [];
-  listName.forEach((element) => result.add((element['title'])));
-  return result.firstWhere((element) => element == type);
-}
-
-Map<String, String> transportTranslate = {
-  'auto': 'Автомобиль',
-  'moto': 'Мотоцикл',
-  'bus': 'Автобус',
-  'truck': 'Грузовой Автомобиль'
-};
 
 class SearchFormStore = _SearchFormStore with _$SearchFormStore;
 
 abstract class _SearchFormStore with Store {
+  final Client _client = Client();
   final SearchFormErrorState error = SearchFormErrorState();
   late List<ReactionDisposer> _disposers;
-  
+  @observable
+  TextEditingController yearController = TextEditingController();
+  @observable
+  TextEditingController engineVolumeController = TextEditingController();
+  @observable
+  TextEditingController vinNumberController = TextEditingController();
+  @observable
+  TextEditingController carPartsController = TextEditingController();
+
+  @observable
+  bool statusOrder = false;
+
   @observable
   bool loaderStatus = false;
 
@@ -65,51 +73,61 @@ abstract class _SearchFormStore with Store {
   ObservableFuture<List<dynamic>>? initialBrands;
 
   @observable
-  List<dynamic> initialDrive = [
-    {'value': 'Полный', 'title': 'Полный'},
-    {'value': 'Передний', 'title': 'Передний'},
-    {'value': 'Задний', 'title': 'Задний'}
-  ];
+  ObservableFuture<List<dynamic>>? initialDrive;
+
   @observable
-  List<dynamic> initialBodyType = [
-    {'value': 'Седан', 'title': 'Седан'},
-    {'value': 'Хэтчбэк', 'title': 'Хэтчбэк'},
-    {'value': 'Купе', 'title': 'Купе'},
-    {'value': 'Универсал', 'title': 'Универсал'},
-    {'value': 'Минивэн', 'title': 'Минивэн'},
-    {'value': 'Внедорожник', 'title': 'Внедорожник'},
-    {'value': 'Пикап', 'title': 'Пикап'},
-    {'value': 'Кабриолет', 'title': 'Кабриолет'},
-    {'value': 'Фургон', 'title': 'Фургон'},
-    {'value': 'Лимузин', 'title': 'Лимузин'}
-  ];
+  ObservableFuture<List<dynamic>>? initialBodyType;
+
   @observable
-  List<dynamic> initialTransmission = [
-    {'value': 'Механика', 'title': 'Механика'},
-    {'value': 'Автомат', 'title': 'Автомат'}
-  ];
+  ObservableFuture<List<dynamic>>? initialTransmission;
+
   @observable
-  ObservableFuture<List<dynamic>>?
-      initialTransportType; // todo change dynamic to nedded type
+  ObservableFuture<List<dynamic>>? initialTransportType;
+
   @observable
-  ObservableMap<dynamic, dynamic> fuelType = ObservableMap.of({
-    'Бензин': false,
-    'Дизель': false,
-    'Електро': false,
-    'Гибрид': false,
-  });
+  ObservableMap fuelType = ObservableMap.of({});
+
+  @observable
+  ObservableMap partType = ObservableMap.of({});
+
+  String toJson() {
+    List upperCaseFuel =
+        fuelType.keys.where((elem) => fuelType[elem] == true).toList();
+    upperCaseFuel =
+        upperCaseFuel.map((e) => e.toString().toUpperCase()).toList();
+    List upperCasePartType =
+        partType.keys.where((elem) => partType[elem] == true).toList();
+    upperCasePartType =
+        upperCasePartType.map((e) => e.toString().toUpperCase()).toList();
+
+    return jsonEncode({
+      'modelId': valueModel,
+      'transmission': valueTransmission,
+      'bodyType': valueBodyType,
+      'drive': valueDrive,
+      'year': year,
+      'engineVolume': volume,
+      'vin': vinNumber,
+      'carPart': carParts.trim(),
+      'fuel': upperCaseFuel,
+      'part': upperCasePartType
+    });
+  }
+
+  @action
+  Future sendOrder() async {
+    var result = toJson();
+    var _endpointProvider = EndpointOrderProvider(_client.init());
+    var status = await _endpointProvider.sendOrder(result);
+    statusOrder = status != 201 ? false : true;
+    print(status);
+  }
 
   @action
   void changeFuelType(key, value) {
     fuelType[key] = value;
     validateFuelType(fuelType);
   }
-
-  @observable
-  ObservableMap partType = ObservableMap.of({
-    'Оригинал': false,
-    'Аналог': false,
-  });
 
   @action
   void changePartType(String key, bool value) {
@@ -119,7 +137,9 @@ abstract class _SearchFormStore with Store {
 
   @action
   void brandSetValue(String value) {
+    if (value == valueBrand) return;
     valueBrand = value;
+    valueModel = '';
     getModel(value.toString());
   }
 
@@ -145,30 +165,158 @@ abstract class _SearchFormStore with Store {
 
   @action
   void transportTypeSetValue(String value) {
+    if (value == valueTransportType) return;
     valueTransportType = value;
+    valueBrand = '';
+    valueModel = '';
     getBrands(value.toString());
   }
 
   Future<List<dynamic>> getTransportByHttp() async {
-    Client _client = new Client();
-    var _endpointProvider = new EndpointTransportProvider(_client.init());
+    var _endpointProvider = EndpointTransportProvider(_client.init());
     List<dynamic> data = await _endpointProvider.getTransport();
     return data;
   }
 
   @action
-  Future getTransport() => initialTransportType = ObservableFuture(getTransportByHttp());
-  
-  @action
-  Future getModel(String brand) => initialModels = ObservableFuture(getModelByHttp(brand));
+  Future getTransport() =>
+      initialTransportType = ObservableFuture(getTransportByHttp());
 
   @action
+  Future getOrder() async {
+    var _endpointProvider = EndpointOrderProvider(_client.init());
+    var data = await _endpointProvider.getLastOrder();
+    if (data == '') {
+      setDefaultValue();
+    } else {
+      setValueFromHttp(data);
+    }
+  }
+
+  @action
+  void setDefaultValue() {
+    getTransport();
+    getTransmission();
+    getBodyType();
+    getCarPartTypeByHttp();
+    getFuelTypeByHttp();
+    getDriveType();
+  }
+
+  @action
+  Future setValueFromHttp(data) async {
+    List fuels = data['fuel'];
+    List partTypes = data['part'];
+    await getCarPartTypeByHttp();
+    await getFuelTypeByHttp();
+    valueTransportType = data['model']['typeId'];
+    valueBrand = data['model']['brandId'];
+    valueModel = data['model']['id'];
+    valueDrive = 'FRONT';
+    valueTransmission = data['transmission'];
+    valueBodyType = data['bodyType'];
+    year = data['year'];
+    yearController.text = year;
+    volume = data['engineVolume'];
+    engineVolumeController.text = volume;
+    vinNumber = data['vin'];
+    vinNumberController.text = vinNumber;
+    carParts = data['carPart'];
+    carPartsController.text = carParts;
+    for (var item in fuels) {
+      fuelType.update(item.toString().toLowerCase(), (value) => true);
+    }
+    for (var item in partTypes) {
+      partType.update(item.toString().toLowerCase(), (value) => true);
+    }
+    getBrands(valueTransportType);
+    getModel(valueBrand);
+    getTransport();
+    getTransmission();
+    getBodyType();
+    getDriveType();
+  }
+
+  @action
+  Future getModel(String brand) =>
+      initialModels = ObservableFuture(getModelByHttp(brand));
+
   Future<List<dynamic>> getModelByHttp(String brand) async {
-    Client _client = new Client();
-    var _endpointProvider = new EndpointModelsProvider(_client.init());
-    List<dynamic> data = await _endpointProvider.getModels(valueTransportType, brand);
-    data = data.map((element) => {'value': element['id'], 'title': element['name']}).toList();
+    var _endpointProvider = EndpointModelsProvider(_client.init());
+    List<dynamic> data =
+        await _endpointProvider.getModels(valueTransportType, brand);
+    data = data
+        .map((element) => {'value': element['id'], 'title': element['name']})
+        .toList();
     return data;
+  }
+
+  @action
+  Future getTransmission() =>
+      initialTransmission = ObservableFuture(getTransmissionByHttp());
+
+  Future<List<dynamic>> getTransmissionByHttp() async {
+    var _endpointProvider = EndpointTransmissionProvider(_client.init());
+    List<dynamic> data = await _endpointProvider.getTransmisson();
+    data = data
+        .map((element) => {
+              'value': element.toString(),
+              'title': element.toString().toLowerCase()
+            })
+        .toList();
+    return data;
+  }
+
+  @action
+  Future getBodyType() =>
+      initialBodyType = ObservableFuture(getBodyTypeByHttp());
+
+  Future<List<dynamic>> getBodyTypeByHttp() async {
+    var _endpointProvider = EndpointBodyTypeProvider(_client.init());
+    List<dynamic> data = await _endpointProvider.getTransmisson();
+    data = data
+        .map((element) => {
+              'value': element.toString(),
+              'title': element.toString().toLowerCase()
+            })
+        .toList();
+    return data;
+  }
+
+  @action
+  Future getDriveType() =>
+      initialDrive = ObservableFuture(getDriveTypeByHttp());
+
+  Future<List<dynamic>> getDriveTypeByHttp() async {
+    var _endpointProvider = EndpointDriveTypeProvider(_client.init());
+    List<dynamic> data = await _endpointProvider.getDriveType();
+    data = data
+        .map((element) => {
+              'value': element.toString(),
+              'title': element.toString().toLowerCase()
+            })
+        .toList();
+    return data;
+  }
+
+  @action
+  Future getFuelTypeByHttp() async {
+    loaderStatus = true;
+    var _endpointProvider = EndpointFuelTypeProvider(_client.init());
+    var data = await _endpointProvider.getFuelType();
+    data = { for (var v in data) v.toString().toLowerCase() : false };
+    fuelType.addAll(data);
+    loaderStatus = false;
+  }
+
+  @action
+  Future getCarPartTypeByHttp() async {
+    loaderStatus = true;
+    var _endpointProvider = EndpointCarPartTypeProvider(_client.init());
+    var data = await _endpointProvider.getCarPartType();
+    data = { for (var v in data) v.toString().toLowerCase() : false };
+    partType.addAll(data);
+    loaderStatus = false;
   }
 
   @action
@@ -176,8 +324,7 @@ abstract class _SearchFormStore with Store {
       initialBrands = ObservableFuture(getBrandsByHttp(type));
 
   Future<List<dynamic>> getBrandsByHttp(String type) async {
-    Client _client = new Client();
-    var _endpointProvider = new EndpointBrandsProvider(_client.init());
+    var _endpointProvider = EndpointBrandsProvider(_client.init());
     List<dynamic> data = await _endpointProvider.getBrands(type);
     data = data
         .map((element) => {'value': element['id'], 'title': element['name']})
@@ -210,75 +357,83 @@ abstract class _SearchFormStore with Store {
 
   @action
   void validateTransportType(String value) {
-    value == 'Тип транспорта:'
-        ? error.valueTransportType = 'Поле обязательно'
+    value == ''
+        ? error.valueTransportType = 'order_required_field'.tr()
         : error.valueTransportType = null;
   }
 
   @action
   void validateBrand(String value) {
-    value == 'Марка:'
-        ? error.valueBrand = 'Поле обязательно'
+    if (valueTransportType == '') return error.valueBrand = null;
+    value == ''
+        ? error.valueBrand = 'order_required_field'.tr()
         : error.valueBrand = null;
   }
 
   @action
   void validateModel(String value) {
-    value == 'Модель:'
-        ? error.valueModel = 'Поле обязательно'
+    if (valueTransportType == '' && valueBrand == '') {
+      return error.valueModel = null;
+    }
+    value == ''
+        ? error.valueModel = 'order_required_field'.tr()
         : error.valueModel = null;
   }
 
   @action
   void validateTransmission(String value) {
-    value == 'Коробка передач:'
-        ? error.valueTransmission = 'Поле обязательно'
+    value == ''
+        ? error.valueTransmission = 'order_required_field'.tr()
         : error.valueTransmission = null;
   }
 
   @action
   void validateBodyType(String value) {
-    value == 'Тип кузова:'
-        ? error.valueBodyType = 'Поле обязательно'
+    value == ''
+        ? error.valueBodyType = 'order_required_field'.tr()
         : error.valueBodyType = null;
   }
 
   @action
   void validateDrive(String value) {
-    value == 'Привод:'
-        ? error.valueDrive = 'Поле обязательно'
-        : error.valueDrive = null;
+    error.valueDrive = value == '' ? 'order_required_field'.tr() : null;
   }
 
   @action
   void validateYear(String value) {
-    error.year = isNull(value) || value.isEmpty ? 'Поле обязательно' : null;
+    error.year = isNull(value) || value.isEmpty || value.length < 4
+        ? 'Минимум 4 симовола'
+        : null;
   }
 
   @action
   void validateVolume(String value) {
-    error.volume = isNull(value) || value.isEmpty ? 'Поле обязательно' : null;
+    error.volume =
+        isNull(value) || value.isEmpty ? 'order_required_field'.tr() : null;
   }
 
   @action
   void validateVinNumber(String value) {
     error.vinNumber =
-        isNull(value) || value.isEmpty ? 'Поле обязательно' : null;
+        isNull(value) || value.isEmpty ? 'order_required_field'.tr() : null;
   }
 
   @action
   void validateCarParts(String value) {
-    error.carParts = isNull(value) || value.isEmpty ? 'Поле обязательно' : null;
+    error.carParts =
+        isNull(value) || value.isEmpty ? 'order_required_field'.tr() : null;
   }
 
   @action
   void validateFuelType(ObservableMap<dynamic, dynamic> value) {
-    error.fuel = value.values.contains(true) ? null : 'Выбор обязательный';
+    error.fuel =
+        value.values.contains(true) ? null : 'order_required_field'.tr();
   }
 
   @action
   void validatePartType(ObservableMap<dynamic, dynamic> value) {
-    error.partType = value.values.contains(true) ? null : 'Выбор обязательный';
+    error.partType =
+        value.values.contains(true) ? null : 'order_required_field'.tr();
   }
 
   @action

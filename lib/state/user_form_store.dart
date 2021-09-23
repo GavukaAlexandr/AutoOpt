@@ -1,15 +1,14 @@
-import 'dart:convert';
-import 'dart:developer';
-
+import 'package:avto_opt/api_client/api_client.dart';
+import 'package:avto_opt/api_client/endpoints/change_notif_endpoint.dart';
+import 'package:avto_opt/api_client/endpoints/get_self_endpoint.dart';
 import 'package:dio/dio.dart';
 import 'package:mobx/mobx.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:validators/validators.dart';
 part 'user_form_store.g.dart';
 
 class UserFormStore = _UserFormStore with _$UserFormStore;
 
 abstract class _UserFormStore with Store {
+  final Client _client = Client();
 
   @observable
   bool isEditing = false;
@@ -32,22 +31,6 @@ abstract class _UserFormStore with Store {
     isEditing = value;
   }
 
-  login() async {
-    final prefs = await SharedPreferences.getInstance();
-    try {
-      var response = await Dio().post(
-          "https://auto-opt.cyber-geeks-lab.synology.me/auth/login",
-          data: {
-            "phoneNumber": prefs.getString('phone').toString(),
-            "firebaseUid": prefs.getString('user-uid').toString()
-          });
-      var result = response.data;
-      prefs.setString('token', result['access_token']);
-    } catch (e) {
-      print(e);
-    }
-  }
-
   @action
   setNotification(name, value) {
     switch (name) {
@@ -66,85 +49,25 @@ abstract class _UserFormStore with Store {
 
   @action
   Future changeNotification() async {
-    Dio dio = Dio();
-
-    dio.interceptors.add(InterceptorsWrapper(onRequest: (options, h) async {
-      final prefs = await SharedPreferences.getInstance();
-      var accessToken = prefs.getString('token');
-      options.headers['Authorization'] = 'Bearer $accessToken';
-      return h.next(options);
-    }, onError: (e, handler) async {
-      if (e.response!.statusCode == 401) {
-        await login();
-        final prefs = await SharedPreferences.getInstance();
-        var _accessToken = prefs.getString('token');
-        _accessToken = null;
-        final RequestOptions options = e.response!.requestOptions;
-        try {
-          options.headers['Authorization'] = 'Bearer $_accessToken';
-          final Response response = await dio.fetch(options);
-          return handler.resolve(response);
-        } catch (e, s) {
-          print(e);
-          print(s);
-        }
-      }
-
-      return handler.next(e);
-    }));
     loaderStatus = true;
-    try {
-      Response response = await dio
-          .put("https://auto-opt.cyber-geeks-lab.synology.me/user/notifications", data: {
-        "telegramNotification": user.notificationTelegram,
-        "viberNotification": user.notificationViber,
-        "phoneNotification": user.notificationPhone
-      });
-      loaderStatus = false;
-    } catch (e) {
-      loaderStatus = false;
-      print('Error: $e');
-    }
+    var _endpointProvider =
+        EndpointChangeNotificationProvider(_client.init());
+    await _endpointProvider.changeNotification({
+      "telegramNotification": user.notificationTelegram,
+      "viberNotification": user.notificationViber,
+      "phoneNotification": user.notificationPhone
+    });
+    loaderStatus = false;
   }
 
   @action
   Future getSelf() async {
-    Dio dio = Dio();
-
-    dio.interceptors.add(InterceptorsWrapper(onRequest: (options, h) async {
-      final prefs = await SharedPreferences.getInstance();
-      var accessToken = prefs.getString('token');
-      options.headers['Authorization'] = 'Bearer $accessToken';
-      return h.next(options);
-    }, onError: (e, handler) async {
-      if (e.response!.statusCode == 401) {
-        await login();
-        final prefs = await SharedPreferences.getInstance();
-        var _accessToken = prefs.getString('token');
-        _accessToken = null;
-        final RequestOptions options = e.response!.requestOptions;
-        try {
-          options.headers['Authorization'] = 'Bearer $_accessToken';
-          final Response response = await dio.fetch(options);
-          return handler.resolve(response);
-        } catch (e, s) {
-          print(e);
-          print(s);
-        }
-      }
-
-      return handler.next(e);
-    }));
     loaderStatus = true;
-    try {
-      Response response = await dio
-          .get("https://auto-opt.cyber-geeks-lab.synology.me/user/self");
-      user = User.fromJson(response.data);
-      loaderStatus = false;
-    } catch (e) {
-      loaderStatus = false;
-      print('Error: $e');
-    }
+    var _endpointProvider = EndpointGetSelfProvider(_client.init());
+    Response response = await _endpointProvider.getSelf();
+    user = User.fromJson(response.data);
+    loaderStatus = false;
+    loaderStatus = false;
   }
 }
 
