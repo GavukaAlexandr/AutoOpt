@@ -1,0 +1,83 @@
+type Query {
+  orders: [Order]
+  order(id: ID!): Order
+}
+
+type Mutation {
+  createOrder(createOrderInput: CreateOrderInput): Order
+}
+
+type Subscription {
+  orderCreated: Order
+}
+
+input CreateOrderInput {
+  userId: String
+  modelId: String
+  transmission: Transmission
+  bodyType: BodyType
+  drive: DriveType
+  year: String
+  engineVolume: String
+  vin: String
+  carPart: String
+  fuel: FuelType
+  part: PartType
+}
+
+type Order {
+  id: String
+  userId: String
+  modelId: String
+  transmission: Transmission
+  bodyType: BodyType
+  drive: DriveType
+  year: String
+  engineVolume: String
+  vin: String
+  carPart: String
+  fuel: FuelType
+  part: PartType
+  createdAt: String
+  updatedAt: String
+  user: String
+  model: String
+}
+
+enum FuelType {
+  GASOLINE
+  DIESEL
+  ELECTRO
+  HYBRID
+}
+
+enum Transmission {
+  AUTOMATIC
+  MECHANICAL
+  VARIABLE
+  ROBOT
+}
+
+enum BodyType {
+  SEDAN
+  HATCHBACK
+  COUPE
+  UNIVERSAL
+  MINIVAN
+  SUV
+  PICKUP
+  CABRIOLET
+  VAN
+  LIMOUSINE
+}
+
+enum DriveType {
+  FULL
+  FRONT
+  REAR
+}
+
+enum PartType {
+  ORIGINAL
+  ANALOGUE
+}
