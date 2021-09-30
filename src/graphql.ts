@@ -84,12 +84,27 @@ export class Order {
     engineVolume?: Nullable<string>;
     vin?: Nullable<string>;
     carPart?: Nullable<string>;
-    fuel?: Nullable<FuelType>;
-    part?: Nullable<PartType>;
+    fuel?: Nullable<Nullable<FuelType>[]>;
+    part?: Nullable<Nullable<PartType>[]>;
     createdAt?: Nullable<string>;
     updatedAt?: Nullable<string>;
-    user?: Nullable<string>;
+    user?: Nullable<User>;
     model?: Nullable<string>;
+}
+
+export class User {
+    id?: Nullable<string>;
+    firstName?: Nullable<string>;
+    lastName?: Nullable<string>;
+    token?: Nullable<string>;
+    firebaseUid?: Nullable<string>;
+    email?: Nullable<string>;
+    phoneNumber?: Nullable<string>;
+    telegramNotification?: Nullable<boolean>;
+    viberNotification?: Nullable<boolean>;
+    phoneNotification?: Nullable<boolean>;
+    createdAt?: Nullable<string>;
+    updatedAt?: Nullable<string>;
 }
 
 type Nullable<T> = T | null;

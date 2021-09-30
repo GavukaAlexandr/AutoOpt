@@ -36,12 +36,27 @@ type Order {
   engineVolume: String
   vin: String
   carPart: String
-  fuel: FuelType
-  part: PartType
+  fuel: [FuelType]
+  part: [PartType]
   createdAt: String
   updatedAt: String
-  user: String
+  user: User
   model: String
+}
+
+type User {
+  id: String
+  firstName: String
+  lastName: String
+  token: String
+  firebaseUid: String
+  email: String
+  phoneNumber: String
+  telegramNotification: Boolean
+  viberNotification: Boolean
+  phoneNotification: Boolean
+  createdAt: String
+  updatedAt: String
 }
 
 enum FuelType {

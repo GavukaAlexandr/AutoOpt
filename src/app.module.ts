@@ -13,6 +13,7 @@ import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
+import { OrderResolver } from './order/order.resolver';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
+    OrderResolver,
   ],
 })
 export class AppModule {}

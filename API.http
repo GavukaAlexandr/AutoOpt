@@ -1,28 +1,70 @@
 @accessToken = {{login.response.body.access_token}}
-POST https://auto-opt.cyber-geeks-lab.synology.me/order
+
+###
+POST http://localhost:3000/order
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
 {
-    "modelId": "0003a782-14d9-4d3f-839e-3db7f7c7f25c",
-    "transmission": "AUTO",
+    "modelId": "85f61898-08a2-4de3-9b74-d051179bb66e",
+    "transmission": "AUTOMATIC",
     "bodyType": "SEDAN",
-    "drive": "FULL",
-    "year": "2021",
-    "engineVolume": "3.3",
-    "vin": "sdgsdfgsdfgsd",
+    "drive": "FRONT",
+    "year": "2019",
+    "engineVolume": "2.0",
+    "vin": "vin number",
     "carPart": "кардан",
-    "fuel": ["GASOLINE", "ELECTRO", "HYBRID"],
-    "part": "ORIGINAL"
+    "fuel": ["GASOLINE"],
+    "part": "ANALOGUE"
 }
 
 ###
-GET https://auto-opt.cyber-geeks-lab.synology.me/transport
-Content-Type: application/json
 
 ###
-GET https://auto-opt.cyber-geeks-lab.synology.me/transport/brands/33ad6aab-30e9-479f-8131-adf747d36d2b
+GET http://localhost:3000/order/last
 Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+###
+
+###
+GET http://localhost:3000/order/all
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+###
+
+###
+GET http://localhost:3000/health
+###
+
+###
+GET http://localhost:3000/user/users
+###
+
+###
+
+GET http://localhost:3000/transport
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+###
+
+###
+GET https://auto-opt.cyber-geeks-lab.synology.me/transport/fuel-types
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+###
+
+###
+GET http://localhost:3000/transport/drive-types
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+###
+
+GET http://localhost:3000/transport/brands/33ad6aab-30e9-479f-8131-adf747d36d2b
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
 
 ###
 GET https://auto-opt.cyber-geeks-lab.synology.me/transport/models/1f52a3dd-1950-4c34-910c-93f735bd95b2/b002fc00-cd72-47a7-ac70-29550bb2c2af
@@ -35,27 +77,52 @@ POST https://auto-opt.cyber-geeks-lab.synology.me/user/register
 content-type: application/json
 
 {
-  "firstName": "user221",
-  "lastName": "Last 221",
-  "email": "user221@gmail222.com",
-  "phoneNumber": "221",
-  "telegramNotification": true
+  "firstName": "ron",
+  "lastName": "ronich",
+  "email": "user222@gmail222.com",
+  "phoneNumber": "+380685065277",
+  "firebaseUid": "6ghzH4WbNEb2lTDT8ENkMRmfWmN2"
 }
 
 ###
 
 # @name login
-POST https://auto-opt.cyber-geeks-lab.synology.me/auth/login
+POST http://localhost:3000/auth/login
 content-type: application/json
 
 {
-  "phoneNumber": "221"
+  "phoneNumber": "+380685065277",
+  "firebaseUid": "6ghzH4WbNEb2lTDT8ENkMRmfWmN2"
 }
 
 ###
 
-GET https://auto-opt.cyber-geeks-lab.synology.me/user/self
+POST http://localhost:3000/user/is-exist
+content-type: application/json
+
+{
+  "phoneNumber": "233321"
+}
+
+###
+GET http://localhost:3000/user/self
+content-type: application/json
 Authorization: Bearer {{accessToken}}
+###
+
+###
+GET http://localhost:3000/public/app-localizations/ru_RU.json
+###
+
+###
+PUT http://localhost:3000/user/notifications
+content-type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "phoneNotification": false
+}
+
 ###
 
 POST https://auto-opt.cyber-geeks-lab.synology.me/user/is-exist
