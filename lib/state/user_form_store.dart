@@ -1,117 +1,111 @@
+import 'package:avto_opt/api_client/api_client.dart';
+import 'package:avto_opt/api_client/endpoints/change_notif_endpoint.dart';
+import 'package:avto_opt/api_client/endpoints/get_self_endpoint.dart';
+import 'package:dio/dio.dart';
 import 'package:mobx/mobx.dart';
-import 'package:validators/validators.dart';
 part 'user_form_store.g.dart';
 
 class UserFormStore = _UserFormStore with _$UserFormStore;
 
 abstract class _UserFormStore with Store {
-  final FormErrorState error = FormErrorState();
+  final Client _client = Client();
 
   @observable
-  String userName = '';
+  bool isEditing = false;
 
   @observable
-  String email = '';
+  User user = User(
+      email: '',
+      firstName: '',
+      lastName: '',
+      phoneNumber: '',
+      notificationPhone: false,
+      notificationTelegram: false,
+      notificationViber: false);
 
   @observable
-  String numberPhone = '';
-
-  @observable
-  bool telegram = false;
-
-  @observable
-  bool phone = false;
-
-  @observable
-  bool viber = false;
+  bool loaderStatus = false;
 
   @action
-  void setTelegram(bool value) {
-    telegram = value;
+  changeEditing(value) {
+    isEditing = value;
   }
 
   @action
-  void setPhone(bool value) {
-    phone = value;
-  }
-
-  @action
-  void setViber(bool value) {
-    viber = value;
-  }
-
-  @action
-  void setUsername(String value) {
-    userName = value;
-  }
-
-  @action
-  void setEmail(String value) {
-    email = value;
-  }
-
-  @action
-  void setNumberPhone(String value) {
-    numberPhone = value;
-  }
-
-  late List<ReactionDisposer> _disposers;
-
-  void setupValidations() {
-    _disposers = [
-      reaction((_) => userName, validateUsername),
-      reaction((_) => email, validateEmail),
-      reaction((_) => numberPhone, validateNumberPhone),
-    ];
-  }
-
-  @action
-  void validateUsername(String value) {
-    if (isNull(value) || value.isEmpty) {
-      error.username = 'Поле обязательно';
-      return;
-    }
-
-    error.username = null;
-  }
-
-  @action
-  void validateNumberPhone(String value) {
-    error.numberPhone =
-        isNull(value) || value.isEmpty ? 'Поле обязательно' : null;
-  }
-
-  @action
-  void validateEmail(String value) {
-    error.email = isEmail(value) ? null : 'Email некорректный';
-  }
-
-  void dispose() {
-    for (final d in _disposers) {
-      d();
+  setNotification(name, value) {
+    switch (name) {
+      case 'telegram':
+        user.notificationTelegram = value;
+        break;
+      case 'viber':
+        user.notificationViber = value;
+        break;
+      case 'phone':
+        user.notificationPhone = value;
+        break;
+      default:
     }
   }
 
-  void validateAll() {
-    validateNumberPhone(numberPhone);
-    validateEmail(email);
-    validateUsername(userName);
+  @action
+  Future changeNotification() async {
+    loaderStatus = true;
+    var _endpointProvider = EndpointChangeNotificationProvider(_client.init());
+    Map<String, bool> preparedData = {
+      "telegramNotification": user.notificationTelegram,
+      "viberNotification": user.notificationViber,
+      "phoneNotification": user.notificationPhone
+    };
+    await _endpointProvider.changeNotification(preparedData);
+    loaderStatus = false;
+  }
+
+  @action
+  Future getSelf() async {
+    loaderStatus = true;
+    var _endpointProvider = EndpointGetSelfProvider(_client.init());
+    Response response = await _endpointProvider.getSelf();
+    user = User.fromJson(response.data);
+    loaderStatus = false;
+    loaderStatus = false;
   }
 }
 
-class FormErrorState = _FormErrorState with _$FormErrorState;
+class User {
+  String firstName;
+  String lastName;
+  String email;
+  String phoneNumber;
+  bool notificationTelegram;
+  bool notificationPhone;
+  bool notificationViber;
 
-abstract class _FormErrorState with Store {
-  @observable
-  String? username;
+  User(
+      {required this.firstName,
+      required this.lastName,
+      required this.email,
+      required this.phoneNumber,
+      required this.notificationTelegram,
+      required this.notificationPhone,
+      required this.notificationViber});
 
-  @observable
-  String? email;
+  factory User.fromJson(Map<String, dynamic> jsonMap) {
+    return User(
+        firstName: jsonMap['firstName'] ?? 'No firstName Found',
+        lastName: jsonMap['lastName'] ?? 'No lastName found',
+        email: jsonMap['email'] ?? 'No Email found',
+        phoneNumber: jsonMap['phoneNumber'] ?? 'No Number found',
+        notificationViber: jsonMap['viberNotification'] ?? false,
+        notificationTelegram: jsonMap['telegramNotification'] ?? false,
+        notificationPhone: jsonMap['phoneNotification'] ?? false);
+  }
 
-  @observable
-  String? numberPhone;
-
-  @computed
-  bool get hasErrors =>
-      username != null || email != null || numberPhone != null;
+  Map<String, dynamic> toJson() => {
+        'firstName': firstName,
+        'lastName': lastName,
+        'phoneNumber': phoneNumber,
+        'notificationViber': notificationViber,
+        'notificationTelegram': notificationTelegram,
+        'notificationPhone': notificationPhone
+      };
 }

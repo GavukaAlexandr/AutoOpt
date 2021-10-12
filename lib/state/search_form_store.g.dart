@@ -9,6 +9,85 @@ part of 'search_form_store.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$SearchFormStore on _SearchFormStore, Store {
+  final _$yearControllerAtom = Atom(name: '_SearchFormStore.yearController');
+
+  @override
+  TextEditingController get yearController {
+    _$yearControllerAtom.reportRead();
+    return super.yearController;
+  }
+
+  @override
+  set yearController(TextEditingController value) {
+    _$yearControllerAtom.reportWrite(value, super.yearController, () {
+      super.yearController = value;
+    });
+  }
+
+  final _$engineVolumeControllerAtom =
+      Atom(name: '_SearchFormStore.engineVolumeController');
+
+  @override
+  TextEditingController get engineVolumeController {
+    _$engineVolumeControllerAtom.reportRead();
+    return super.engineVolumeController;
+  }
+
+  @override
+  set engineVolumeController(TextEditingController value) {
+    _$engineVolumeControllerAtom
+        .reportWrite(value, super.engineVolumeController, () {
+      super.engineVolumeController = value;
+    });
+  }
+
+  final _$vinNumberControllerAtom =
+      Atom(name: '_SearchFormStore.vinNumberController');
+
+  @override
+  TextEditingController get vinNumberController {
+    _$vinNumberControllerAtom.reportRead();
+    return super.vinNumberController;
+  }
+
+  @override
+  set vinNumberController(TextEditingController value) {
+    _$vinNumberControllerAtom.reportWrite(value, super.vinNumberController, () {
+      super.vinNumberController = value;
+    });
+  }
+
+  final _$carPartsControllerAtom =
+      Atom(name: '_SearchFormStore.carPartsController');
+
+  @override
+  TextEditingController get carPartsController {
+    _$carPartsControllerAtom.reportRead();
+    return super.carPartsController;
+  }
+
+  @override
+  set carPartsController(TextEditingController value) {
+    _$carPartsControllerAtom.reportWrite(value, super.carPartsController, () {
+      super.carPartsController = value;
+    });
+  }
+
+  final _$statusOrderAtom = Atom(name: '_SearchFormStore.statusOrder');
+
+  @override
+  bool get statusOrder {
+    _$statusOrderAtom.reportRead();
+    return super.statusOrder;
+  }
+
+  @override
+  set statusOrder(bool value) {
+    _$statusOrderAtom.reportWrite(value, super.statusOrder, () {
+      super.statusOrder = value;
+    });
+  }
+
   final _$loaderStatusAtom = Atom(name: '_SearchFormStore.loaderStatus');
 
   @override
@@ -179,13 +258,13 @@ mixin _$SearchFormStore on _SearchFormStore, Store {
   final _$initialModelsAtom = Atom(name: '_SearchFormStore.initialModels');
 
   @override
-  List<dynamic> get initialModels {
+  ObservableFuture<List<dynamic>>? get initialModels {
     _$initialModelsAtom.reportRead();
     return super.initialModels;
   }
 
   @override
-  set initialModels(List<dynamic> value) {
+  set initialModels(ObservableFuture<List<dynamic>>? value) {
     _$initialModelsAtom.reportWrite(value, super.initialModels, () {
       super.initialModels = value;
     });
@@ -194,13 +273,13 @@ mixin _$SearchFormStore on _SearchFormStore, Store {
   final _$initialBrandsAtom = Atom(name: '_SearchFormStore.initialBrands');
 
   @override
-  List<dynamic> get initialBrands {
+  ObservableFuture<List<dynamic>>? get initialBrands {
     _$initialBrandsAtom.reportRead();
     return super.initialBrands;
   }
 
   @override
-  set initialBrands(List<dynamic> value) {
+  set initialBrands(ObservableFuture<List<dynamic>>? value) {
     _$initialBrandsAtom.reportWrite(value, super.initialBrands, () {
       super.initialBrands = value;
     });
@@ -209,13 +288,13 @@ mixin _$SearchFormStore on _SearchFormStore, Store {
   final _$initialDriveAtom = Atom(name: '_SearchFormStore.initialDrive');
 
   @override
-  List<dynamic> get initialDrive {
+  ObservableFuture<List<dynamic>>? get initialDrive {
     _$initialDriveAtom.reportRead();
     return super.initialDrive;
   }
 
   @override
-  set initialDrive(List<dynamic> value) {
+  set initialDrive(ObservableFuture<List<dynamic>>? value) {
     _$initialDriveAtom.reportWrite(value, super.initialDrive, () {
       super.initialDrive = value;
     });
@@ -224,13 +303,13 @@ mixin _$SearchFormStore on _SearchFormStore, Store {
   final _$initialBodyTypeAtom = Atom(name: '_SearchFormStore.initialBodyType');
 
   @override
-  List<dynamic> get initialBodyType {
+  ObservableFuture<List<dynamic>>? get initialBodyType {
     _$initialBodyTypeAtom.reportRead();
     return super.initialBodyType;
   }
 
   @override
-  set initialBodyType(List<dynamic> value) {
+  set initialBodyType(ObservableFuture<List<dynamic>>? value) {
     _$initialBodyTypeAtom.reportWrite(value, super.initialBodyType, () {
       super.initialBodyType = value;
     });
@@ -240,13 +319,13 @@ mixin _$SearchFormStore on _SearchFormStore, Store {
       Atom(name: '_SearchFormStore.initialTransmission');
 
   @override
-  List<dynamic> get initialTransmission {
+  ObservableFuture<List<dynamic>>? get initialTransmission {
     _$initialTransmissionAtom.reportRead();
     return super.initialTransmission;
   }
 
   @override
-  set initialTransmission(List<dynamic> value) {
+  set initialTransmission(ObservableFuture<List<dynamic>>? value) {
     _$initialTransmissionAtom.reportWrite(value, super.initialTransmission, () {
       super.initialTransmission = value;
     });
@@ -256,13 +335,13 @@ mixin _$SearchFormStore on _SearchFormStore, Store {
       Atom(name: '_SearchFormStore.initialTransportType');
 
   @override
-  List<dynamic> get initialTransportType {
+  ObservableFuture<List<dynamic>>? get initialTransportType {
     _$initialTransportTypeAtom.reportRead();
     return super.initialTransportType;
   }
 
   @override
-  set initialTransportType(List<dynamic> value) {
+  set initialTransportType(ObservableFuture<List<dynamic>>? value) {
     _$initialTransportTypeAtom.reportWrite(value, super.initialTransportType,
         () {
       super.initialTransportType = value;
@@ -299,26 +378,44 @@ mixin _$SearchFormStore on _SearchFormStore, Store {
     });
   }
 
-  final _$getTransportAsyncAction =
-      AsyncAction('_SearchFormStore.getTransport');
+  final _$sendOrderAsyncAction = AsyncAction('_SearchFormStore.sendOrder');
 
   @override
-  Future<dynamic> getTransport() {
-    return _$getTransportAsyncAction.run(() => super.getTransport());
+  Future<dynamic> sendOrder() {
+    return _$sendOrderAsyncAction.run(() => super.sendOrder());
   }
 
-  final _$getModelAsyncAction = AsyncAction('_SearchFormStore.getModel');
+  final _$getOrderAsyncAction = AsyncAction('_SearchFormStore.getOrder');
 
   @override
-  Future<dynamic> getModel(String brand) {
-    return _$getModelAsyncAction.run(() => super.getModel(brand));
+  Future<dynamic> getOrder() {
+    return _$getOrderAsyncAction.run(() => super.getOrder());
   }
 
-  final _$getBrandsAsyncAction = AsyncAction('_SearchFormStore.getBrands');
+  final _$setValueFromHttpAsyncAction =
+      AsyncAction('_SearchFormStore.setValueFromHttp');
 
   @override
-  Future<dynamic> getBrands(String type) {
-    return _$getBrandsAsyncAction.run(() => super.getBrands(type));
+  Future<dynamic> setValueFromHttp(dynamic data) {
+    return _$setValueFromHttpAsyncAction
+        .run(() => super.setValueFromHttp(data));
+  }
+
+  final _$getFuelTypeByHttpAsyncAction =
+      AsyncAction('_SearchFormStore.getFuelTypeByHttp');
+
+  @override
+  Future<dynamic> getFuelTypeByHttp() {
+    return _$getFuelTypeByHttpAsyncAction.run(() => super.getFuelTypeByHttp());
+  }
+
+  final _$getCarPartTypeByHttpAsyncAction =
+      AsyncAction('_SearchFormStore.getCarPartTypeByHttp');
+
+  @override
+  Future<dynamic> getCarPartTypeByHttp() {
+    return _$getCarPartTypeByHttpAsyncAction
+        .run(() => super.getCarPartTypeByHttp());
   }
 
   final _$_SearchFormStoreActionController =
@@ -407,6 +504,83 @@ mixin _$SearchFormStore on _SearchFormStore, Store {
         name: '_SearchFormStore.transportTypeSetValue');
     try {
       return super.transportTypeSetValue(value);
+    } finally {
+      _$_SearchFormStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  Future<dynamic> getTransport() {
+    final _$actionInfo = _$_SearchFormStoreActionController.startAction(
+        name: '_SearchFormStore.getTransport');
+    try {
+      return super.getTransport();
+    } finally {
+      _$_SearchFormStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setDefaultValue() {
+    final _$actionInfo = _$_SearchFormStoreActionController.startAction(
+        name: '_SearchFormStore.setDefaultValue');
+    try {
+      return super.setDefaultValue();
+    } finally {
+      _$_SearchFormStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  Future<dynamic> getModel(String brand) {
+    final _$actionInfo = _$_SearchFormStoreActionController.startAction(
+        name: '_SearchFormStore.getModel');
+    try {
+      return super.getModel(brand);
+    } finally {
+      _$_SearchFormStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  Future<dynamic> getTransmission() {
+    final _$actionInfo = _$_SearchFormStoreActionController.startAction(
+        name: '_SearchFormStore.getTransmission');
+    try {
+      return super.getTransmission();
+    } finally {
+      _$_SearchFormStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  Future<dynamic> getBodyType() {
+    final _$actionInfo = _$_SearchFormStoreActionController.startAction(
+        name: '_SearchFormStore.getBodyType');
+    try {
+      return super.getBodyType();
+    } finally {
+      _$_SearchFormStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  Future<dynamic> getDriveType() {
+    final _$actionInfo = _$_SearchFormStoreActionController.startAction(
+        name: '_SearchFormStore.getDriveType');
+    try {
+      return super.getDriveType();
+    } finally {
+      _$_SearchFormStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  Future<dynamic> getBrands(String type) {
+    final _$actionInfo = _$_SearchFormStoreActionController.startAction(
+        name: '_SearchFormStore.getBrands');
+    try {
+      return super.getBrands(type);
     } finally {
       _$_SearchFormStoreActionController.endAction(_$actionInfo);
     }
@@ -558,6 +732,11 @@ mixin _$SearchFormStore on _SearchFormStore, Store {
   @override
   String toString() {
     return '''
+yearController: ${yearController},
+engineVolumeController: ${engineVolumeController},
+vinNumberController: ${vinNumberController},
+carPartsController: ${carPartsController},
+statusOrder: ${statusOrder},
 loaderStatus: ${loaderStatus},
 year: ${year},
 volume: ${volume},
