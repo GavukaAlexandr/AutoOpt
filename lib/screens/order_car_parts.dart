@@ -68,12 +68,12 @@ class _OrderCarPartsState extends State<OrderCarParts> {
       style: const AlertStyle(backgroundColor: Colors.white),
       context: context,
       type: AlertType.success,
-      title: "Заказ успешно принят",
+      title: "succes_order".tr(),
       buttons: [
         DialogButton(
-          child: const Text(
-            "Закрыть",
-            style: TextStyle(color: Colors.white, fontSize: 16),
+          child: Text(
+            "close_text".tr(),
+            style: const TextStyle(color: Colors.white, fontSize: 16),
           ),
           onPressed: () => Navigator.pop(context),
           color: Colors.red,

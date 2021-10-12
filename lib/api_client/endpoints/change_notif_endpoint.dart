@@ -7,8 +7,8 @@ class EndpointChangeNotificationProvider {
   EndpointChangeNotificationProvider(this._client);
   
   Future changeNotification(data) async {
-    try{
-      final Response response = await _client.post('/user/notifications', data: data);
+    try {
+      final Response response = await _client.put('/user/notifications', data: data );
       return response.statusCode;
     }
     on DioError catch(ex){

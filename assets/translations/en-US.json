@@ -44,5 +44,7 @@
     "uncorrect_phone_sms": "Invalid phone number format. Please enter your phone number in the correct format",
     "uncorrect_phone_error": "Invalid phone",
     "send_order_btn": "Send order",
-    "repeat_order_btn": "Repeat order"
+    "repeat_order_btn": "Repeat order",
+    "close_text": "Close",
+    "succes_order": "Order successfully accepted"
 }

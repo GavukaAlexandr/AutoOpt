@@ -50,13 +50,13 @@ abstract class _UserFormStore with Store {
   @action
   Future changeNotification() async {
     loaderStatus = true;
-    var _endpointProvider =
-        EndpointChangeNotificationProvider(_client.init());
-    await _endpointProvider.changeNotification({
+    var _endpointProvider = EndpointChangeNotificationProvider(_client.init());
+    Map<String, bool> preparedData = {
       "telegramNotification": user.notificationTelegram,
       "viberNotification": user.notificationViber,
       "phoneNotification": user.notificationPhone
-    });
+    };
+    await _endpointProvider.changeNotification(preparedData);
     loaderStatus = false;
   }
 
