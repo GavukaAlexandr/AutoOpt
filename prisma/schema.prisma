@@ -1,0 +1,132 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Type {
+  id     String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name   String      @unique @db.VarChar(255)
+  brands BrandType[]
+  models Model[]
+}
+
+model Brand {
+  id    String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name  String      @unique @db.VarChar(255)
+  types BrandType[]
+  Model Model[]
+}
+
+model BrandType {
+
+  typeId  String @map("type_id") @db.Uuid
+  brandId String @map("brand_id") @db.Uuid
+
+  type  Type  @relation(fields: [typeId], references: [id])
+  brand Brand @relation(fields: [brandId], references: [id])
+  @@id([typeId, brandId])
+  @@map("brand_types")
+}
+
+model Model {
+  id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String      @unique @db.VarChar(255)
+  typeId    String      @map("type_id") @db.Uuid
+  brandId   String      @map("brand_id") @db.Uuid
+  order     Order[]
+  UserModel UserModel[]
+  type      Type        @relation(fields: [typeId], references: [id])
+  brand     Brand       @relation(fields: [brandId], references: [id])
+}
+
+enum FuelType {
+  GASOLINE
+  DIESEL
+  ELECTRO
+  HYBRID
+}
+
+enum PartType {
+  ORIGINAL
+  ANALOGUE
+}
+
+enum Transmission {
+  AUTOMATIC
+  MECHANICAL
+  VARIABLE
+  ROBOT
+}
+
+enum BodyType {
+  SEDAN
+  HATCHBACK
+  COUPE
+  UNIVERSAL
+  MINIVAN
+  SUV
+  PICKUP
+  CABRIOLET
+  VAN
+  LIMOUSINE
+}
+
+enum DriveType {
+  FULL
+  FRONT
+  REAR
+}
+
+model Order {
+  id           String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String       @map("user_id") @db.Uuid
+  modelId      String       @map("model_id") @db.Uuid
+  transmission Transmission
+  bodyType     BodyType     @map("body_type")
+  drive        DriveType
+  year         String
+  engineVolume String       @map("engine_volume")
+  vin          String
+  carPart      String       @map("car_part") @db.Text
+  fuel         FuelType[]
+  // part         PartType[] rename to  quality type
+  part         PartType[] 
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  user         User         @relation(fields: [userId], references: [id])
+  model        Model        @relation(fields: [modelId], references: [id])
+}
+
+model User {
+  id                   String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  firstName            String      @db.VarChar(255)
+  lastName             String      @db.VarChar(255)
+  token                String?
+  firebaseUid          String      @unique @map("firebase_uid")
+  email                String      @unique @db.VarChar(255)
+  phoneNumber          String      @unique @map("phone_number") @db.VarChar(255)
+  telegramNotification Boolean?    @map("telegram_notification")
+  viberNotification    Boolean?    @map("viber_notification")
+  phoneNotification    Boolean?    @map("phone_notification")
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+  orders               Order[]
+  UserModel            UserModel[]
+}
+
+model UserModel {
+  userId  String @map("user_id") @db.Uuid
+  modelId String @map("model_id") @db.Uuid
+
+  user  User?  @relation(fields: [userId], references: [id])
+  model Model? @relation(fields: [modelId], references: [id])
+  @@id([userId, modelId])
+  @@map("user_model")
+}
