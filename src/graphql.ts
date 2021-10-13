@@ -45,7 +45,21 @@ export enum PartType {
     ANALOGUE = "ANALOGUE"
 }
 
-export class CreateOrderInput {
+export class UpdateOrderInput {
+    id: string;
+    modelId?: Nullable<string>;
+    transmission?: Nullable<Transmission>;
+    bodyType?: Nullable<BodyType>;
+    drive?: Nullable<DriveType>;
+    year?: Nullable<string>;
+    engineVolume?: Nullable<string>;
+    vin?: Nullable<string>;
+    carPart?: Nullable<string>;
+    fuel?: Nullable<Nullable<FuelType>[]>;
+    part?: Nullable<Nullable<PartType>[]>;
+}
+
+export class OrderInput {
     userId?: Nullable<string>;
     modelId?: Nullable<string>;
     transmission?: Nullable<Transmission>;
@@ -55,28 +69,28 @@ export class CreateOrderInput {
     engineVolume?: Nullable<string>;
     vin?: Nullable<string>;
     carPart?: Nullable<string>;
-    fuel?: Nullable<FuelType>;
-    part?: Nullable<PartType>;
+    fuel?: Nullable<Nullable<FuelType>[]>;
+    part?: Nullable<Nullable<PartType>[]>;
 }
 
 export abstract class IQuery {
-    abstract orders(): Nullable<Nullable<Order>[]> | Promise<Nullable<Nullable<Order>[]>>;
-
     abstract order(id: string): Nullable<Order> | Promise<Nullable<Order>>;
+
+    abstract orders(page?: Nullable<number>, perPage?: Nullable<number>, sortOrder?: Nullable<string>): Nullable<Order[]> | Promise<Nullable<Order[]>>;
 }
 
 export abstract class IMutation {
-    abstract createOrder(createOrderInput?: Nullable<CreateOrderInput>): Nullable<Order> | Promise<Nullable<Order>>;
-}
+    abstract createOrder(createOrder?: Nullable<OrderInput>): Nullable<Order> | Promise<Nullable<Order>>;
 
-export abstract class ISubscription {
-    abstract orderCreated(): Nullable<Order> | Promise<Nullable<Order>>;
+    abstract updateOrder(updateOrderInput?: Nullable<UpdateOrderInput>): Nullable<Order> | Promise<Nullable<Order>>;
+
+    abstract removeOrder(id?: Nullable<string>): Nullable<Order> | Promise<Nullable<Order>>;
 }
 
 export class Order {
-    id?: Nullable<string>;
+    id: string;
     userId?: Nullable<string>;
-    modelId?: Nullable<string>;
+    modelId?: Nullable<Model>;
     transmission?: Nullable<Transmission>;
     bodyType?: Nullable<BodyType>;
     drive?: Nullable<DriveType>;
@@ -89,7 +103,7 @@ export class Order {
     createdAt?: Nullable<string>;
     updatedAt?: Nullable<string>;
     user?: Nullable<User>;
-    model?: Nullable<string>;
+    model?: Nullable<Model>;
 }
 
 export class User {
@@ -105,6 +119,32 @@ export class User {
     phoneNotification?: Nullable<boolean>;
     createdAt?: Nullable<string>;
     updatedAt?: Nullable<string>;
+    orders?: Nullable<Nullable<Order>[]>;
+}
+
+export class Model {
+    id: string;
+    user?: Nullable<Nullable<User>[]>;
+    name: string;
+    typeId: Type;
+    brandId: Brand;
+    order?: Nullable<Nullable<Order>[]>;
+    type?: Nullable<Type>;
+    brand?: Nullable<Brand>;
+}
+
+export class Brand {
+    id: string;
+    name: string;
+    types?: Nullable<Nullable<Type>[]>;
+    Model?: Nullable<Nullable<Model>[]>;
+}
+
+export class Type {
+    id: string;
+    name: string;
+    brands?: Nullable<Nullable<Brand>[]>;
+    models?: Nullable<Nullable<Model>[]>;
 }
 
 type Nullable<T> = T | null;

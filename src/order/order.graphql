@@ -1,17 +1,29 @@
 type Query {
-  orders: [Order]
   order(id: ID!): Order
+  orders(page: Int, perPage: Int, sortOrder: String): [Order!]
 }
 
 type Mutation {
-  createOrder(createOrderInput: CreateOrderInput): Order
+  createOrder(createOrder: OrderInput): Order
+  updateOrder(updateOrderInput: UpdateOrderInput): Order
+  removeOrder(id: String): Order
 }
 
-type Subscription {
-  orderCreated: Order
+input UpdateOrderInput {
+  id: String!
+  modelId: String
+  transmission: Transmission
+  bodyType: BodyType
+  drive: DriveType
+  year: String
+  engineVolume: String
+  vin: String
+  carPart: String
+  fuel: [FuelType]
+  part: [PartType]
 }
 
-input CreateOrderInput {
+input OrderInput {
   userId: String
   modelId: String
   transmission: Transmission
@@ -21,14 +33,14 @@ input CreateOrderInput {
   engineVolume: String
   vin: String
   carPart: String
-  fuel: FuelType
-  part: PartType
+  fuel: [FuelType]
+  part: [PartType]
 }
 
 type Order {
-  id: String
+  id: String!
   userId: String
-  modelId: String
+  modelId: Model
   transmission: Transmission
   bodyType: BodyType
   drive: DriveType
@@ -41,7 +53,7 @@ type Order {
   createdAt: String
   updatedAt: String
   user: User
-  model: String
+  model: Model
 }
 
 type User {
@@ -57,7 +69,34 @@ type User {
   phoneNotification: Boolean
   createdAt: String
   updatedAt: String
+  orders: [Order]
 }
+
+type Model {
+  id: String!
+  user: [User]
+  name: String!
+  typeId: Type!
+  brandId: Brand!
+  order: [Order]
+  type: Type
+  brand: Brand
+}
+
+type Brand {
+  id:    String!  
+  name:  String!
+  types: [Type]
+  Model: [Model]
+}
+
+type Type {
+  id: String!
+  name: String!
+  brands: [Brand]
+  models: [Model]
+}
+
 
 enum FuelType {
   GASOLINE
