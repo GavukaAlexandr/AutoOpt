@@ -1,9 +1,9 @@
 import * as React from 'react';
-
 import buildGraphQLProvider from 'ra-data-graphql';
 import { Admin, Resource, ListGuesser } from 'react-admin';
 import { InMemoryCache, ApolloClient } from '@apollo/client';
 import buildQuery from './buildQuery';
+import { OrderList } from './components/orderList';
 const { useState } = React;
 
 const App = () => {
@@ -19,6 +19,9 @@ const App = () => {
     buildGraphQLProvider({
       client,
       buildQuery,
+      introspection: {
+        include: ['Order'],
+      }
     })
       .then((dataProvider) => {
       setDataProvider(() => dataProvider )
@@ -32,7 +35,7 @@ const App = () => {
 
   return (
     <Admin dataProvider={dataProvider} >
-      <Resource name="orders" list={ListGuesser} />
+      <Resource name="Order" list={OrderList} />
     </Admin>
   );
 }

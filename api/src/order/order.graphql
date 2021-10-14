@@ -1,29 +1,47 @@
 type Query {
-  order(id: ID!): Order
-  orders(page: Int, perPage: Int, sortOrder: String): [Order!]
+  gerOrder(id: ID!): Order
+  allOrders(page: Int, perPage: Int, sortField: String, sortOrder: String, filter: String):[Order]
 }
 
 type Mutation {
-  createOrder(createOrder: OrderInput): Order
+  createOrder(createOrderInput: CreateOrderInput): Order!
   updateOrder(updateOrderInput: UpdateOrderInput): Order
-  removeOrder(id: String): Order
+  deleteOrder(id: ID!): Order
 }
 
 input UpdateOrderInput {
   id: String!
   modelId: String
+  typeId: String
+  BrandId: String
   transmission: Transmission
   bodyType: BodyType
   drive: DriveType
   year: String
   engineVolume: String
+  status: OrderStatus
   vin: String
   carPart: String
   fuel: [FuelType]
   part: [PartType]
 }
 
-input OrderInput {
+input CreateOrderInput {
+  userId: String!
+  modelId: String!
+  transmission: Transmission!
+  bodyType: BodyType!
+  drive: DriveType!
+  year: String!
+  engineVolume: String!
+  vin: String!
+  carPart: String!
+  fuel: [FuelType]!
+  part: [PartType]!
+}
+
+type Order {
+  id: String!
   userId: String
   modelId: String
   transmission: Transmission
@@ -33,27 +51,17 @@ input OrderInput {
   engineVolume: String
   vin: String
   carPart: String
-  fuel: [FuelType]
-  part: [PartType]
-}
-
-type Order {
-  id: String!
-  userId: String
-  modelId: Model
-  transmission: Transmission
-  bodyType: BodyType
-  drive: DriveType
-  year: String
-  engineVolume: String
-  vin: String
-  carPart: String
+  isDeleted: Boolean
+  status: OrderStatus
   fuel: [FuelType]
   part: [PartType]
   createdAt: String
   updatedAt: String
-  user: User
-  model: Model
+}
+
+type OrderPage {
+  items: [Order]
+  totalCount: Int
 }
 
 type User {
@@ -134,4 +142,10 @@ enum DriveType {
 enum PartType {
   ORIGINAL
   ANALOGUE
+}
+
+enum OrderStatus {
+  PROCESSING
+  SENT
+  DONE
 }

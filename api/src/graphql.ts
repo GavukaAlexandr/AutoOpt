@@ -45,52 +45,61 @@ export enum PartType {
     ANALOGUE = "ANALOGUE"
 }
 
+export enum OrderStatus {
+    PROCESSING = "PROCESSING",
+    SENT = "SENT",
+    DONE = "DONE"
+}
+
 export class UpdateOrderInput {
     id: string;
     modelId?: Nullable<string>;
+    typeId?: Nullable<string>;
+    BrandId?: Nullable<string>;
     transmission?: Nullable<Transmission>;
     bodyType?: Nullable<BodyType>;
     drive?: Nullable<DriveType>;
     year?: Nullable<string>;
     engineVolume?: Nullable<string>;
+    status?: Nullable<OrderStatus>;
     vin?: Nullable<string>;
     carPart?: Nullable<string>;
     fuel?: Nullable<Nullable<FuelType>[]>;
     part?: Nullable<Nullable<PartType>[]>;
 }
 
-export class OrderInput {
-    userId?: Nullable<string>;
-    modelId?: Nullable<string>;
-    transmission?: Nullable<Transmission>;
-    bodyType?: Nullable<BodyType>;
-    drive?: Nullable<DriveType>;
-    year?: Nullable<string>;
-    engineVolume?: Nullable<string>;
-    vin?: Nullable<string>;
-    carPart?: Nullable<string>;
-    fuel?: Nullable<Nullable<FuelType>[]>;
-    part?: Nullable<Nullable<PartType>[]>;
+export class CreateOrderInput {
+    userId: string;
+    modelId: string;
+    transmission: Transmission;
+    bodyType: BodyType;
+    drive: DriveType;
+    year: string;
+    engineVolume: string;
+    vin: string;
+    carPart: string;
+    fuel: Nullable<FuelType>[];
+    part: Nullable<PartType>[];
 }
 
 export abstract class IQuery {
-    abstract order(id: string): Nullable<Order> | Promise<Nullable<Order>>;
+    abstract gerOrder(id: string): Nullable<Order> | Promise<Nullable<Order>>;
 
-    abstract orders(page?: Nullable<number>, perPage?: Nullable<number>, sortOrder?: Nullable<string>): Nullable<Order[]> | Promise<Nullable<Order[]>>;
+    abstract allOrders(page?: Nullable<number>, perPage?: Nullable<number>, sortField?: Nullable<string>, sortOrder?: Nullable<string>, filter?: Nullable<string>): Nullable<Nullable<Order>[]> | Promise<Nullable<Nullable<Order>[]>>;
 }
 
 export abstract class IMutation {
-    abstract createOrder(createOrder?: Nullable<OrderInput>): Nullable<Order> | Promise<Nullable<Order>>;
+    abstract createOrder(createOrderInput?: Nullable<CreateOrderInput>): Order | Promise<Order>;
 
     abstract updateOrder(updateOrderInput?: Nullable<UpdateOrderInput>): Nullable<Order> | Promise<Nullable<Order>>;
 
-    abstract removeOrder(id?: Nullable<string>): Nullable<Order> | Promise<Nullable<Order>>;
+    abstract deleteOrder(id: string): Nullable<Order> | Promise<Nullable<Order>>;
 }
 
 export class Order {
     id: string;
     userId?: Nullable<string>;
-    modelId?: Nullable<Model>;
+    modelId?: Nullable<string>;
     transmission?: Nullable<Transmission>;
     bodyType?: Nullable<BodyType>;
     drive?: Nullable<DriveType>;
@@ -98,12 +107,17 @@ export class Order {
     engineVolume?: Nullable<string>;
     vin?: Nullable<string>;
     carPart?: Nullable<string>;
+    isDeleted?: Nullable<boolean>;
+    status?: Nullable<OrderStatus>;
     fuel?: Nullable<Nullable<FuelType>[]>;
     part?: Nullable<Nullable<PartType>[]>;
     createdAt?: Nullable<string>;
     updatedAt?: Nullable<string>;
-    user?: Nullable<User>;
-    model?: Nullable<Model>;
+}
+
+export class OrderPage {
+    items?: Nullable<Nullable<Order>[]>;
+    totalCount?: Nullable<number>;
 }
 
 export class User {
