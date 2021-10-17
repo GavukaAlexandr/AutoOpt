@@ -1,49 +1,25 @@
-import { gql } from "@apollo/client";
-function buildFieldList(introspectionResults, resource, raFetchType) {
-  return resource.type.fields.map((m) => m.name).join('\n')
-}
+import { gql } from '@apollo/client';
+// in src/dataProvider.js
+import buildGraphQLProvider, { buildQuery } from 'ra-data-graphql-simple';
+import { InMemoryCache, ApolloClient } from '@apollo/client';
 
-const buildQuery = introspectionResults => (raFetchType, resourceName, params) => {
-  const resource = introspectionResults.resources.find(r => {
-    console.log(r);
-    return r.type.name === resourceName;
-  });
 
-  switch (raFetchType) {
-    case 'GET_LIST':
-      return {
-        query: gql`query { ${resource[raFetchType].name} {
-                     ${buildFieldList(introspectionResults, resource, raFetchType)}
-                  }}`,
-        variables: {
-          page: params.page,
-          perPage: params.perPage,
-          sortField: params.sort.field,
-          sortOrder: params.sort.order
-        },
-        parseResponse: response => {
-          return {
-            data: response.data[resource[raFetchType].name],
-            total: 10
-          }
-        },
-      }
-      case 'GET_ONE':
+const client = new ApolloClient({
+  uri: 'http://localhost:3000/graphql',
+  cache: new InMemoryCache()
+});
+const myBuildQuery = introspection => (fetchType, resource, params) => {
+    const builtQuery = buildQuery(introspection)(fetchType, resource, params);
+
+    if (resource === 'Command' && fetchType === 'GET_ONE') {
         return {
-          query: gql`query ${resource[raFetchType].name}($id: ID!) {
-                    ${resource[raFetchType].name} (id: $id) {
-                       ${buildFieldList(introspectionResults, resource, raFetchType)}
-                    }}`,
-          variables: params, // params = { id: ... }
-          parseResponse: response => {
-            return {
-              data: response.data[resource[raFetchType].name],
-            }
-          },
-        }
-    default:
-      break
-  }
-}
+            // Use the default query variables and parseResponse
+            ...builtQuery,
+            // Override the query
+        };
+    }
 
-export default buildQuery;
+    return builtQuery;
+};
+
+export default buildGraphQLProvider({ buildQuery: myBuildQuery, client })
