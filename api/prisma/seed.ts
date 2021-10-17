@@ -11,7 +11,7 @@ const modelQueries = [];
 
 async function main() {
   for (const type of transportTypes) {
-    let { data: brands } = await axios.get(
+    let { data: brands } = await axios.get<Record<string, any>[]>(
       `http://avtoopt.com.ua/apps/get_data.php?type=brands&name=${
         type === 'auto' ? 'avto' : type
       }`,
@@ -25,7 +25,7 @@ async function main() {
     allBrands = [...allBrands, ...brands];
 
     for (const brand of brands) {
-      const { data: models } = await axios.get(
+      const { data: models } = await axios.get<Record<string, any>[]>(
         `http://avtoopt.com.ua/apps/get_data.php?type=models&name=${
           type === 'auto' ? 'avto' : type
         }&brand=${encodeURIComponent(brand.title)}`,
