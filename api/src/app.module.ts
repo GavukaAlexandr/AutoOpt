@@ -13,7 +13,8 @@ import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
-import { OrderResolver } from './order/order.resolver';
+import { OrderResolver } from './order/gql/order.resolver';
+import { UserResolver } from './user/gql/user.resolver';
 
 @Module({
   imports: [
@@ -35,12 +36,14 @@ import { OrderResolver } from './order/order.resolver';
     }),
     GraphQLModule.forRoot({
       debug: true,
+      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       playground: true,
-      typePaths: ['./**/*.graphql'],
-      definitions: {
-        path: join(process.cwd(), 'src/graphql.ts'),
-        outputAs: 'class',
-      },
+      sortSchema: true
+      // typePaths: ['./**/*.graphql'],
+      // definitions: {
+      //   path: join(process.cwd(), 'src/graphql.ts'),
+      //   outputAs: 'class',
+      // },
       // plugins: [ApolloServerPluginLandingPageLocalDefault()],
     }),
   ],
@@ -52,7 +55,7 @@ import { OrderResolver } from './order/order.resolver';
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
-    OrderResolver,
+    OrderResolver, UserResolver
   ],
 })
 export class AppModule {}

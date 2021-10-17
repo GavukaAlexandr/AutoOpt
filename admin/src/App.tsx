@@ -20,7 +20,7 @@ const App = () => {
       client,
       buildQuery,
       introspection: {
-        include: ['Order'],
+        include: ['Order', 'User'],
       }
     })
       .then((dataProvider) => {
@@ -36,6 +36,7 @@ const App = () => {
   return (
     <Admin dataProvider={dataProvider} >
       <Resource name="Order" list={OrderList} />
+      <Resource name="User" list={ListGuesser} />
     </Admin>
   );
 }
