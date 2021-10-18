@@ -51,10 +51,15 @@ enum FuelType {
   HYBRID
 }
 
+type ListMetadata {
+  count: Int
+}
+
 type Mutation {
   createOrder(createOrderInput: CreateOrderInput!): Order!
-  deleteOrder(deleteOrderInput: DeleteOrderInput!): Order!
+  deleteOrder(deleteOrderInput: DeleteOrderInput!): Boolean!
   updateOrder(updateOrderInput: UpdateOrderInput!): Order!
+  updateUser(updateUserInput: UpdateUserInput!): User!
 }
 
 type Order {
@@ -75,6 +80,10 @@ type Order {
   year: String!
 }
 
+input OrderFilter {
+  ids: [ID!]
+}
+
 enum OrderStatus {
   DONE
   PROCESSING
@@ -87,9 +96,12 @@ enum PartType {
 }
 
 type Query {
-  allOrders(filter: String, page: Int, perPage: Int, sortField: String, sortOrder: String): [Order!]!
-  allUsers(filter: String, page: Int, perPage: Int, sortField: String, sortOrder: String): [User!]!
-  gerOrder(id: String!): Order!
+  _allOrdersMeta(filter: OrderFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): ListMetadata!
+  _allUsersMeta(filter: UserFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): ListMetadata!
+  allOrders(filter: OrderFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): [Order!]!
+  allUsers(filter: UserFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): [User!]!
+  bodyType: BodyType!
+  getOrder(id: String!): Order!
   getUser(id: String!): User!
 }
 
@@ -106,12 +118,23 @@ input UpdateOrderInput {
   drive: DriveType!
   engineVolume: String!
   fuel: [FuelType!]!
-  id: String!
+  id: ID!
   modelId: String!
   part: [PartType!]!
   transmission: Transmission!
   vin: String!
   year: String!
+}
+
+input UpdateUserInput {
+  email: String!
+  firstName: String!
+  id: ID!
+  lastName: String!
+  phoneNotification: Boolean!
+  phoneNumber: String!
+  telegramNotification: Boolean!
+  viberNotification: Boolean!
 }
 
 type User {
@@ -126,4 +149,8 @@ type User {
   telegramNotification: Boolean!
   updatedAt: DateTime!
   viberNotification: Boolean!
+}
+
+input UserFilter {
+  id: ID
 }

@@ -1,127 +1,139 @@
 // import { BodyType, DriveType, OrderStatus, PartType, Transmission, FuelType } from '.prisma/client';
 import { BodyType, DriveType, FuelType, OrderStatus, PartType, Transmission, Order as OrderEntity, } from '.prisma/client'
-import { Field, InputType, ObjectType, registerEnumType } from '@nestjs/graphql'
+import { Field, ID, InputType, Int, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 @ObjectType()
 export class Order implements OrderEntity {
     isDeleted: boolean
 
     @Field(type => String)
-    id: string
+    id!: string
 
     @Field(type => String)
-    userId: string
+    userId!: string
 
     @Field(type => String)
-    modelId: string
+    modelId!: string
 
     @Field(type => BodyType)
-    bodyType: BodyType
+    bodyType!: BodyType
 
     @Field(type => String)
-    carPart: string
+    carPart!: string
 
     @Field(type => DriveType)
-    drive: DriveType
+    drive!: DriveType
 
     @Field(type => String)
-    engineVolume: string
+    engineVolume!: string
 
-    @Field(type => [FuelType])
-    fuel: FuelType[]
+    @Field(type => [FuelType!])
+    fuel!: FuelType[]
 
-    @Field(type => [PartType])
-    part: PartType[]
+    @Field(type => [PartType!])
+    part!: PartType[]
 
-    @Field(type => OrderStatus)
-    status: OrderStatus
+    @Field(type => OrderStatus!)
+    status!: OrderStatus
 
     @Field(type => Transmission)
-    transmission: Transmission
+    transmission!: Transmission
 
     @Field(type => String)
-    vin: string
+    vin!: string
 
     @Field(type => String)
-    year: string
+    year!: string
 
     @Field(type => Date)
-    createdAt: Date
+    createdAt!: Date
 
     @Field(type => Date)
-    updatedAt: Date
+    updatedAt!: Date
+}
+
+@InputType()
+export class OrderFilter {
+    @Field(() => [ID], { nullable: true })
+    ids?: string[]
+}
+
+@ObjectType()
+export class ListMetadata {
+    @Field(() => Int!, { nullable: true })
+    count!: number
 }
 
 @InputType()
 export class UpdateOrderInput {
-    @Field(type => String)
-    id: String
+    @Field(type => ID!)
+    id!: String
 
     @Field(type => String)
-    modelId: String
+    modelId?: String
 
     @Field(type => Transmission)
-    transmission: Transmission
+    transmission?: Transmission
 
     @Field(type => BodyType)
-    bodyType: BodyType
+    bodyType?: BodyType
 
     @Field(type => DriveType)
-    drive: DriveType
+    drive?: DriveType
 
     @Field(type => String)
-    year: String
+    year?: String
 
     @Field(type => String)
-    engineVolume: String
+    engineVolume?: String
 
     @Field(type => String)
-    vin: String
+    vin?: String
 
     @Field(type => String)
-    carPart: String
+    carPart?: String
 
     @Field(type => [FuelType])
-    fuel: FuelType[]
+    fuel?: FuelType[]
 
     @Field(type => [PartType])
-    part: PartType[]
+    part?: PartType[]
 }
 
 @InputType()
 export class CreateOrderInput {
-    @Field(type => String)
-    userId: String
+    @Field(type => String!)
+    userId!: String
 
-    @Field(type => String)
-    modelId: String
+    @Field(type => String!)
+    modelId!: String
 
-    @Field(type => Transmission)
-    transmission: Transmission
+    @Field(type => Transmission!)
+    transmission!: Transmission
 
-    @Field(type => BodyType)
-    bodyType: BodyType
+    @Field(type => BodyType!)
+    bodyType!: BodyType
 
-    @Field(type => DriveType)
-    drive: DriveType
+    @Field(type => DriveType!)
+    drive!: DriveType
 
-    @Field(type => String)
-    year: String
+    @Field(type => String!)
+    year!: String
 
-    @Field(type => String)
-    engineVolume: String
+    @Field(type => String!)
+    engineVolume!: String
 
-    @Field(type => String)
-    vin: String
+    @Field(type => String!)
+    vin!: String
 
-    @Field(type => String)
-    carPart: String
+    @Field(type => String!)
+    carPart!: String
 
-    @Field(type => [FuelType])
-    fuel: FuelType[]
+    @Field(type => [FuelType!])
+    fuel!: FuelType[]
 
-    @Field(type => [PartType])
-    part: PartType[]
+    @Field(type => [PartType!])
+    part!: PartType[]
 }
 
 @InputType()

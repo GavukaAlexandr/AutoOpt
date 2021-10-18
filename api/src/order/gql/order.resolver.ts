@@ -1,7 +1,8 @@
+import { BodyType } from '.prisma/client';
 import { Resolver, Query, Args, Int, Mutation } from '@nestjs/graphql';
 import { Public } from 'src/auth/decorators';
 import { PrismaService } from 'src/prisma.service';
-import { CreateOrderInput, DeleteOrderInput, Order, UpdateOrderInput } from './order.model';
+import { CreateOrderInput, DeleteOrderInput, ListMetadata, Order, OrderFilter, UpdateOrderInput } from './order.model';
 
 @Resolver(of => Order)
 export class OrderResolver {
@@ -9,7 +10,7 @@ export class OrderResolver {
 
   @Public()
   @Query(returns => Order)
-  async gerOrder(@Args('id') id: string) {
+  async getOrder(@Args('id') id: string) {
     return this.prismaService.order.findMany({
       where: { id: id, isDeleted: false },
     });
@@ -22,13 +23,35 @@ export class OrderResolver {
     @Args('page', { type: () => Int, nullable: true }) page,
     @Args('sortField', { type: () => String, nullable: true }) sortField,
     @Args('sortOrder', { type: () => String, nullable: true }) sortOrder,
-    @Args('filter', { type: () => String, nullable: true }) filter,
+    @Args('filter', { type: () => OrderFilter, nullable: true }) filter,
   ) {
     return this.prismaService.order.findMany({
       skip: page,
       take: perPage,
-      orderBy: { [sortField]: sortOrder },
+      orderBy: { [sortField] : sortOrder},
+      where: {
+        id: {
+          in: filter
+        }
+      }
     });
+  }
+
+  @Public()
+  @Query(returns => ListMetadata)
+  async _allOrdersMeta(
+    @Args('perPage', { type: () => Int, nullable: true }) perPage,
+    @Args('page', { type: () => Int, nullable: true }) page,
+    @Args('sortField', { type: () => String, nullable: true }) sortField: string,
+    @Args('sortOrder', { type: () => String, nullable: true }) sortOrder: string,
+    @Args('filter', { type: () => OrderFilter, nullable: true }) filter,
+  ) {
+    const count = await this.prismaService.order.count(({
+      skip: page,
+      take: perPage,
+      orderBy: { [sortField]: sortOrder},
+    }));
+    return {count: count };
   }
 
   @Public()
@@ -56,7 +79,7 @@ export class OrderResolver {
   }
 
   @Public()
-  @Mutation(returns => Order)
+  @Mutation(returns => Boolean)
   async deleteOrder(@Args({ name: 'deleteOrderInput', type: () => DeleteOrderInput }) deleteOrderInput) {
     return this.prismaService.order.update({
       where: { id: deleteOrderInput.id },
@@ -64,5 +87,11 @@ export class OrderResolver {
         isDeleted: true,
       },
     });
+  }
+
+  @Public()
+  @Query(() => BodyType)
+  async bodyType() {
+    return 
   }
 }

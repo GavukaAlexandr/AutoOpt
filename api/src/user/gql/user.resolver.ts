@@ -1,8 +1,8 @@
 import { Resolver, Query, Args, Int, Mutation, ResolveField, Parent } from '@nestjs/graphql';
 import { Public } from 'src/auth/decorators';
-import { Order } from 'src/order/gql/order.model';
+import { ListMetadata, Order } from 'src/order/gql/order.model';
 import { PrismaService } from 'src/prisma.service';
-import { User } from './user.model';
+import { UpdateUserInput, User, UserFilter } from './user.model';
 
 @Resolver(of => User)
 export class UserResolver {
@@ -18,7 +18,7 @@ export class UserResolver {
 
   @Public()
   @ResolveField('orders', returns => [Order])
-  async allOrders(@Parent() user: User) {
+  async order(@Parent() user: User) {
     const { id } = user;
     return this.prismaService.order.findMany({ where: { userId: id } });
   }
@@ -30,14 +30,44 @@ export class UserResolver {
     @Args('page', { type: () => Int, nullable: true }) page,
     @Args('sortField', { type: () => String, nullable: true }) sortField,
     @Args('sortOrder', { type: () => String, nullable: true }) sortOrder,
-    @Args('filter', { type: () => String, nullable: true }) filter,
+    @Args('filter', { type: () => UserFilter, nullable: true }) filter,
   ) {
-    return this.prismaService.order.findMany({
+    return this.prismaService.user.findMany({
       skip: page,
       take: perPage,
       orderBy: { [sortField]: sortOrder },
     });
   }
+
+  @Public()
+  @Query(returns => ListMetadata)
+  async _allUsersMeta(
+    @Args('perPage', { type: () => Int, nullable: true }) perPage,
+    @Args('page', { type: () => Int, nullable: true }) page,
+    @Args('sortField', { type: () => String, nullable: true }) sortField: string,
+    @Args('sortOrder', { type: () => String, nullable: true }) sortOrder: string,
+    @Args('filter', { type: () => UserFilter, nullable: true }) filter,
+  ) {
+    console.log(sortField, sortOrder);
+    const count = await this.prismaService.order.count(({
+      skip: page,
+      take: perPage,
+      orderBy: { [sortField]: sortOrder},
+    }));
+    return {count: count };
+  }
+
+  @Public()
+  @Mutation(() => User)
+  async updateUser(@Args({ name: 'updateUserInput', type: () => UpdateUserInput }) updateUserInput) {
+    const { id, ...preparedUser } = updateUserInput;
+    this.prismaService.user.update({
+      where: { id: id },
+      data: { ...preparedUser }
+    })
+  }
+
+
 }
 
 //   @Public()
