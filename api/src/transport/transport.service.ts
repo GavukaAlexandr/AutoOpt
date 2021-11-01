@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
-import { createBrandDto, createModelDto } from './dto/transport.dto';
+import { createModelDto } from './dto/transport.dto';
 
 @Injectable()
 export class TransportService {
@@ -11,8 +11,13 @@ export class TransportService {
   }
 
   async getBrands(transportId: string) {
-    return this.prisma.brand.findMany({
-      where: { types: { some: { type: { id: transportId } } } },
+    return this.prisma.model.findMany({
+      where: { 
+        typeId: transportId
+      },
+      select: {
+        brand: true
+      }
     });
   }
 
@@ -25,11 +30,10 @@ export class TransportService {
     });
   }
 
-  async createBrand({ name, type }: createBrandDto) {
+  async createBrand(name: string ) {
     return this.prisma.brand.create({
       data: {
         name: name,
-        types: { create: { type: { connect: { name: type } } } },
       },
     });
   }

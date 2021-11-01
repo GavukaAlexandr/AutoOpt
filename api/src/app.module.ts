@@ -15,6 +15,9 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
 import { OrderResolver } from './order/gql/order.resolver';
 import { UserResolver } from './user/gql/user.resolver';
+import { TypeResolver } from './transport/gql/type.resolver';
+import { BrandResolver } from './transport/gql/brand.resolver';
+import { ModelResolver } from './transport/gql/model.resolver';
 
 @Module({
   imports: [
@@ -55,7 +58,7 @@ import { UserResolver } from './user/gql/user.resolver';
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
-    OrderResolver, UserResolver
+    OrderResolver, UserResolver, TypeResolver, BrandResolver, ModelResolver
   ],
 })
 export class AppModule {}

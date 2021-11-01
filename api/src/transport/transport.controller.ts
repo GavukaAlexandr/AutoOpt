@@ -32,7 +32,7 @@ export class TransportController {
   }
 
   @Post('brand')
-  async createBrand(@Body() brand: createBrandDto) {
+  async createBrand(@Body() brand: string) {
     return this.transportService.createBrand(brand);
   }
 

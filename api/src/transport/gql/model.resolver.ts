@@ -1,0 +1,108 @@
+import { Resolver, Query, Args, Int, Mutation, ID, Parent, ResolveField } from '@nestjs/graphql';
+import { Type } from './type.model';
+import { Public } from 'src/auth/decorators';
+import { ListMetadata } from 'src/list.metaData';
+import { PrismaService } from 'src/prisma.service';
+import { Brand } from './brand.model';
+import { Model, ModelFilter } from './model.model';
+
+@Resolver(of => Model)
+export class ModelResolver {
+    constructor(private prismaService: PrismaService) { }
+
+    @Public()
+    @Query(returns => Model)
+    async Model(@Args('id') id: string) {
+        return this.prismaService.model.findUnique({
+            where: { id: id },
+        });
+    }
+
+    @Public()
+    @ResolveField('type', returns => [Type])
+    async type(@Parent() model: Model) {
+        const { id } = model;
+        return this.prismaService.type.findMany({ where: { models: { some: { id } } } });
+    }
+
+    @Public()
+    @ResolveField('brand', returns => [Brand])
+    async brand(@Parent() model: Model) {
+        const { brandId } = model;
+        return this.prismaService.brand.findMany({ where: { id: brandId } });
+    }
+
+    @Public()
+    @Query(returns => [Model])
+    async allModels(
+        @Args('perPage', { type: () => Int, nullable: true }) perPage,
+        @Args('page', { type: () => Int, nullable: true }) page,
+        @Args('sortField', { type: () => String, nullable: true }) sortField,
+        @Args('sortOrder', { type: () => String, nullable: true }) sortOrder,
+        @Args('filter', { type: () => ModelFilter, nullable: true }) filter: ModelFilter,
+    ) {
+        return this.prismaService.model.findMany({
+            skip: page,
+            take: perPage,
+            orderBy: { [sortField]: sortOrder },
+            where: {
+                id: { in: filter.ids },
+            }
+        });
+    }
+
+    @Public()
+    @Query(returns => ListMetadata)
+    async _allModelsMeta(
+        @Args('perPage', { type: () => Int, nullable: true }) perPage,
+        @Args('page', { type: () => Int, nullable: true }) page,
+        @Args('sortField', { type: () => String, nullable: true }) sortField: string,
+        @Args('sortOrder', { type: () => String, nullable: true }) sortOrder: string,
+        @Args('filter', { type: () => ModelFilter, nullable: true }) filter: ModelFilter,
+    ) {
+        const count = await this.prismaService.model.count(({
+            orderBy: { [sortField]: sortOrder },
+            where: {
+                id: { in: filter.ids },
+            }
+        }));
+        return { count: count };
+    }
+
+    // @Public()
+    // @ResolveField('brands', returns => [Brand])
+    // async brand(@Parent() type: Type) {
+    //     const { id } = type;
+    //     return this.prismaService.brand.findMany({ where: { types: { every: { typeId: id } } } });
+    // }
+    // @Public()
+    // @Mutation(() => Type)
+    // async createType(@Args({ name: 'createTypeInput', type: () => CreateTypeInput }) createTypeInput) {
+    //     return this.prismaService.type.create({
+    //         data: {
+    //             ...createTypeInput
+    //         }
+    //     });
+    // }
+
+    // @Public()
+    // @Mutation(returns => Type)
+    // async updateType(@Args({ name: 'updateTypeInput', type: () => UpdateTypeInput }) updateTypeInput) {
+    //     const { id, ...preparedType } = updateTypeInput;
+    //     return this.prismaService.type.update({
+    //         where: { id: id },
+    //         data: { ...preparedType },
+    //     });
+    // }
+
+    // @Public()
+    // @Mutation(returns => Boolean)
+    // async deleteOrder(@Args({ name: 'id', type: () => ID }) id: string) {
+    //     return this.prismaService.order.update({
+    //         where: { id: deleteOrderInput.id },
+    //         data: {
+    //             isDeleted: true,
+    //         },
+    //     });
+    // }
+}

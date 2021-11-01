@@ -13,26 +13,13 @@ generator client {
 model Type {
   id     String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name   String      @unique @db.VarChar(255)
-  brands BrandType[]
   models Model[]
 }
 
 model Brand {
   id    String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name  String      @unique @db.VarChar(255)
-  types BrandType[]
   Model Model[]
-}
-
-model BrandType {
-
-  typeId  String @map("type_id") @db.Uuid
-  brandId String @map("brand_id") @db.Uuid
-
-  type  Type  @relation(fields: [typeId], references: [id])
-  brand Brand @relation(fields: [brandId], references: [id])
-  @@id([typeId, brandId])
-  @@map("brand_types")
 }
 
 model Model {

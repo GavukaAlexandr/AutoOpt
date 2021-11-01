@@ -1,67 +1,64 @@
 // import { BodyType, DriveType, OrderStatus, PartType, Transmission, FuelType } from '.prisma/client';
 import { BodyType, DriveType, FuelType, OrderStatus, PartType, Transmission, Order as OrderEntity, } from '.prisma/client'
 import { Field, ID, InputType, Int, ObjectType, registerEnumType } from '@nestjs/graphql'
+import { User } from 'src/user/gql/user.model'
 
 @ObjectType()
 export class Order implements OrderEntity {
     isDeleted: boolean
 
     @Field(type => String)
-    id!: string
+    id: string
 
     @Field(type => String)
-    userId!: string
+    userId: string
 
     @Field(type => String)
-    modelId!: string
+    modelId: string
 
     @Field(type => BodyType)
-    bodyType!: BodyType
+    bodyType: BodyType
 
     @Field(type => String)
-    carPart!: string
+    carPart: string
 
     @Field(type => DriveType)
-    drive!: DriveType
+    drive: DriveType
 
     @Field(type => String)
-    engineVolume!: string
+    engineVolume: string
 
     @Field(type => [FuelType!])
-    fuel!: FuelType[]
+    fuel: FuelType[]
 
     @Field(type => [PartType!])
-    part!: PartType[]
+    part: PartType[]
 
     @Field(type => OrderStatus!)
-    status!: OrderStatus
+    status: OrderStatus
 
     @Field(type => Transmission)
-    transmission!: Transmission
+    transmission: Transmission
 
     @Field(type => String)
-    vin!: string
+    vin: string
 
     @Field(type => String)
-    year!: string
+    year: string
 
     @Field(type => Date)
-    createdAt!: Date
+    createdAt: Date
 
     @Field(type => Date)
-    updatedAt!: Date
+    updatedAt: Date
 }
 
 @InputType()
 export class OrderFilter {
-    @Field(() => [ID], { nullable: true })
-    ids?: string[]
-}
 
-@ObjectType()
-export class ListMetadata {
-    @Field(() => Int!, { nullable: true })
-    count!: number
+  @Field(() => [ID], {nullable: true} )
+  ids?: string[];
+
 }
 
 @InputType()

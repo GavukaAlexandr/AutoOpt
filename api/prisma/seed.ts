@@ -12,8 +12,7 @@ const modelQueries = [];
 async function main() {
   for (const type of transportTypes) {
     let { data: brands } = await axios.get<Record<string, any>[]>(
-      `http://avtoopt.com.ua/apps/get_data.php?type=brands&name=${
-        type === 'auto' ? 'avto' : type
+      `http://avtoopt.com.ua/apps/get_data.php?type=brands&name=${type === 'auto' ? 'avto' : type
       }`,
     );
 
@@ -26,8 +25,7 @@ async function main() {
 
     for (const brand of brands) {
       const { data: models } = await axios.get<Record<string, any>[]>(
-        `http://avtoopt.com.ua/apps/get_data.php?type=models&name=${
-          type === 'auto' ? 'avto' : type
+        `http://avtoopt.com.ua/apps/get_data.php?type=models&name=${type === 'auto' ? 'avto' : type
         }&brand=${encodeURIComponent(brand.title)}`,
       );
 
@@ -61,31 +59,8 @@ async function main() {
       where: { name: brand.title },
       create: {
         name: brand.title,
-        types: {
-          create: [
-            {
-              type: {
-                connect: {
-                  name: brand.type,
-                },
-              },
-            },
-          ],
-        },
       },
-      update: {
-        types: {
-          create: [
-            {
-              type: {
-                connect: {
-                  name: brand.type,
-                },
-              },
-            },
-          ],
-        },
-      },
+      update: {}
     });
   });
 
@@ -94,7 +69,7 @@ async function main() {
 
 main()
   .then(() => {
-    console.log('SUCKsess');
+    console.log('success');
   })
   .catch((e) => {
     console.error(e);

@@ -1,8 +1,9 @@
-import { BodyType } from '.prisma/client';
-import { Resolver, Query, Args, Int, Mutation } from '@nestjs/graphql';
+import { Resolver, Query, Args, Int, Mutation, Parent, ResolveField, ID } from '@nestjs/graphql';
 import { Public } from 'src/auth/decorators';
+import { ListMetadata } from 'src/list.metaData';
 import { PrismaService } from 'src/prisma.service';
-import { CreateOrderInput, DeleteOrderInput, ListMetadata, Order, OrderFilter, UpdateOrderInput } from './order.model';
+import { User } from 'src/user/gql/user.model';
+import { CreateOrderInput, DeleteOrderInput, Order, OrderFilter, UpdateOrderInput } from './order.model';
 
 @Resolver(of => Order)
 export class OrderResolver {
@@ -10,35 +11,40 @@ export class OrderResolver {
 
   @Public()
   @Query(returns => Order)
-  async getOrder(@Args('id') id: string) {
-    return this.prismaService.order.findMany({
-      where: { id: id, isDeleted: false },
+  async Order(@Args('id', { type: () => ID, nullable: true }) id: string) {
+    return this.prismaService.order.findUnique({
+      where: { id: id },
     });
   }
 
   @Public()
-  @Query(returns => [Order])
+  @ResolveField('orders', returns => [User])
+  async user(@Parent() user: Order) {
+    const { id } = user;
+    return this.prismaService.user.findMany({ where: { id } });
+  }
+
+  @Public()
+  @Query(() => [Order])
   async allOrders(
     @Args('perPage', { type: () => Int, nullable: true }) perPage,
     @Args('page', { type: () => Int, nullable: true }) page,
     @Args('sortField', { type: () => String, nullable: true }) sortField,
     @Args('sortOrder', { type: () => String, nullable: true }) sortOrder,
-    @Args('filter', { type: () => OrderFilter, nullable: true }) filter,
+    @Args('filter', { type: () => OrderFilter, nullable: true }) filter: OrderFilter,
   ) {
     return this.prismaService.order.findMany({
       skip: page,
       take: perPage,
-      orderBy: { [sortField] : sortOrder},
+      orderBy: { [sortField]: sortOrder },
       where: {
-        id: {
-          in: filter
-        }
+        id: { in: filter.ids },
       }
     });
   }
 
   @Public()
-  @Query(returns => ListMetadata)
+  @Query(() => ListMetadata)
   async _allOrdersMeta(
     @Args('perPage', { type: () => Int, nullable: true }) perPage,
     @Args('page', { type: () => Int, nullable: true }) page,
@@ -47,15 +53,16 @@ export class OrderResolver {
     @Args('filter', { type: () => OrderFilter, nullable: true }) filter,
   ) {
     const count = await this.prismaService.order.count(({
-      skip: page,
-      take: perPage,
-      orderBy: { [sortField]: sortOrder},
+      orderBy: { [sortField]: sortOrder },
+      where: {
+        id: { in: filter.ids },
+      }
     }));
-    return {count: count };
-  }
+    return { count: count };
+  };
 
   @Public()
-  @Mutation(returns => Order)
+  @Mutation(() => Order)
   async createOrder(@Args({ name: 'createOrderInput', type: () => CreateOrderInput }) createOrderInput) {
     const { modelId, userId, ...preparedOrder } = createOrderInput;
     return this.prismaService.order.create({
@@ -79,19 +86,13 @@ export class OrderResolver {
   }
 
   @Public()
-  @Mutation(returns => Boolean)
-  async deleteOrder(@Args({ name: 'deleteOrderInput', type: () => DeleteOrderInput }) deleteOrderInput) {
+  @Mutation(returns => Order)
+  async deleteOrder(@Args({ name: 'id', type: () => ID }) id) {
     return this.prismaService.order.update({
-      where: { id: deleteOrderInput.id },
+      where: { id },
       data: {
         isDeleted: true,
       },
     });
-  }
-
-  @Public()
-  @Query(() => BodyType)
-  async bodyType() {
-    return 
   }
 }

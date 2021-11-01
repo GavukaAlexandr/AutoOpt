@@ -6,6 +6,7 @@ const client = new ApolloClient({
   cache: new InMemoryCache()
 });
 const myBuildQuery = introspection => (fetchType, resource, params) => {
+    if (params.sort === undefined) return buildQuery(introspection)(fetchType, resource, params);
     switch (params.sort.order) {
         case 'ASC':
             params.sort.order = 'asc';
@@ -17,7 +18,6 @@ const myBuildQuery = introspection => (fetchType, resource, params) => {
             break;
     } 
     const builtQuery = buildQuery(introspection)(fetchType, resource, params);
-
     return builtQuery;
 };
 

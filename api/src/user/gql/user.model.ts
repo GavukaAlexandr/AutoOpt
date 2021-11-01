@@ -40,12 +40,14 @@ export class User implements UserEntity {
 
     @Field(type => [Order])
     orders: Order[]
+
+    
 }
 
 @InputType()
 export class UserFilter {
-    @Field(() => ID, { nullable: true })
-    id?: string
+    @Field(() => [ID], { nullable: true })
+    ids?: string[]
 }
 
 @InputType()
