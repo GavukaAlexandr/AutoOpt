@@ -14,9 +14,7 @@ import { ModelList } from "./components/model/modelList";
 import UserIcon from "@material-ui/icons/PersonRounded";
 import MyLayout from "./components/ui/Layout";
 import { TypeCreate } from "./components/type/TypeCreate";
-import { TypeEdit } from "./components/type/TypeEdit";
 import { BrandCreate } from "./components/brand/BrandCreate";
-import { BrandEdit } from "./components/brand/BrandEdit";
 import { ModelCreate } from "./components/model/CreateModel";
 
 const App = () => {
@@ -35,11 +33,12 @@ const App = () => {
 
   return (
     <Admin dataProvider={dataProvider}  layout={MyLayout}>
-      <Resource name="Type" list={TypeList} create={TypeCreate} edit={TypeEdit}/>
-      <Resource name="Brand" list={BrandList} create={BrandCreate} />
+      <Resource name="Type" list={TypeList} create={TypeCreate} />
+      <Resource name="Brand" list={BrandList} create={BrandCreate}/>
       <Resource name="Model" list={ModelList} create={ModelCreate}/>
       <Resource name="Order" list={OrderList} />
       <Resource name="User" icon={UserIcon} list={UserList} show={UserShow} />
+      {/* <Resource name="orderStatuses" /> */}
     </Admin>
   );
 };

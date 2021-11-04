@@ -24,6 +24,7 @@ type Brand {
 
 input BrandFilter {
   ids: [ID!]
+  q: String
 }
 
 input CreateOrderInput {
@@ -70,11 +71,15 @@ type Model {
 }
 
 input ModelFilter {
+  brandIds: String
   ids: [ID!]
+  q: String
+  typeIds: String
 }
 
 type Mutation {
   createBrand(name: String!): Brand!
+  createModel(brandIds: ID, name: String!, typeIds: ID): Model!
   createOrder(createOrderInput: CreateOrderInput!): Order!
   createType(name: String!): Type!
   deleteOrder(id: ID!): Order!
@@ -133,6 +138,7 @@ type Query {
   allOrders(filter: OrderFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): [Order!]!
   allTypes(filter: TypeFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): [Type!]!
   allUsers(filter: UserFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): [User!]!
+  orderStatuses: [String!]!
 }
 
 enum Transmission {
@@ -151,6 +157,7 @@ type Type {
 
 input TypeFilter {
   ids: [ID!]
+  q: String
 }
 
 input UpdateOrderInput {

@@ -12,55 +12,60 @@ import {
   BooleanField,
   Show,
   SimpleShowLayout,
-  RichTextField,
+  SimpleForm,
 } from "react-admin";
 import {
   Chip,
+  InputLabel,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
 } from "@material-ui/core";
+import MenuItem from "@mui/material/MenuItem";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
+import { FormControl } from "@mui/material";
 
 const OrderShow = (props: any) => {
+  const [status, setStatus] = React.useState("");
   const { record } = useShowController(props);
   const classes = useStyles();
 
+  const handleChange = (event: SelectChangeEvent) => {
+    setStatus(event.target.value);
+  };
+
+  React.useEffect(() => {
+    const status = props.statusList.find(
+      ({ name }) => name === `${record?.status}`
+    );
+    setStatus(status);
+  }, []);
+
   if (!record) return null;
   return (
-    <Show
-      {...props}
-      /* disable the app title change when shown */
-      title=" "
-    >
-      <SimpleShowLayout className={classes.card}>
-        <CardContent >
+    <Show {...props} title=" ">
+      <SimpleShowLayout>
+        <CardContent className={classes.root}>
           <Grid container>
-            <Grid item xs={6}>
-              <Typography variant="h6" gutterBottom className={classes.test}>
+            <Grid item xs="auto">
+              <Typography variant="h6" gutterBottom>
                 Date: {new Date(record.createdAt).toLocaleDateString()}
               </Typography>
             </Grid>
           </Grid>
-          <Grid container>
-            <Grid item xs={6}>
-              <Typography variant="h6" gutterBottom align="center">
-                Order
-              </Typography>
-            </Grid>
-            <Grid item xs={6}>
-              <Typography variant="h6" gutterBottom align="center">
-                User
-              </Typography>
-            </Grid>
-          </Grid>
-          <Grid container spacing={10}>
-            <Grid item xs={6}>
+
+          <Grid container spacing={2}>
+            <Grid item xs={8}>
+              <Typography variant="h5">Order:</Typography>
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Car part:&nbsp; {record.carPart}</TableCell>
+                    <TableCell>
+                      <Typography variant="h6">Car part:</Typography>
+                      {record.carPart}
+                    </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Year: {record.year}</TableCell>
@@ -69,7 +74,7 @@ const OrderShow = (props: any) => {
                     <TableCell>Vin: {record.vin}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell>Drive {record.drive}</TableCell>
+                    <TableCell>Drive: {record.drive}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Engine Volume: {record.engineVolume}</TableCell>
@@ -116,9 +121,30 @@ const OrderShow = (props: any) => {
                   </TableRow>
                 </TableHead>
               </Table>
+              <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+                <InputLabel id="demo-simple-select-standard-label">
+                  Status
+                </InputLabel>
+                <Select
+                  value={status}
+                  onChange={handleChange}
+                  label="Status"
+                  labelId="demo-simple-select-standard-label"
+                >
+                  {props.statusList.map((status) => {
+                    return (
+                      <MenuItem key={status.id} value={status.id}>
+                        {status.name.toLowerCase()}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+              </FormControl>
             </Grid>
 
-            <Grid item xs={6}>
+            <Grid item xs="auto">
+              <Typography variant="h5">User:</Typography>
+
               <Table>
                 <TableHead>
                   <TableRow>
@@ -211,20 +237,8 @@ const OrderShow = (props: any) => {
 
 export default OrderShow;
 const useStyles = makeStyles({
-  root: {
-    maxWidth: 1000,
-    margin: "auto",
-    marginTop: "5px",
-    marginBottom: "5px",
-  },
-  card: {
-    border: ".1px solid grey",
-    padding: "10px",
-    boxShadow: "3.px 2.5px grey",
-  },
+  root: {},
   test: { display: "flex", alignItems: "center" },
-  text: { fontSize: "16px" },
-  bold: { fontSize: "18px", fontWeight: "bold" },
   spacer: { height: 20 },
   rightAlignedCell: { textAlign: "right" },
   invoices: { margin: "10px 0" },

@@ -13,6 +13,13 @@ const theme = createMuiTheme({
       main: blue[500],
     },
   },
+  typography: {
+    "fontFamily": `"Roboto", "Helvetica", "Arial", sans-serif`,
+    "fontSize": 15,
+    "fontWeightLight": 300,
+    "fontWeightRegular": 400,
+    "fontWeightMedium": 500
+   }
 });
 
 // eslint-disable-next-line import/no-anonymous-default-export

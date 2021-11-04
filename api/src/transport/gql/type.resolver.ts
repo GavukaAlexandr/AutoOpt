@@ -6,6 +6,7 @@ import { PrismaService } from 'src/prisma.service';
 import { Brand, BrandFilter } from './brand.model';
 import { plainToClass } from 'class-transformer';
 import { Model } from './model.model';
+import { OrderStatus } from '.prisma/client';
 
 @Resolver(of => Type)
 export class TypeResolver {
@@ -33,7 +34,12 @@ export class TypeResolver {
             take: perPage,
             orderBy: { [sortField]: sortOrder },
             where: {
-                id: { in: filter.ids },
+                id: {
+                    in: filter.ids
+                },
+                name: {
+                    contains: filter.q
+                }
             }
         });
     }

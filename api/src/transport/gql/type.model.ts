@@ -24,6 +24,9 @@ export class Type implements TypeEntity {
 export class TypeFilter {
     @Field(() => [ID], { nullable: true })
     ids?: string[]
+
+    @Field(() => String, {nullable: true})
+    q?: string
 }
 
 @InputType()

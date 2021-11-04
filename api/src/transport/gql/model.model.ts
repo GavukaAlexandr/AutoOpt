@@ -25,6 +25,15 @@ export class Model implements ModelEntity {
 export class ModelFilter {
     @Field(() => [ID], { nullable: true })
     ids?: string[]
+
+    @Field(() => String, {nullable: true})
+    q?: string
+
+    @Field(() => String, {nullable: true})
+    brandIds?: string
+
+    @Field(() => String, {nullable: true})
+    typeIds?: string
 }
 
 @InputType()
@@ -34,10 +43,4 @@ export class UpdateModelInput {
 
     @Field(type => String)
     name?: String
-}
-
-@InputType()
-export class CreateModelInput {
-    @Field(type => String!)
-    name!: String
 }

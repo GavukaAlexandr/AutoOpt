@@ -47,6 +47,9 @@ export class ModelResolver {
             orderBy: { [sortField]: sortOrder },
             where: {
                 id: { in: filter.ids },
+                name: { contains: filter.q },
+                brandId: {equals: filter.brandIds},
+                typeId: {equals: filter.typeIds}
             }
         });
     }
@@ -64,9 +67,36 @@ export class ModelResolver {
             orderBy: { [sortField]: sortOrder },
             where: {
                 id: { in: filter.ids },
+                name: { contains: filter.q },
+                brandId: {equals: filter.brandIds},
+                typeId: {equals: filter.typeIds}
             }
         }));
         return { count: count };
+    }
+
+    @Public()
+    @Mutation(() => Model)
+    async createModel(
+        @Args({ name: 'name', type: () => String! }) name,
+        @Args({ name: 'brandIds', type: () => ID, nullable: true }) brand,
+        @Args({ name: 'typeIds', type: () => ID, nullable: true }) type,
+    ) {
+        return this.prismaService.model.create({
+            data: {
+                name,
+                brand: {
+                    connect: {
+                        id: brand
+                    }
+                },
+                type: {
+                    connect: {
+                        id: type
+                    }
+                }
+            }
+        });
     }
 
     // @Public()
@@ -75,15 +105,7 @@ export class ModelResolver {
     //     const { id } = type;
     //     return this.prismaService.brand.findMany({ where: { types: { every: { typeId: id } } } });
     // }
-    // @Public()
-    // @Mutation(() => Type)
-    // async createType(@Args({ name: 'createTypeInput', type: () => CreateTypeInput }) createTypeInput) {
-    //     return this.prismaService.type.create({
-    //         data: {
-    //             ...createTypeInput
-    //         }
-    //     });
-    // }
+
 
     // @Public()
     // @Mutation(returns => Type)

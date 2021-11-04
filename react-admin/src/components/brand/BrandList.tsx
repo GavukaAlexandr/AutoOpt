@@ -7,11 +7,16 @@ import {
   ReferenceArrayField,
   SingleFieldList,
   TextField,
+  TextInput,
 } from "react-admin";
+
+const brandFilters = [
+  <TextInput source="q" label="Name" alwaysOn />,
+];
 
 export const BrandList = (props) => {
   return (
-    <List {...props}>
+    <List {...props} filters={brandFilters}>
       <Datagrid>
         <TextField source="name" />
         <ReferenceArrayField source="typeIds" reference="Type" sortable={false}>
@@ -19,7 +24,6 @@ export const BrandList = (props) => {
             <ChipField source="name" />
           </SingleFieldList>
         </ReferenceArrayField>
-        <EditButton />
       </Datagrid>
     </List>
   );

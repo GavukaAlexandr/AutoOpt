@@ -5,6 +5,7 @@ import { ListMetadata } from 'src/list.metaData';
 import { PrismaService } from 'src/prisma.service';
 import { Type } from './type.model';
 import { Model } from './model.model';
+import { plainToClass } from 'class-transformer';
 
 @Resolver(of => Brand)
 export class BrandResolver {
@@ -22,17 +23,24 @@ export class BrandResolver {
     @ResolveField('type', returns => [Type])
     async type(@Parent() brand: Brand) {
         const { id } = brand;
-        return this.prismaService.model.findMany({ 
-            where: { 
+        const modelTypes = await this.prismaService.model.findMany({
+            where: {
                 brandId: id
             },
-            select: { type: true }
+            select: { type: true },
+            distinct: ['typeId']
         });
+
+        const preparedTypes = modelTypes.map(modelBrand => {
+            return plainToClass(Type, modelBrand.type);
+        });
+
+        return preparedTypes;
     }
 
     @Public()
     @ResolveField('models', returns => [Model])
-    async brand(@Parent() brand: Brand) {
+    async model(@Parent() brand: Brand) {
         const { id } = brand;
         return this.prismaService.model.findMany({ where: { brandId: id } });
     }
@@ -51,7 +59,8 @@ export class BrandResolver {
             take: perPage,
             orderBy: { [sortField]: sortOrder },
             where: {
-                id: { in: filter.ids },
+                id: { in: filter.ids }, 
+                name: { contains: filter.q },
             }
         });
     }
@@ -69,6 +78,7 @@ export class BrandResolver {
             orderBy: { [sortField]: sortOrder },
             where: {
                 id: { in: filter.ids },
+                name: { contains: filter.q }
             }
         }));
         return { count: count };
@@ -78,33 +88,13 @@ export class BrandResolver {
     @Public()
     @Mutation(() => Brand)
     async createBrand(
-        @Args({ name: 'name', type: () => String! }) name) {
+        @Args({ name: 'name', type: () => String }) name) {
         return this.prismaService.brand.create({
             data: {
-                name: name,
+                name
             }
         });
     }
-
-    // @Public()
-    // @Mutation(returns => Brand)
-    // async updateBrand(
-    //     @Args({ name: 'id', type: () => ID! }) id,
-    //     @Args({ name: 'typeIds', type: () => [ID!], nullable: true }) ids,
-    //     @Args({ name: 'name', type: () => String! }) name
-    // ) {
-    //     return this.prismaService.brand.update({
-    //         where: { id },
-    //         data: {
-    //             name,
-    //             types: {
-    //                 upsert: {
-
-    //                 }
-    //             }
-    //         },
-    //     });
-    // }
 
     // @Public()
     // @Mutation(returns => Boolean)

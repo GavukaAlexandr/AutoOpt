@@ -18,6 +18,8 @@ import { UserResolver } from './user/gql/user.resolver';
 import { TypeResolver } from './transport/gql/type.resolver';
 import { BrandResolver } from './transport/gql/brand.resolver';
 import { ModelResolver } from './transport/gql/model.resolver';
+import { OrderStatus } from '.prisma/client';
+import { EnumResolver } from './enum.resolver';
 
 @Module({
   imports: [
@@ -58,7 +60,7 @@ import { ModelResolver } from './transport/gql/model.resolver';
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
-    OrderResolver, UserResolver, TypeResolver, BrandResolver, ModelResolver
+    OrderResolver, UserResolver, TypeResolver, BrandResolver, ModelResolver, EnumResolver
   ],
 })
 export class AppModule {}
