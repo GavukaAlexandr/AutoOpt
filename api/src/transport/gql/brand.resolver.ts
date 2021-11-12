@@ -59,10 +59,33 @@ export class BrandResolver {
             take: perPage,
             orderBy: { [sortField]: sortOrder },
             where: {
-                id: { in: filter.ids }, 
                 name: { contains: filter.q },
             }
         });
+    }
+
+    @Public()
+    @Query(returns => [Brand])
+    async allBrandsOfType(
+        @Args('perPage', { type: () => Int, nullable: true }) perPage,
+        @Args('page', { type: () => Int, nullable: true }) page,
+        @Args('filter', { type: () => BrandFilter, nullable: true }) filter: BrandFilter,
+    ) {
+        const modelBrands = await this.prismaService.model.findMany({
+            skip: page,
+            take: perPage,
+            where: {
+                brand: { name: { contains: filter.q } },
+                type: { id: filter.typeId }
+            },
+            select: { brand: true },
+            distinct: ['brandId']
+        });
+
+        const preparedBrands = modelBrands.map(modelBrand => {
+            return plainToClass(Brand, modelBrand.brand);
+        });
+        return preparedBrands;
     }
 
     @Public()
@@ -77,7 +100,6 @@ export class BrandResolver {
         const count = await this.prismaService.brand.count(({
             orderBy: { [sortField]: sortOrder },
             where: {
-                id: { in: filter.ids },
                 name: { contains: filter.q }
             }
         }));

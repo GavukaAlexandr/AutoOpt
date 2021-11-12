@@ -19,5 +19,5 @@ export class CreateOrder {
   vin: string;
   carParts: string;
   fuelType: FuelType[];
-  partType: PartType[];
+  partOfType: PartType;
 }

@@ -27,20 +27,11 @@ export class TypeResolver {
         @Args('page', { type: () => Int, nullable: true }) page,
         @Args('sortField', { type: () => String, nullable: true }) sortField,
         @Args('sortOrder', { type: () => String, nullable: true }) sortOrder,
-        @Args('filter', { type: () => TypeFilter, nullable: true }) filter: TypeFilter,
     ) {
         return this.prismaService.type.findMany({
             skip: page,
             take: perPage,
             orderBy: { [sortField]: sortOrder },
-            where: {
-                id: {
-                    in: filter.ids
-                },
-                name: {
-                    contains: filter.q
-                }
-            }
         });
     }
 
@@ -51,13 +42,9 @@ export class TypeResolver {
         @Args('page', { type: () => Int, nullable: true }) page,
         @Args('sortField', { type: () => String, nullable: true }) sortField: string,
         @Args('sortOrder', { type: () => String, nullable: true }) sortOrder: string,
-        @Args('filter', { type: () => TypeFilter, nullable: true }) filter: TypeFilter,
     ) {
         const count = await this.prismaService.type.count(({
             orderBy: { [sortField]: sortOrder },
-            where: {
-                id: { in: filter.ids },
-            }
         }));
         return { count: count };
     }

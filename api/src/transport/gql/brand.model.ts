@@ -20,9 +20,8 @@ export class Brand implements BrandEntity {
 
 @InputType()
 export class BrandFilter {
-    @Field(() => [ID], { nullable: true })
-    ids?: string[]
-
     @Field(() => String, {nullable: true})
     q?: string
+    @Field(() => String, {nullable: true})
+    typeId
 }

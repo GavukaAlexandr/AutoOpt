@@ -63,7 +63,7 @@ export class UserResolver {
 
   @Public()
   @Mutation(() => User)
-  async updateUser(@Args({ name: 'updateUserInput', type: () => UpdateUserInput }) updateUserInput) {
+  async updateUser(@Args({ name: 'updateUserInput', type: () => UpdateUserInput, nullable: true }) updateUserInput) {
     const { id, ...preparedUser } = updateUserInput;
 
     return this.prismaService.user.update({
