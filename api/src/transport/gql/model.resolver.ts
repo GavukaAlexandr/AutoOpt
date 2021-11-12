@@ -18,18 +18,18 @@ export class ModelResolver {
         });
     }
 
-    @Public()
-    @ResolveField('type', returns => [Type])
-    async type(@Parent() model: Model) {
-        const { id } = model;
-        return this.prismaService.type.findMany({ where: { models: { some: { id } } } });
-    }
+    // @Public()
+    // @ResolveField('type', returns => [Type])
+    // async type(@Parent() model: Model) {
+    //     const { id } = model;
+    //     return this.prismaService.type.findUnique({ where: {} });
+    // }
 
     @Public()
-    @ResolveField('brand', returns => [Brand])
+    @ResolveField('brand', () => Brand)
     async brand(@Parent() model: Model) {
         const { brandId } = model;
-        return this.prismaService.brand.findMany({ where: { id: brandId } });
+        return this.prismaService.brand.findUnique({ where: { id: brandId } });
     }
 
     @Public()
@@ -46,12 +46,13 @@ export class ModelResolver {
             take: perPage,
             orderBy: { [sortField]: sortOrder },
             where: {
-                id: { in: filter.ids },
                 name: { contains: filter.q },
-                brandId: {equals: filter.brandIds},
-                typeId: {equals: filter.typeIds}
-            }
+                brandId: filter.brandId,
+                typeId: filter.typeId
+            },
+            include: { type: true }
         });
+
     }
 
     @Public()
@@ -66,10 +67,10 @@ export class ModelResolver {
         const count = await this.prismaService.model.count(({
             orderBy: { [sortField]: sortOrder },
             where: {
-                id: { in: filter.ids },
+                // id: { in: filter.ids },
                 name: { contains: filter.q },
-                brandId: {equals: filter.brandIds},
-                typeId: {equals: filter.typeIds}
+                // brandId: { equals: filter.brandIds },
+                // typeId: { equals: filter.typeIds }
             }
         }));
         return { count: count };

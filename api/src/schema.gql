@@ -23,8 +23,8 @@ type Brand {
 }
 
 input BrandFilter {
-  ids: [ID!]
   q: String
+  typeId: String
 }
 
 input CreateOrderInput {
@@ -34,7 +34,7 @@ input CreateOrderInput {
   engineVolume: String!
   fuel: [FuelType!]!
   modelId: String!
-  part: [PartType!]!
+  partOfType: PartType!
   transmission: Transmission!
   userId: String!
   vin: String!
@@ -64,17 +64,16 @@ type ListMetadata {
 }
 
 type Model {
-  brand: [Brand!]!
+  brand: Brand!
   id: ID!
   name: String!
-  type: [Type!]!
+  type: Type!
 }
 
 input ModelFilter {
-  brandIds: String
-  ids: [ID!]
+  brandId: String
   q: String
-  typeIds: String
+  typeId: String
 }
 
 type Mutation {
@@ -83,26 +82,26 @@ type Mutation {
   createOrder(createOrderInput: CreateOrderInput!): Order!
   createType(name: String!): Type!
   deleteOrder(id: ID!): Order!
-  updateOrder(updateOrderInput: UpdateOrderInput!): Order!
+  updateOrder(id: ID!, updateOrderInput: UpdateOrderInput): Order!
   updateType(id: ID!, name: String!): Type!
-  updateUser(updateUserInput: UpdateUserInput!): User!
+  updateUser(updateUserInput: UpdateUserInput): User!
 }
 
 type Order {
   bodyType: BodyType!
   carPart: String!
+  comment: String
   createdAt: DateTime!
   drive: DriveType!
   engineVolume: String!
   fuel: [FuelType!]!
   id: String!
-  modelId: String!
-  orders: [User!]!
-  part: [PartType!]!
+  model: Model!
+  partOfType: PartType!
   status: OrderStatus!
   transmission: Transmission!
   updatedAt: DateTime!
-  userId: String!
+  user: User!
   vin: String!
   year: String!
 }
@@ -130,13 +129,14 @@ type Query {
   User(id: String!): User!
   _allBrandsMeta(filter: BrandFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): ListMetadata!
   _allModelsMeta(filter: ModelFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): ListMetadata!
-  _allOrdersMeta(filter: OrderFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): ListMetadata!
-  _allTypesMeta(filter: TypeFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): ListMetadata!
+  _allTypesMeta(page: Int, perPage: Int, sortField: String, sortOrder: String): ListMetadata!
   _allUsersMeta(filter: UserFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): ListMetadata!
   allBrands(filter: BrandFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): [Brand!]!
+  allBrandsOfType(filter: BrandFilter, page: Int, perPage: Int): [Brand!]!
   allModels(filter: ModelFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): [Model!]!
   allOrders(filter: OrderFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): [Order!]!
-  allTypes(filter: TypeFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): [Type!]!
+  allOrdersMeta(filter: OrderFilter, sortField: String, sortOrder: String): ListMetadata!
+  allTypes(page: Int, perPage: Int, sortField: String, sortOrder: String): [Type!]!
   allUsers(filter: UserFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): [User!]!
   orderStatuses: [String!]!
 }
@@ -155,37 +155,30 @@ type Type {
   name: String!
 }
 
-input TypeFilter {
-  ids: [ID!]
-  q: String
-}
-
 input UpdateOrderInput {
-  bodyType: BodyType!
-  carPart: String!
-  drive: DriveType!
-  engineVolume: String!
-  fuel: [FuelType!]!
-  id: ID!
-  modelId: String!
-  part: [PartType!]!
-  transmission: Transmission!
-  vin: String!
-  year: String!
+  bodyType: BodyType
+  carPart: String
+  comment: String
+  drive: DriveType
+  engineVolume: String
+  fuel: [FuelType!]
+  modelId: String
+  partOfType: PartType
+  status: OrderStatus
+  transmission: Transmission
+  vin: String
+  year: String
 }
 
 input UpdateUserInput {
-  email: String!
-  firstName: String!
+  comment: String
+  firstName: String
   id: ID!
-  lastName: String!
-  phoneNotification: Boolean!
-  phoneNumber: String!
-  telegramNotification: Boolean!
-  viberNotification: Boolean!
+  lastName: String
 }
 
 type User {
+  comment: String
   createdAt: DateTime!
   email: String!
   firstName: String!

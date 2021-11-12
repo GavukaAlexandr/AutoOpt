@@ -1,20 +1,23 @@
 // import { BodyType, DriveType, OrderStatus, PartType, Transmission, FuelType } from '.prisma/client';
 import { BodyType, DriveType, FuelType, OrderStatus, PartType, Transmission, Order as OrderEntity, } from '.prisma/client'
 import { Field, ID, InputType, Int, ObjectType, registerEnumType } from '@nestjs/graphql'
+import { Model } from 'src/transport/gql/model.model'
 import { User } from 'src/user/gql/user.model'
 
 @ObjectType()
 export class Order implements OrderEntity {
+    modelId: string
     isDeleted: boolean
+    userId: string
 
     @Field(type => String)
     id: string
 
-    @Field(type => String)
-    userId: string
+    @Field(type => User)
+    user: User
 
-    @Field(type => String)
-    modelId: string
+    @Field(type => Model)
+    model: Model
 
     @Field(type => BodyType)
     bodyType: BodyType
@@ -28,13 +31,13 @@ export class Order implements OrderEntity {
     @Field(type => String)
     engineVolume: string
 
-    @Field(type => [FuelType!])
+    @Field(type => [FuelType])
     fuel: FuelType[]
 
-    @Field(type => [PartType!])
-    part: PartType[]
+    @Field(type => PartType)
+    partOfType: PartType
 
-    @Field(type => OrderStatus!)
+    @Field(type => OrderStatus)
     status: OrderStatus
 
     @Field(type => Transmission)
@@ -46,6 +49,9 @@ export class Order implements OrderEntity {
     @Field(type => String)
     year: string
 
+    @Field(type => String, { nullable: true })
+    comment: string
+
     @Field(type => Date)
     createdAt: Date
 
@@ -56,81 +62,84 @@ export class Order implements OrderEntity {
 @InputType()
 export class OrderFilter {
 
-  @Field(() => [ID], {nullable: true} )
-  ids?: string[];
+    @Field(() => [ID], { nullable: true })
+    ids?: string[];
 
 }
 
 @InputType()
 export class UpdateOrderInput {
-    @Field(type => ID!)
-    id!: String
-
-    @Field(type => String)
+    @Field(type => String, { nullable: true })
     modelId?: String
 
-    @Field(type => Transmission)
+    @Field(type => Transmission, { nullable: true })
     transmission?: Transmission
 
-    @Field(type => BodyType)
+    @Field(type => OrderStatus, { nullable: true })
+    status?: OrderStatus
+
+    @Field(type => BodyType, { nullable: true })
     bodyType?: BodyType
 
-    @Field(type => DriveType)
+    @Field(type => DriveType, { nullable: true })
     drive?: DriveType
 
-    @Field(type => String)
+    @Field(type => String, { nullable: true })
     year?: String
 
-    @Field(type => String)
+    @Field(type => String, { nullable: true })
     engineVolume?: String
 
-    @Field(type => String)
+    @Field(type => String, { nullable: true })
     vin?: String
 
-    @Field(type => String)
+    @Field(type => String, { nullable: true })
     carPart?: String
 
-    @Field(type => [FuelType])
+    @Field(type => [FuelType], { nullable: true })
     fuel?: FuelType[]
 
-    @Field(type => [PartType])
-    part?: PartType[]
+    @Field(type => PartType, { nullable: true })
+    partOfType?: PartType
+
+    @Field(type => String, { nullable: true })
+    comment?: string
 }
 
 @InputType()
 export class CreateOrderInput {
-    @Field(type => String!)
+    @Field(type => String)
     userId!: String
 
-    @Field(type => String!)
+    @Field(type => String)
     modelId!: String
 
-    @Field(type => Transmission!)
+    @Field(type => Transmission)
     transmission!: Transmission
 
-    @Field(type => BodyType!)
+    @Field(type => BodyType)
     bodyType!: BodyType
 
-    @Field(type => DriveType!)
+    @Field(type => DriveType)
     drive!: DriveType
 
-    @Field(type => String!)
+    @Field(type => String)
     year!: String
 
-    @Field(type => String!)
+    @Field(type => String)
     engineVolume!: String
 
-    @Field(type => String!)
+    @Field(type => String)
     vin!: String
 
-    @Field(type => String!)
+    @Field(type => String)
     carPart!: String
 
-    @Field(type => [FuelType!])
+    @Field(type => [FuelType])
     fuel!: FuelType[]
 
-    @Field(type => [PartType!])
-    part!: PartType[]
+    @Field(type => PartType)
+    partOfType!: PartType
 }
 
 @InputType()
@@ -146,20 +155,20 @@ registerEnumType(BodyType, {
 
 registerEnumType(DriveType, {
     name: 'DriveType',
-}); 
+});
 
 registerEnumType(FuelType, {
     name: 'FuelType',
-}); 
+});
 
 registerEnumType(PartType, {
     name: 'PartType',
-}); 
+});
 
 registerEnumType(OrderStatus, {
     name: 'OrderStatus',
-}); 
+});
 
 registerEnumType(Transmission, {
     name: 'Transmission',
-}); 
+});

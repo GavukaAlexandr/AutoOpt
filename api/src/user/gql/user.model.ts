@@ -5,7 +5,6 @@ import { Order } from 'src/order/gql/order.model'
 @ObjectType()
 export class User implements UserEntity {
     token: string
-
     firebaseUid: string
 
     @Field(type => String)
@@ -19,6 +18,9 @@ export class User implements UserEntity {
 
     @Field(type => String)
     email: string
+
+    @Field(type => String, { nullable: true })
+    comment: string
 
     @Field(type => String)
     phoneNumber: string
@@ -41,7 +43,7 @@ export class User implements UserEntity {
     @Field(type => [Order])
     orders: Order[]
 
-    
+
 }
 
 @InputType()
@@ -55,24 +57,12 @@ export class UpdateUserInput {
     @Field(() => ID)
     id!: string
 
-    @Field(type => String)
+    @Field(type => String, {nullable: true})
     firstName?: string
 
-    @Field(type => String)
+    @Field(type => String, {nullable: true})
     lastName?: string
 
-    @Field(type => String)
-    email?: string
-
-    @Field(type => String)
-    phoneNumber?: string
-
-    @Field(type => Boolean)
-    telegramNotification?: boolean
-
-    @Field(type => Boolean)
-    viberNotification: boolean
-
-    @Field(type => Boolean)
-    phoneNotification: boolean
+    @Field(type => String, {nullable: true}) 
+    comment?: string
 }

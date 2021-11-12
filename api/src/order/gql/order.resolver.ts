@@ -2,6 +2,7 @@ import { Resolver, Query, Args, Int, Mutation, Parent, ResolveField, ID } from '
 import { Public } from 'src/auth/decorators';
 import { ListMetadata } from 'src/list.metaData';
 import { PrismaService } from 'src/prisma.service';
+import { Model } from 'src/transport/gql/model.model';
 import { User } from 'src/user/gql/user.model';
 import { CreateOrderInput, DeleteOrderInput, Order, OrderFilter, UpdateOrderInput } from './order.model';
 
@@ -18,10 +19,23 @@ export class OrderResolver {
   }
 
   @Public()
-  @ResolveField('orders', returns => [User])
-  async user(@Parent() user: Order) {
-    const { id } = user;
-    return this.prismaService.user.findMany({ where: { id } });
+  @ResolveField('user', () => User)
+  async user(@Parent() order: Order) {
+    const { userId } = order;
+    return this.prismaService.user.findUnique({ where: { id: userId } });
+  }
+
+
+  @Public()
+  @ResolveField('model', () => Model)
+  async model(@Parent() order: Order) {
+    const { modelId } = order;
+    return this.prismaService.model.findUnique({
+      where: {
+        id: modelId
+      },
+      include: { type: true }
+    })
   }
 
   @Public()
@@ -37,17 +51,12 @@ export class OrderResolver {
       skip: page,
       take: perPage,
       orderBy: { [sortField]: sortOrder },
-      where: {
-        id: { in: filter.ids },
-      }
     });
   }
 
   @Public()
   @Query(() => ListMetadata)
-  async _allOrdersMeta(
-    @Args('perPage', { type: () => Int, nullable: true }) perPage,
-    @Args('page', { type: () => Int, nullable: true }) page,
+  async allOrdersMeta(
     @Args('sortField', { type: () => String, nullable: true }) sortField: string,
     @Args('sortOrder', { type: () => String, nullable: true }) sortOrder: string,
     @Args('filter', { type: () => OrderFilter, nullable: true }) filter,
@@ -77,11 +86,15 @@ export class OrderResolver {
 
   @Public()
   @Mutation(returns => Order)
-  async updateOrder(@Args({ name: 'updateOrderInput', type: () => UpdateOrderInput }) updateOrderInput) {
-    const { id, ...preparedOrder } = updateOrderInput;
+  async updateOrder(
+    @Args({ name: 'id', type: () => ID }) id,
+    @Args({ name: 'updateOrderInput', type: () => UpdateOrderInput, nullable: true }) updateOrderInput,
+  ) {
     return this.prismaService.order.update({
-      where: { id: id },
-      data: { ...preparedOrder },
+      where: { id },
+      data: {
+        ...updateOrderInput
+      },
     });
   }
 

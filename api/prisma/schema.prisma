@@ -11,14 +11,14 @@ generator client {
 }
 
 model Type {
-  id     String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name   String      @unique @db.VarChar(255)
+  id     String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name   String  @unique @db.VarChar(255)
   models Model[]
 }
 
 model Brand {
-  id    String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name  String      @unique @db.VarChar(255)
+  id    String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name  String  @unique @db.VarChar(255)
   Model Model[]
 }
 
@@ -89,8 +89,8 @@ model Order {
   vin          String
   carPart      String       @map("car_part") @db.Text
   fuel         FuelType[]
-  // part         PartType[] rename to  quality type
-  part         PartType[]
+  comment      String?      @db.Text
+  partOfType   PartType
   isDeleted    Boolean?     @default(false) @map("is_deleted")
   status       OrderStatus? @default(PROCESSING)
   createdAt    DateTime     @default(now())
@@ -112,6 +112,7 @@ model User {
   phoneNotification    Boolean?    @map("phone_notification")
   createdAt            DateTime    @default(now())
   updatedAt            DateTime    @updatedAt
+  comment              String?     @db.Text
   orders               Order[]
   UserModel            UserModel[]
 }

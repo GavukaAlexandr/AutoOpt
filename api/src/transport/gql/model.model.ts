@@ -1,4 +1,4 @@
-import { Model as ModelEntity, } from '.prisma/client'
+import { Model as ModelEntity, Type as TypeEntity } from '.prisma/client'
 import { Field, ID, InputType, Int, ObjectType, registerEnumType } from '@nestjs/graphql'
 import { Brand } from './brand.model'
 import { Type } from './type.model'
@@ -14,26 +14,23 @@ export class Model implements ModelEntity {
     @Field(() => String)
     name: string
 
-    @Field(() => [Type])
-    type: Type[]
+    @Field(() => Type)
+    type: Type
 
-    @Field(() => [Brand])
-    brand: Brand[]
+    @Field(() => Brand)
+    brand: Brand
 }
 
 @InputType()
 export class ModelFilter {
-    @Field(() => [ID], { nullable: true })
-    ids?: string[]
-
     @Field(() => String, {nullable: true})
     q?: string
 
     @Field(() => String, {nullable: true})
-    brandIds?: string
+    brandId?: string
 
     @Field(() => String, {nullable: true})
-    typeIds?: string
+    typeId?: string
 }
 
 @InputType()
