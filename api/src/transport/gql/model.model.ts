@@ -31,6 +31,9 @@ export class ModelFilter {
 
     @Field(() => String, {nullable: true})
     typeId?: string
+
+    @Field(() => String, {nullable: true})
+    brand?: string
 }
 
 @InputType()
