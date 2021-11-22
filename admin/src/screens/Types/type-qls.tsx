@@ -16,5 +16,34 @@ export const TYPE_LIST = gql`
       id
       name
     }
+    allOrdersMeta(sortField: "id", sortOrder: "asc", filter: {}) {
+      count
+    }
+  }
+`;
+
+export const CREATE_TYPE = gql`
+  mutation createType(
+    $name: String
+  ) {
+    createType(
+      name: $name
+    ) {
+      id
+    }
+  }
+`;
+
+export const UPDATE_TYPE = gql`
+  mutation updateType(
+    $name: String
+    $id: ID
+  ) {
+    updateType(
+      id: $id
+      name: $name
+    ) {
+      id
+    }
   }
 `;

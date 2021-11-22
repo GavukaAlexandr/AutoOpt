@@ -3,7 +3,7 @@ import { Public } from 'src/auth/decorators';
 import { ListMetadata } from 'src/list.metaData';
 import { Order } from 'src/order/gql/order.model';
 import { PrismaService } from 'src/prisma.service';
-import { UpdateUserInput, User, UserFilter } from './user.model';
+import { CreateUserInput, UpdateUserInput, User, UserFilter } from './user.model';
 
 @Resolver(of => User)
 export class UserResolver {
@@ -33,29 +33,37 @@ export class UserResolver {
     @Args('sortOrder', { type: () => String, nullable: true }) sortOrder,
     @Args('filter', { type: () => UserFilter, nullable: true }) filter: UserFilter,
   ) {
+    const { firstName, lastName, phoneNumber, email } = filter;
     return this.prismaService.user.findMany({
       skip: page,
       take: perPage,
       orderBy: { [sortField]: sortOrder },
       where: {
-        id: { in: filter.ids },
+        firstName: { contains: firstName, mode: 'insensitive' },
+        lastName: { contains: lastName, mode: 'insensitive' },
+        phoneNumber: { contains: phoneNumber, mode: 'insensitive' },
+        email: { contains: email, mode: 'insensitive' }
       }
     });
   }
 
   @Public()
   @Query(returns => ListMetadata)
-  async _allUsersMeta(
+  async allUsersMeta(
     @Args('perPage', { type: () => Int, nullable: true }) perPage,
     @Args('page', { type: () => Int, nullable: true }) page,
     @Args('sortField', { type: () => String, nullable: true }) sortField: string,
     @Args('sortOrder', { type: () => String, nullable: true }) sortOrder: string,
     @Args('filter', { type: () => UserFilter, nullable: true }) filter: UserFilter,
   ) {
+    const { firstName, lastName, phoneNumber, email } = filter;
     const count = await this.prismaService.user.count(({
       orderBy: { [sortField]: sortOrder },
       where: {
-        id: { in: filter.ids },
+        firstName: { contains: firstName, mode: 'insensitive' },
+        lastName: { contains: lastName, mode: 'insensitive' },
+        phoneNumber: { contains: phoneNumber, mode: 'insensitive' },
+        email: { contains: email, mode: 'insensitive' }
       }
     }));
     return { count: count };
@@ -72,41 +80,21 @@ export class UserResolver {
     })
   }
 
+  @Public()
+  @Mutation(() => User)
+  async createUser(@Args({ name: 'createUserInput', type: () => CreateUserInput, nullable: true }) createUserInput) {
+    return this.prismaService.user.create({
+      data: {
+        firstName: createUserInput.firstName,
+        lastName: createUserInput.lastName,
+        email: createUserInput.email,
+        firebaseUid: createUserInput.firebaseUid,
+        phoneNumber: createUserInput.phoneNumber,
+        telegramNotification: createUserInput.telegramNotification,
+        viberNotification: createUserInput.viberNotification,
+        phoneNotification: createUserInput.phoneNotification,
+      },
+    });
+  }
 
 }
-
-//   @Public()
-//   @Mutation(returns => Order)
-//   async createOrder(@Args({ name: 'createOrderInput', type: () => CreateOrderInput }) createOrderInput) {
-//     const { modelId, userId, ...preparedOrder } = createOrderInput;
-//     return this.prismaService.order.create({
-//       data: {
-//         ...preparedOrder,
-//         user: { connect: { id: userId } },
-//         model: { connect: { id: modelId } },
-//       },
-//       include: { user: true, model: { include: { brand: true, type: true } } },
-//     });
-//   }
-
-//   @Public()
-//   @Mutation(returns => Order)
-//   async updateOrder(@Args({ name: 'updateOrderInput', type: () => UpdateOrderInput }) updateOrderInput) {
-//     const { id, ...preparedOrder } = updateOrderInput;
-//     return this.prismaService.order.update({
-//       where: { id: id },
-//       data: { ...preparedOrder },
-//     });
-//   }
-
-//   @Public()
-//   @Mutation(returns => Order)
-//   async deleteOrder(@Args({ name: 'deleteOrderInput', type: () => DeleteOrderInput }) deleteOrderInput) {
-//     return this.prismaService.order.update({
-//       where: { id: deleteOrderInput.id },
-//       data: {
-//         isDeleted: true,
-//       },
-//     });
-//   }
-// }

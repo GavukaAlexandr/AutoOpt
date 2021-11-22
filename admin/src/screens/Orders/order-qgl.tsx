@@ -6,16 +6,19 @@ export const ORDERS_LIST = gql`
     $perPage: Int
     $sortField: String
     $sortOrder: String
+    $filter: OrderFilter
   ) {
     allOrders(
       page: $page
       perPage: $perPage
       sortField: $sortField
       sortOrder: $sortOrder
+      filter: $filter
     ) {
       id
       status
       comment
+      carPart
       model {
         id
         name
@@ -32,10 +35,11 @@ export const ORDERS_LIST = gql`
         id
         firstName
         lastName
+        phoneNumber
       }
       createdAt
     }
-    allOrdersMeta(sortField: "id", sortOrder: "desc", filter: {}) {
+    allOrdersMeta(sortField: "id", sortOrder: "asc", filter: $filter) {
       count
     }
   }
@@ -82,9 +86,23 @@ export const ORDER = gql`
   }
 `;
 
+export const FIRST_ORDER = gql`
+  query getFirstOrder(
+    $sortField: String
+    $sortOrder: String
+  ) {
+    getFirstOrder(
+      sortField: $sortField
+      sortOrder: $sortOrder
+    ) {
+      createdAt
+    }
+  }
+`;
+
 export const UPDATE_ORDER = gql`
   mutation updateOrder($id: ID!, $updateOrderInput: UpdateOrderInput) {
-    updateOrder(id: $id, updateOrderInput: $updateOrderInput,) {
+    updateOrder(id: $id, updateOrderInput: $updateOrderInput) {
       id
     }
   }

@@ -11,7 +11,6 @@ module.exports = {
             modifyVars: getThemeVariables({
               dark: true,
               compact: true,
-              
             }),
             javascriptEnabled: true,
           },

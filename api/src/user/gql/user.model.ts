@@ -48,8 +48,17 @@ export class User implements UserEntity {
 
 @InputType()
 export class UserFilter {
-    @Field(() => [ID], { nullable: true })
-    ids?: string[]
+    @Field(() => String, { nullable: true })
+    phoneNumber?: string
+
+    @Field(() => String, { nullable: true })
+    lastName?: string
+
+    @Field(() => String, { nullable: true })
+    firstName?: string
+
+    @Field(() => String, { nullable: true })
+    email?: string
 }
 
 @InputType()
@@ -65,4 +74,31 @@ export class UpdateUserInput {
 
     @Field(type => String, {nullable: true}) 
     comment?: string
+}
+
+@InputType()
+export class CreateUserInput {
+    @Field(type => String, {nullable: true})
+    firstName!: string
+
+    @Field(type => String, {nullable: true})
+    lastName!: string
+
+    @Field(type => String)
+    email!: string
+
+    @Field(type => String)
+    phoneNumber!: string
+
+    @Field(type => Boolean)
+    telegramNotification?: boolean
+
+    @Field(type => Boolean)
+    viberNotification?: boolean
+
+    @Field(type => Boolean)
+    phoneNotification?: boolean
+
+    @Field(type => String)
+    firebaseUid!: string
 }

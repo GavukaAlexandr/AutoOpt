@@ -21,6 +21,8 @@ export class Brand implements BrandEntity {
 @InputType()
 export class BrandFilter {
     @Field(() => String, {nullable: true})
+    name?: string
+    @Field(() => String, {nullable: true})
     q?: string
     @Field(() => String, {nullable: true})
     typeId

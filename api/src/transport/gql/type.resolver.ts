@@ -37,9 +37,7 @@ export class TypeResolver {
 
     @Public()
     @Query(returns => ListMetadata)
-    async _allTypesMeta(
-        @Args('perPage', { type: () => Int, nullable: true }) perPage,
-        @Args('page', { type: () => Int, nullable: true }) page,
+    async allTypesMeta(
         @Args('sortField', { type: () => String, nullable: true }) sortField: string,
         @Args('sortOrder', { type: () => String, nullable: true }) sortOrder: string,
     ) {
@@ -77,7 +75,7 @@ export class TypeResolver {
 
     @Public()
     @Mutation(() => Type)
-    async createType(@Args({ name: 'name', type: () => String! }) name) {
+    async createType(@Args({ name: 'name', type: () => String, nullable: true }) name) {
         return this.prismaService.type.create({
             data: {
                 name: name
@@ -88,12 +86,12 @@ export class TypeResolver {
     @Public()
     @Mutation(returns => Type)
     async updateType(
-        @Args({ name: 'id', type: () => ID! }) id,
-        @Args({ name: 'name', type: () => String! }) name) {
+        @Args({ name: 'id', type: () => ID, nullable: true }) id,
+        @Args({ name: 'name', type: () => String, nullable: true }) name) {
         return this.prismaService.type.update({
-            where: { id: id },
+            where: { id },
             data: {
-                name: name
+                name
             },
         });
     }

@@ -61,10 +61,29 @@ export class Order implements OrderEntity {
 
 @InputType()
 export class OrderFilter {
+    @Field(() => ID, { nullable: true })
+    user?: string;
 
-    @Field(() => [ID], { nullable: true })
-    ids?: string[];
+    @Field(() => String, { nullable: true })
+    firstName?: string
 
+    @Field(() => String, { nullable: true })
+    lastName?: string
+
+    @Field(() => String, { nullable: true })
+    phoneNumber?: string
+
+    @Field(() => Date, { nullable: true })
+    startDate?: Date
+
+    @Field(() => Date, { nullable: true })
+    endDate?: Date
+
+    @Field(() => String, { nullable: true })
+    carPart?: string
+
+    @Field(() => OrderStatus, { nullable: true })
+    status?: OrderStatus
 }
 
 @InputType()

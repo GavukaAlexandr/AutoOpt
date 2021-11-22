@@ -20,39 +20,12 @@ import { TYPE_LIST } from "../Types/type-qls";
 import { ORDER, UPDATE_ORDER } from "./order-qgl";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { coloredTags } from "../../helpres/ColoredTags";
 
 const { TextArea } = Input;
 
 const { Title, Paragraph } = Typography;
 const { Option } = Select;
-
-const styleTag = {
-  fontSize: "16px",
-};
-
-const coloredTags = (value: string) => {
-  let color;
-  if (value === "PROCESSING") {
-    color = "orange";
-  }
-  if (value === "SENT") {
-    color = "blue";
-  }
-  if (value === "DONE") {
-    color = "green";
-  }
-  if (value === "ANALOGUE") {
-    color = "purple";
-  }
-  if (value === "ORIGINAL") {
-    color = "lime";
-  }
-  return (
-    <Tag style={styleTag} color={color} key={value}>
-      <strong>{value.toLowerCase()}</strong>
-    </Tag>
-  );
-};
 
 export const OrderCard = ({
   data,
@@ -488,7 +461,7 @@ export const OrderCard = ({
         </Title>
         <Paragraph
           copyable
-          style={{ display: "inline", fontSize: "18px" }}
+          style={{ display: "inline" }}
           editable={{
             onChange: updateCarPart,
           }}
@@ -615,6 +588,7 @@ export const OrderCard = ({
                 isOpen: false,
               }));
             }}
+            // onPopupScroll={onScroll}
             style={{ width: 200 }}
             placeholder="Change a Model"
             optionFilterProp="children"
@@ -703,6 +677,7 @@ export const OrderCard = ({
         <Title style={{ display: "inline" }} level={5}>
           Fuel type:{" "}
           <Select
+           style={{minWidth: "100px"}}
             mode="multiple"
             showArrow
             tagRender={fuelTagRender}

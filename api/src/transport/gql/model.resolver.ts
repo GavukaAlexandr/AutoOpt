@@ -18,13 +18,6 @@ export class ModelResolver {
         });
     }
 
-    // @Public()
-    // @ResolveField('type', returns => [Type])
-    // async type(@Parent() model: Model) {
-    //     const { id } = model;
-    //     return this.prismaService.type.findUnique({ where: {} });
-    // }
-
     @Public()
     @ResolveField('brand', () => Brand)
     async brand(@Parent() model: Model) {
@@ -46,9 +39,10 @@ export class ModelResolver {
             take: perPage,
             orderBy: { [sortField]: sortOrder },
             where: {
-                name: { contains: filter.q },
+                name: { contains: filter.q, mode: "insensitive" },
                 brandId: filter.brandId,
-                typeId: filter.typeId
+                typeId: filter.typeId,
+                brand: { name: { contains: filter.brand, mode: "insensitive" } }
             },
             include: { type: true }
         });
@@ -57,9 +51,7 @@ export class ModelResolver {
 
     @Public()
     @Query(returns => ListMetadata)
-    async _allModelsMeta(
-        @Args('perPage', { type: () => Int, nullable: true }) perPage,
-        @Args('page', { type: () => Int, nullable: true }) page,
+    async allModelsMeta(
         @Args('sortField', { type: () => String, nullable: true }) sortField: string,
         @Args('sortOrder', { type: () => String, nullable: true }) sortOrder: string,
         @Args('filter', { type: () => ModelFilter, nullable: true }) filter: ModelFilter,
@@ -67,10 +59,10 @@ export class ModelResolver {
         const count = await this.prismaService.model.count(({
             orderBy: { [sortField]: sortOrder },
             where: {
-                // id: { in: filter.ids },
-                name: { contains: filter.q },
-                // brandId: { equals: filter.brandIds },
-                // typeId: { equals: filter.typeIds }
+                name: { contains: filter.q, mode: "insensitive" },
+                brandId: filter.brandId,
+                typeId: filter.typeId,
+                brand: { name: { contains: filter.brand, mode: "insensitive" } }
             }
         }));
         return { count: count };
@@ -78,10 +70,30 @@ export class ModelResolver {
 
     @Public()
     @Mutation(() => Model)
+    async updateModel(
+        @Args({ name: 'id', type: () => ID, nullable: true }) id,
+        @Args({ name: 'name', type: () => String, nullable: true }) name,
+        @Args({ name: 'brand', type: () => ID, nullable: true }) brand,
+        @Args({ name: 'type', type: () => ID, nullable: true }) type,
+    ) {
+        return this.prismaService.model.update(
+            {
+                where: { id },
+                data: {
+                    name,
+                    brandId: brand,
+                    typeId: type
+                }
+            }
+        )
+    }
+
+    @Public()
+    @Mutation(() => Model)
     async createModel(
-        @Args({ name: 'name', type: () => String! }) name,
-        @Args({ name: 'brandIds', type: () => ID, nullable: true }) brand,
-        @Args({ name: 'typeIds', type: () => ID, nullable: true }) type,
+        @Args({ name: 'name', type: () => String, nullable: true }) name,
+        @Args({ name: 'brandId', type: () => ID, nullable: true }) brand,
+        @Args({ name: 'typeId', type: () => ID, nullable: true }) type,
     ) {
         return this.prismaService.model.create({
             data: {

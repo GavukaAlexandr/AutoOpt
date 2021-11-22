@@ -23,6 +23,7 @@ type Brand {
 }
 
 input BrandFilter {
+  name: String
   q: String
   typeId: String
 }
@@ -39,6 +40,17 @@ input CreateOrderInput {
   userId: String!
   vin: String!
   year: String!
+}
+
+input CreateUserInput {
+  email: String!
+  firebaseUid: String!
+  firstName: String
+  lastName: String
+  phoneNotification: Boolean!
+  phoneNumber: String!
+  telegramNotification: Boolean!
+  viberNotification: Boolean!
 }
 
 """
@@ -71,19 +83,23 @@ type Model {
 }
 
 input ModelFilter {
+  brand: String
   brandId: String
   q: String
   typeId: String
 }
 
 type Mutation {
-  createBrand(name: String!): Brand!
-  createModel(brandIds: ID, name: String!, typeIds: ID): Model!
+  createBrand(name: String): Brand!
+  createModel(brandId: ID, name: String, typeId: ID): Model!
   createOrder(createOrderInput: CreateOrderInput!): Order!
-  createType(name: String!): Type!
+  createType(name: String): Type!
+  createUser(createUserInput: CreateUserInput): User!
   deleteOrder(id: ID!): Order!
+  updateBrand(id: ID, name: String): Brand!
+  updateModel(brand: ID, id: ID, name: String, type: ID): Model!
   updateOrder(id: ID!, updateOrderInput: UpdateOrderInput): Order!
-  updateType(id: ID!, name: String!): Type!
+  updateType(id: ID, name: String): Type!
   updateUser(updateUserInput: UpdateUserInput): User!
 }
 
@@ -107,7 +123,14 @@ type Order {
 }
 
 input OrderFilter {
-  ids: [ID!]
+  carPart: String
+  endDate: DateTime
+  firstName: String
+  lastName: String
+  phoneNumber: String
+  startDate: DateTime
+  status: OrderStatus
+  user: ID
 }
 
 enum OrderStatus {
@@ -127,17 +150,18 @@ type Query {
   Order(id: ID): Order!
   Type(id: String!): Type!
   User(id: String!): User!
-  _allBrandsMeta(filter: BrandFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): ListMetadata!
-  _allModelsMeta(filter: ModelFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): ListMetadata!
-  _allTypesMeta(page: Int, perPage: Int, sortField: String, sortOrder: String): ListMetadata!
-  _allUsersMeta(filter: UserFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): ListMetadata!
   allBrands(filter: BrandFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): [Brand!]!
+  allBrandsMeta(filter: BrandFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): ListMetadata!
   allBrandsOfType(filter: BrandFilter, page: Int, perPage: Int): [Brand!]!
   allModels(filter: ModelFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): [Model!]!
+  allModelsMeta(filter: ModelFilter, sortField: String, sortOrder: String): ListMetadata!
   allOrders(filter: OrderFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): [Order!]!
   allOrdersMeta(filter: OrderFilter, sortField: String, sortOrder: String): ListMetadata!
   allTypes(page: Int, perPage: Int, sortField: String, sortOrder: String): [Type!]!
+  allTypesMeta(sortField: String, sortOrder: String): ListMetadata!
   allUsers(filter: UserFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): [User!]!
+  allUsersMeta(filter: UserFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): ListMetadata!
+  getFirstOrder(sortField: String, sortOrder: String): [Order!]!
   orderStatuses: [String!]!
 }
 
@@ -193,5 +217,8 @@ type User {
 }
 
 input UserFilter {
-  ids: [ID!]
+  email: String
+  firstName: String
+  lastName: String
+  phoneNumber: String
 }

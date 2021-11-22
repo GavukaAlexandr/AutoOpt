@@ -5,6 +5,7 @@ import { PrismaService } from 'src/prisma.service';
 import { Model } from 'src/transport/gql/model.model';
 import { User } from 'src/user/gql/user.model';
 import { CreateOrderInput, DeleteOrderInput, Order, OrderFilter, UpdateOrderInput } from './order.model';
+import { startOfDay, endOfDay } from 'date-fns'
 
 @Resolver(of => Order)
 export class OrderResolver {
@@ -47,28 +48,70 @@ export class OrderResolver {
     @Args('sortOrder', { type: () => String, nullable: true }) sortOrder,
     @Args('filter', { type: () => OrderFilter, nullable: true }) filter: OrderFilter,
   ) {
+    const { endDate, startDate, status, firstName, carPart, lastName, phoneNumber, user } = filter;
+
     return this.prismaService.order.findMany({
       skip: page,
       take: perPage,
       orderBy: { [sortField]: sortOrder },
+      where: {
+        userId: user,
+        user: {
+          firstName: { contains: firstName, mode: 'insensitive' },
+          lastName: { contains: lastName, mode: 'insensitive' },
+          phoneNumber: { contains: phoneNumber, mode: 'insensitive'},
+        },
+        createdAt: this.getRangeByDate({ startDate, endDate }),
+        carPart: { contains: carPart, mode: 'insensitive' },
+        status: status
+      }
     });
   }
+
+  @Public()
+  @Query(() => [Order])
+  async getFirstOrder(
+    @Args('sortField', { type: () => String, nullable: true }) sortField: string,
+    @Args('sortOrder', { type: () => String, nullable: true }) sortOrder: string,
+  ) {
+    return this.prismaService.order.findMany(({
+      orderBy: { [sortField]: sortOrder },
+      take: 1
+    }));
+  };
 
   @Public()
   @Query(() => ListMetadata)
   async allOrdersMeta(
     @Args('sortField', { type: () => String, nullable: true }) sortField: string,
     @Args('sortOrder', { type: () => String, nullable: true }) sortOrder: string,
-    @Args('filter', { type: () => OrderFilter, nullable: true }) filter,
+    @Args('filter', { type: () => OrderFilter, nullable: true }) filter: OrderFilter,
   ) {
-    const count = await this.prismaService.order.count(({
+    const { endDate, startDate, status, user, firstName, lastName, carPart, phoneNumber } = filter;
+
+    const result = await this.prismaService.order.count(({
       orderBy: { [sortField]: sortOrder },
       where: {
-        id: { in: filter.ids },
+        userId: user,
+        user: {
+          firstName: { contains: firstName, mode: 'insensitive' },
+          lastName: { contains: lastName, mode: 'insensitive' },
+          phoneNumber: { contains: phoneNumber, mode: 'insensitive' },
+        },
+        createdAt: this.getRangeByDate({ startDate, endDate }),
+        carPart: { contains: carPart, mode: 'insensitive' },
+        status: status
       }
     }));
-    return { count: count };
+    return { count: result };
   };
+
+  getRangeByDate({ startDate, endDate }) {
+    return (startDate && endDate) && {
+      lte: endOfDay(endDate),
+      gte: startOfDay(startDate)
+    };
+  }
 
   @Public()
   @Mutation(() => Order)

@@ -59,7 +59,7 @@ export class BrandResolver {
             take: perPage,
             orderBy: { [sortField]: sortOrder },
             where: {
-                name: { contains: filter.q },
+                name: { contains: filter.name, mode: 'insensitive'}
             }
         });
     }
@@ -90,7 +90,7 @@ export class BrandResolver {
 
     @Public()
     @Query(returns => ListMetadata)
-    async _allBrandsMeta(
+    async allBrandsMeta(
         @Args('perPage', { type: () => Int, nullable: true }) perPage,
         @Args('page', { type: () => Int, nullable: true }) page,
         @Args('sortField', { type: () => String, nullable: true }) sortField: string,
@@ -100,7 +100,7 @@ export class BrandResolver {
         const count = await this.prismaService.brand.count(({
             orderBy: { [sortField]: sortOrder },
             where: {
-                name: { contains: filter.q }
+                name: { contains: filter.name, mode: 'insensitive' }
             }
         }));
         return { count: count };
@@ -110,12 +110,29 @@ export class BrandResolver {
     @Public()
     @Mutation(() => Brand)
     async createBrand(
-        @Args({ name: 'name', type: () => String }) name) {
+        @Args({ name: 'name', type: () => String, nullable: true }) name) {
         return this.prismaService.brand.create({
             data: {
                 name
             }
         });
+    }
+
+    @Public()
+    @Mutation(() => Brand)
+    async updateBrand(
+        @Args({ name: 'id', type: () => ID, nullable: true }) id,
+        @Args({ name: 'name', type: () => String, nullable: true }) name) {
+        return this.prismaService.brand.update(
+            {
+                where: {
+                    id
+                },
+                data: {
+                    name
+                }
+            }
+        );
     }
 
     // @Public()
