@@ -22,5 +22,5 @@
   },
   "include": [
     "src"
-, "craco.config.js"  ]
+, "craco.config.js", "fireBase.ts"  ]
 }

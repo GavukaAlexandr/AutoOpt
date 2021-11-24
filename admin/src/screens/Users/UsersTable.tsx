@@ -20,7 +20,6 @@ import {
   SearchOutlined,
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
-import { ExpandedUser } from "./ExpandedUser";
 
 interface Item {
   key: string;
@@ -437,7 +436,6 @@ export const UsersTable = ({
         bordered
         dataSource={data}
         columns={mergedColumns}
-        expandedRowRender={(record) => <ExpandedUser record={record} />}
         pagination={{
           showSizeChanger: true,
           pageSizeOptions: ["10", "25", "50", "100", "200"],

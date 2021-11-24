@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Table, Input, InputNumber, Popconfirm, Form, Typography, Spin, Row } from "antd";
+import {
+  Table,
+  Input,
+  InputNumber,
+  Popconfirm,
+  Form,
+  Typography,
+  Spin,
+  Row,
+  BackTop,
+} from "antd";
 import { useMutation, useQuery } from "@apollo/client";
 import { errorMessage, succesMessage } from "../../helpres/messages";
 import { debounce } from "ts-debounce";
@@ -147,7 +157,7 @@ export const BrandTable = ({
 
   const typeUpdate = (newData: Item) => {
     let { name, key } = newData;
-    setLoading(true)
+    setLoading(true);
     try {
       updateBrand({
         variables: {
@@ -160,7 +170,7 @@ export const BrandTable = ({
       return succesMessage("Brand updated");
     } catch (error) {
       setLoading(false);
-      return errorMessage('Brand update error');
+      return errorMessage("Brand update error");
     }
   };
 
@@ -193,18 +203,18 @@ export const BrandTable = ({
     const delayDebounceFn = setTimeout(() => {
       try {
         refetch({
-          filter:{
-            name: searchName
-          }
-        }); 
+          filter: {
+            name: searchName,
+          },
+        });
         setLoading(false);
       } catch (error) {
-        setLoading(false)
-        errorMessage("brand search error")
+        setLoading(false);
+        errorMessage("brand search error");
       }
     }, 600);
     return () => clearTimeout(delayDebounceFn);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchName]);
 
   const onChangePage = (currentPage: number, pageSize?: number): void => {
@@ -214,11 +224,12 @@ export const BrandTable = ({
     });
   };
 
-  if (brandsLoading) return (
-    <Row justify="center" align="middle" style={{ minHeight: "100%" }}>
-      <Spin />
-    </Row>
-  );
+  if (brandsLoading)
+    return (
+      <Row justify="center" align="middle" style={{ minHeight: "100%" }}>
+        <Spin />
+      </Row>
+    );
   if (error) return <p>Error </p>;
   const columns = [
     {
@@ -236,7 +247,6 @@ export const BrandTable = ({
       dataIndex: "create",
     },
     {
-      width: "29%",
       title: "Name",
       dataIndex: "name",
       editable: true,
@@ -252,15 +262,18 @@ export const BrandTable = ({
         );
       },
       filterIcon: () => {
-        return <SearchOutlined
-        style={{
-          fontSize: "1.2rem",
-          color: searchName ? "yellow" : "white",
-        }}
-      />
+        return (
+          <SearchOutlined
+            style={{
+              fontSize: "1.2rem",
+              color: searchName ? "yellow" : "white",
+            }}
+          />
+        );
       },
     },
     {
+      width: "6%",
       dataIndex: "operation",
       render: (_: any, record: Item) => {
         const editable = isEditing(record);
@@ -309,7 +322,7 @@ export const BrandTable = ({
     <>
       <Form form={form} component={false}>
         <Table
-        loading={loading}
+          loading={loading}
           components={{
             body: {
               cell: EditableCell,
@@ -332,6 +345,7 @@ export const BrandTable = ({
         handleOk={handleOk}
         handleCancel={handleCancel}
       />
+      <BackTop />
     </>
   );
 };

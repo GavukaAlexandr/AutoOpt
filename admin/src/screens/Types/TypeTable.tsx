@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Table, Input, InputNumber, Popconfirm, Form, Typography, Row, Spin } from "antd";
+import {
+  Table,
+  Input,
+  InputNumber,
+  Popconfirm,
+  Form,
+  Typography,
+  Row,
+  Spin,
+  BackTop,
+} from "antd";
 import { useMutation, useQuery } from "@apollo/client";
 import { errorMessage, succesMessage } from "../../helpres/messages";
 import { CREATE_TYPE, TYPE_LIST, UPDATE_TYPE } from "./type-qls";
@@ -177,11 +187,12 @@ export const TypeTable = ({
     }
   };
 
-  if (loading) return (
-    <Row justify="center" align="middle" style={{ minHeight: "100%" }}>
-      <Spin />
-    </Row>
-  );
+  if (loading)
+    return (
+      <Row justify="center" align="middle" style={{ minHeight: "100%" }}>
+        <Spin />
+      </Row>
+    );
   if (error) return <p>Error </p>;
   const columns = [
     {
@@ -210,17 +221,17 @@ export const TypeTable = ({
         const editable = isEditing(record);
         return editable ? (
           <span>
-          <a
-            href="#;"
-            onClick={() => save(record.key)}
-            style={{ marginRight: 8 }}
-          >
-            Save
-          </a>
-          <Popconfirm title="Sure to cancel?" onConfirm={cancel}>
-            <a>Cancel</a>
-          </Popconfirm>
-        </span>
+            <a
+              href="#;"
+              onClick={() => save(record.key)}
+              style={{ marginRight: 8 }}
+            >
+              Save
+            </a>
+            <Popconfirm title="Sure to cancel?" onConfirm={cancel}>
+              <a>Cancel</a>
+            </Popconfirm>
+          </span>
         ) : (
           <Typography.Link
             disabled={editingKey !== ""}
@@ -271,6 +282,7 @@ export const TypeTable = ({
         handleOk={handleOk}
         handleCancel={handleCancel}
       />
+      <BackTop />
     </>
   );
 };

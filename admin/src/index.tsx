@@ -9,6 +9,7 @@ import {
   ApolloProvider,
 } from "@apollo/client";
 import { BrowserRouter } from "react-router-dom";
+import ReCAPTCHA from "react-google-recaptcha";
 
 const client = new ApolloClient({
   uri: "http://localhost:3000/graphql",

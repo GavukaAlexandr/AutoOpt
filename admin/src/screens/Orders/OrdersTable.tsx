@@ -13,7 +13,7 @@ import {
 } from "antd";
 import { computePage } from "../../helpres/pagination-helper";
 import { ORDERS_LIST } from "./order-qgl";
-import { ExpandedOrder, ExpandedOrderByUser } from "./ExpandedTable";
+import { ExpandedOrder } from "./ExpandedTable";
 import {
   BODY_TYPES,
   DRIVE_TYPES,
@@ -60,38 +60,53 @@ export const OrdersTable = ({
     },
   });
 
-  const { data: statusesData } = useQuery(STATUSES, {
+  const { data: statusesData, loading: loadingStatuses } = useQuery(STATUSES, {
     variables: {
       name: "OrderStatus",
     },
   });
-  const { data: transmissionsData } = useQuery(TRANSMISSIONS, {
-    variables: {
-      name: "Transmission",
-    },
-  });
-  const { data: partTypeData } = useQuery(PART_TYPES, {
-    variables: {
-      name: "PartType",
-    },
-  });
-  const { data: driveTypeData } = useQuery(DRIVE_TYPES, {
-    variables: {
-      name: "DriveType",
-    },
-  });
+  const { data: transmissionsData, loading: loadingTransmission } = useQuery(
+    TRANSMISSIONS,
+    {
+      variables: {
+        name: "Transmission",
+      },
+    }
+  );
+  const { data: partTypeData, loading: loadingPartType } = useQuery(
+    PART_TYPES,
+    {
+      variables: {
+        name: "PartType",
+      },
+    }
+  );
+  const { data: driveTypeData, loading: loadingDriveTypes } = useQuery(
+    DRIVE_TYPES,
+    {
+      variables: {
+        name: "DriveType",
+      },
+    }
+  );
 
-  const { data: bodyTypeData } = useQuery(BODY_TYPES, {
-    variables: {
-      name: "BodyType",
-    },
-  });
+  const { data: bodyTypeData, loading: loadingBodyTypes } = useQuery(
+    BODY_TYPES,
+    {
+      variables: {
+        name: "BodyType",
+      },
+    }
+  );
 
-  const { data: fuelTypeData } = useQuery(BODY_TYPES, {
-    variables: {
-      name: "FuelType",
-    },
-  });
+  const { data: fuelTypeData, loading: loadingFuelType } = useQuery(
+    BODY_TYPES,
+    {
+      variables: {
+        name: "FuelType",
+      },
+    }
+  );
 
   useEffect(() => {
     setLoading(true);
@@ -162,7 +177,15 @@ export const OrdersTable = ({
     }
   };
 
-  if (loadingList)
+  if (
+    loadingList ||
+    loadingBodyTypes ||
+    loadingDriveTypes ||
+    loadingFuelType ||
+    loadingPartType ||
+    loadingStatuses ||
+    loadingTransmission
+  )
     return (
       <Row justify="center" align="middle" style={{ minHeight: "100%" }}>
         <Spin />
@@ -386,254 +409,6 @@ export const OrdersTable = ({
           showSizeChanger: true,
           pageSizeOptions: ["10", "25", "50", "100", "200"],
           defaultPageSize: 50,
-          onChange: onChangePage,
-          total: data.allOrdersMeta.count,
-        }}
-      />
-      <BackTop />
-    </>
-  );
-};
-
-export const OrdersTableByUser = ({
-  page,
-  perPage,
-  sortField,
-  sortOrder,
-  userId,
-}: {
-  page: number;
-  perPage: number;
-  sortField: string;
-  sortOrder: string;
-  userId: string;
-}) => {
-  const [searchCarPart, setSearchCarPart] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const {
-    loading: ordersLoading,
-    error,
-    data,
-    refetch,
-  } = useQuery(ORDERS_LIST, {
-    variables: {
-      page,
-      perPage,
-      sortField,
-      sortOrder,
-      filter: {
-        user: userId,
-        carPart: "",
-      },
-    },
-  });
-  const { data: statusesData } = useQuery(STATUSES, {
-    variables: {
-      name: "OrderStatus",
-    },
-  });
-  const { data: transmissionsData } = useQuery(TRANSMISSIONS, {
-    variables: {
-      name: "Transmission",
-    },
-  });
-  const { data: partTypeData } = useQuery(PART_TYPES, {
-    variables: {
-      name: "PartType",
-    },
-  });
-  const { data: driveTypeData } = useQuery(DRIVE_TYPES, {
-    variables: {
-      name: "DriveType",
-    },
-  });
-
-  const { data: bodyTypeData } = useQuery(BODY_TYPES, {
-    variables: {
-      name: "BodyType",
-    },
-  });
-
-  const { data: fuelTypeData } = useQuery(BODY_TYPES, {
-    variables: {
-      name: "FuelType",
-    },
-  });
-
-  useEffect(() => {
-    setLoading(true);
-    const delayDebounceFn = setTimeout(() => {
-      try {
-        refetch({
-          filter: {
-            user: userId,
-            carPart: searchCarPart,
-          },
-        });
-        setLoading(false);
-      } catch (error) {
-        setLoading(false);
-        errorMessage(`${error}`);
-      }
-    }, 400);
-    return () => clearTimeout(delayDebounceFn);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchCarPart]);
-
-  const tableFromResponse = (data: Record<string, any>[]) => {
-    return data.map((v, i) => {
-      return {
-        key: v.id,
-        firstName: v.user.firstName,
-        lastName: v.user.lastName,
-        status: v.status,
-        model: v.model.name,
-        brand: v.model.brand.name,
-        createdAt: new Date(v.createdAt).toLocaleDateString("ua-UA"),
-        phoneNumber: v.user.phoneNumber,
-        type: v.model.type.name,
-        carPart: v.carPart,
-      };
-    });
-  };
-
-  const onChangePage = (currentPage: number, pageSize?: number): void => {
-    setLoading(true);
-    try {
-      refetch({
-        page: computePage(currentPage, pageSize!), //skip
-        perPage: pageSize, //take
-      });
-      setLoading(false);
-    } catch (error) {
-      setLoading(false);
-      errorMessage(`${error}`);
-    }
-  };
-
-  if (ordersLoading)
-    return (
-      <Row justify="center" align="middle" style={{ minHeight: "100%" }}>
-        <Spin />
-      </Row>
-    );
-  if (error) return <p>Oppps Something Wrong </p>;
-
-  const mainColumns = [
-    {
-      title: "First Name",
-      dataIndex: "firstName",
-      key: "firstName",
-      render: (text: string) => <a>{text}</a>,
-    },
-    {
-      title: "Last Name",
-      dataIndex: "lastName",
-      key: "lastName",
-      render: (text: string) => <a>{text}</a>,
-    },
-    {
-      title: "Phone",
-      dataIndex: "phoneNumber",
-      key: "phoneNumber",
-      render: (text: string) => <Paragraph copyable>{text}</Paragraph>,
-    },
-    {
-      width: "40%",
-      title: () => {
-        return (
-          <>
-            <span>CarPart: </span>
-            {"  "}
-            <Input
-              style={{ width: "auto" }}
-              autoFocus
-              value={searchCarPart}
-              onChange={(v) => {
-                v.preventDefault();
-                setSearchCarPart(v.target.value);
-              }}
-            ></Input>
-          </>
-        );
-      },
-      dataIndex: "carPart",
-      key: "carPart",
-      render: (text: string) => (
-        <Paragraph ellipsis={{ rows: 3, expandable: true, symbol: "more" }}>
-          {text}
-        </Paragraph>
-      ),
-    },
-    {
-      title: "Type",
-      dataIndex: "type",
-      key: "type",
-      render: (text: string) => <Tag>{text}</Tag>,
-    },
-    {
-      title: "Brand",
-      dataIndex: "brand",
-      key: "brand",
-      render: (text: string) => <Tag>{text}</Tag>,
-    },
-    {
-      title: "Model",
-      dataIndex: "model",
-      key: "model",
-      render: (text: string) => <Tag>{text}</Tag>,
-    },
-    {
-      title: "Status",
-      key: "status",
-      dataIndex: "status",
-      render: (status: string) => {
-        let color;
-        if (status === "PROCESSING") {
-          color = "orange";
-        }
-        if (status === "SENT") {
-          color = "blue";
-        }
-        if (status === "DONE") {
-          color = "green";
-        }
-        return (
-          <Tag color={color} key={status}>
-            {status.toLowerCase()}
-          </Tag>
-        );
-      },
-    },
-    {
-      title: "createdAt",
-      dataIndex: "createdAt",
-      key: "createdAt",
-    },
-  ];
-  return (
-    <>
-      <Table
-        className="table-striped-rows"
-        columns={mainColumns}
-        loading={loading}
-        expandedRowRender={(record) => (
-          <ExpandedOrderByUser
-            fuelTypes={fuelTypeData}
-            bodyTypes={bodyTypeData}
-            driveTypes={driveTypeData}
-            partTypes={partTypeData}
-            transmissions={transmissionsData}
-            statuses={statusesData}
-            record={record}
-          />
-        )}
-        dataSource={tableFromResponse(data.allOrders)}
-        pagination={{
-          showSizeChanger: true,
-          pageSizeOptions: ["10", "25", "50", "100", "200"],
-          defaultPageSize: 10,
           onChange: onChangePage,
           total: data.allOrdersMeta.count,
         }}

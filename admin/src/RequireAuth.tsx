@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, Navigate, Outlet } from "react-router-dom";
 
-export function RequireAuth({ changeAuth }: any) {
-  const email = localStorage.getItem("email");
+export function RequireAuth() {
+  const phone = localStorage.getItem("phone");
   const password = localStorage.getItem("password");
   let location = useLocation();
 
-  if (!email && !password) {
-    changeAuth(false);
+  if (!phone && !password) {
     return <Navigate to="/login" state={{ from: location }} />;
   } else {
-    changeAuth(true);
     return <Outlet />;
   }
 }

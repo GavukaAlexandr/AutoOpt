@@ -8,6 +8,7 @@ import {
   Typography,
   Row,
   Spin,
+  BackTop,
 } from "antd";
 import { useMutation, useQuery } from "@apollo/client";
 import { errorMessage, succesMessage } from "../../helpres/messages";
@@ -120,25 +121,24 @@ export const ModelTable = ({
     setEditingKey(record.key);
   };
 
-
   useEffect(() => {
     setLoading(true);
     const delayDebounceFn = setTimeout(() => {
       try {
         refetch({
-          filter:{
+          filter: {
             q: searchName,
-            brand: searchBrand
-          }
-        }); 
+            brand: searchBrand,
+          },
+        });
         setLoading(false);
       } catch (error) {
-        setLoading(false)
-        errorMessage("Model search error")
+        setLoading(false);
+        errorMessage("Model search error");
       }
     }, 600);
     return () => clearTimeout(delayDebounceFn);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchName, searchBrand]);
 
   useEffect(() => {
@@ -180,11 +180,11 @@ export const ModelTable = ({
         },
         refetchQueries: [MODEL_LIST, "allModels"],
       });
-      setLoading(false)
+      setLoading(false);
       setIsModalVisible(false);
       return succesMessage("Model was created");
     } catch (error) {
-      setLoading(false)
+      setLoading(false);
       setIsModalVisible(false);
       return errorMessage("Error Model created");
     }
@@ -211,7 +211,7 @@ export const ModelTable = ({
         },
         refetchQueries: [MODEL_LIST, "allModels"],
       });
-      setLoading(true);
+      setLoading(false);
       return succesMessage("Model updated");
     } catch (error) {
       setLoading(false);
@@ -405,7 +405,7 @@ export const ModelTable = ({
     },
     {
       dataIndex: "operation",
-      width: "1%",
+      width: "6%",
       render: (_: any, record: Item) => {
         const editable = isEditing(record);
         return editable ? (
@@ -481,6 +481,7 @@ export const ModelTable = ({
         handleOk={handleOk}
         handleCancel={handleCancel}
       />
+      <BackTop />
     </>
   );
 };
