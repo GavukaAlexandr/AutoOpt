@@ -1,5 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useQuery } from "@apollo/client";
+import React, { useEffect, useState } from "react";
 import {
   Table,
   BackTop,
@@ -12,19 +11,12 @@ import {
   Menu,
 } from "antd";
 import { computePage } from "../../helpres/pagination-helper";
-import { ORDERS_LIST } from "./order-qgl";
 import { ExpandedOrder } from "./ExpandedTable";
-import {
-  BODY_TYPES,
-  DRIVE_TYPES,
-  PART_TYPES,
-  STATUSES,
-  TRANSMISSIONS,
-} from "../enums-gql";
 import { SearchOutlined } from "@ant-design/icons";
 import { CustomRangePicker } from "./RangePicker";
 import { errorMessage } from "../../helpres/messages";
 import { coloredTags } from "../../helpres/ColoredTags";
+import { Order, OrderStatus, useAllOrdersQuery } from "../../generated/graphql";
 
 const { Paragraph } = Typography;
 
@@ -43,14 +35,14 @@ export const OrdersTable = ({
   const [searchLastName, setSearchLastName] = useState("");
   const [searchPhone, setSearchPhone] = useState("");
   const [searchCarPart, setSearchCarPart] = useState("");
-  const [status, setStatus] = useState("PROCESSING");
+  const [status, setStatus] = useState<OrderStatus>(OrderStatus.Processing);
   const [loading, setLoading] = useState(false);
   const {
     loading: loadingList,
     error,
     data,
     refetch,
-  } = useQuery(ORDERS_LIST, {
+  } = useAllOrdersQuery({
     variables: {
       page,
       perPage,
@@ -59,54 +51,6 @@ export const OrdersTable = ({
       filter: {},
     },
   });
-
-  const { data: statusesData, loading: loadingStatuses } = useQuery(STATUSES, {
-    variables: {
-      name: "OrderStatus",
-    },
-  });
-  const { data: transmissionsData, loading: loadingTransmission } = useQuery(
-    TRANSMISSIONS,
-    {
-      variables: {
-        name: "Transmission",
-      },
-    }
-  );
-  const { data: partTypeData, loading: loadingPartType } = useQuery(
-    PART_TYPES,
-    {
-      variables: {
-        name: "PartType",
-      },
-    }
-  );
-  const { data: driveTypeData, loading: loadingDriveTypes } = useQuery(
-    DRIVE_TYPES,
-    {
-      variables: {
-        name: "DriveType",
-      },
-    }
-  );
-
-  const { data: bodyTypeData, loading: loadingBodyTypes } = useQuery(
-    BODY_TYPES,
-    {
-      variables: {
-        name: "BodyType",
-      },
-    }
-  );
-
-  const { data: fuelTypeData, loading: loadingFuelType } = useQuery(
-    BODY_TYPES,
-    {
-      variables: {
-        name: "FuelType",
-      },
-    }
-  );
 
   useEffect(() => {
     setLoading(true);
@@ -130,7 +74,7 @@ export const OrdersTable = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchFirstName, searchLastName, searchPhone, searchCarPart]);
 
-  const tableFromResponse = (data: Record<string, any>[]) => {
+  const tableFromResponse = (data: any[]) => {
     return data.map((v, i) => {
       return {
         key: v.id,
@@ -177,15 +121,7 @@ export const OrdersTable = ({
     }
   };
 
-  if (
-    loadingList ||
-    loadingBodyTypes ||
-    loadingDriveTypes ||
-    loadingFuelType ||
-    loadingPartType ||
-    loadingStatuses ||
-    loadingTransmission
-  )
+  if (loadingList)
     return (
       <Row justify="center" align="middle" style={{ minHeight: "100%" }}>
         <Spin />
@@ -196,11 +132,11 @@ export const OrdersTable = ({
   const statusMenu = (
     <Menu
       onClick={(v) => {
-        setStatus(v.key);
+        setStatus(v.key as OrderStatus);
         try {
           refetch({
             filter: {
-              status: v.key,
+              status: v.key as OrderStatus,
             },
           });
         } catch (error) {
@@ -208,15 +144,15 @@ export const OrdersTable = ({
         }
       }}
     >
-      {statusesData.__type.enumValues.map((data: Record<string, any>) => {
-        return <Menu.Item key={data.name}>{coloredTags(data.name)}</Menu.Item>;
+      {Object.keys(OrderStatus).map((data: string) => {
+        return <Menu.Item key={data}>{coloredTags(data)}</Menu.Item>;
       })}
     </Menu>
   );
 
   const mainColumns = [
     {
-      title: "First Name",
+      title: "Имя",
       dataIndex: "firstName",
       key: "firstName",
       render: (text: string) => <a>{text}</a>,
@@ -243,7 +179,7 @@ export const OrdersTable = ({
       },
     },
     {
-      title: "Last Name",
+      title: "Фамилия",
       dataIndex: "lastName",
       key: "lastName",
       render: (text: string) => <a>{text}</a>,
@@ -270,7 +206,7 @@ export const OrdersTable = ({
       },
     },
     {
-      title: "Phone",
+      title: "Телефон",
       dataIndex: "phoneNumber",
       key: "phoneNumber",
       render: (text: string) => <Paragraph copyable>{text}</Paragraph>,
@@ -298,11 +234,11 @@ export const OrdersTable = ({
     },
     {
       width: "30%",
-      title: "Car part",
+      title: "Запчасть",
       dataIndex: "carPart",
       key: "carPart",
       render: (text: string) => (
-        <Paragraph ellipsis={{ rows: 2, expandable: true, symbol: "more" }}>
+        <Paragraph ellipsis={{ rows: 2, expandable: true, symbol: "больше" }}>
           {text}
         </Paragraph>
       ),
@@ -329,19 +265,19 @@ export const OrdersTable = ({
       },
     },
     {
-      title: "Type",
+      title: "Тип",
       dataIndex: "type",
       key: "type",
       render: (text: string) => <Tag>{text}</Tag>,
     },
     {
-      title: "Brand",
+      title: "Бренд",
       dataIndex: "brand",
       key: "brand",
       render: (text: string) => <Tag>{text}</Tag>,
     },
     {
-      title: "Model",
+      title: "Модель",
       dataIndex: "model",
       key: "model",
       render: (text: string) => <Tag>{text}</Tag>,
@@ -395,22 +331,16 @@ export const OrdersTable = ({
         loading={loading}
         expandedRowRender={(record) => (
           <ExpandedOrder
-            fuelTypes={fuelTypeData}
-            bodyTypes={bodyTypeData}
-            driveTypes={driveTypeData}
-            partTypes={partTypeData}
-            transmissions={transmissionsData}
-            statuses={statusesData}
             record={record}
           />
         )}
-        dataSource={tableFromResponse(data.allOrders)}
+        dataSource={tableFromResponse(data?.allOrders as Order[])}
         pagination={{
           showSizeChanger: true,
           pageSizeOptions: ["10", "25", "50", "100", "200"],
           defaultPageSize: 50,
           onChange: onChangePage,
-          total: data.allOrdersMeta.count,
+          total: data?.allOrdersMeta.count as number,
         }}
       />
       <BackTop />

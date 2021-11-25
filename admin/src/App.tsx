@@ -8,7 +8,7 @@ import { RequireAuth } from "./RequireAuth";
 import { TypeTable } from "./screens/Types/TypeTable";
 import { BrandTable } from "./screens/Brands/BrandTable";
 import { ModelTable } from "./screens/Models/ModelTable";
-import MainLayout from "./layout";
+import MainLayout from "./Layout";
 declare global {
   interface Window {
     recaptchaVerifier: any;

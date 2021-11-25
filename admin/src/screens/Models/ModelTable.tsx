@@ -10,21 +10,20 @@ import {
   Spin,
   BackTop,
 } from "antd";
-import { useMutation, useQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
 import { errorMessage, succesMessage } from "../../helpres/messages";
 import { computePage } from "../../helpres/pagination-helper";
-import { CREATE_MODEL, MODEL_LIST, UPDATE_MODEL } from "./model-gql";
-import { StringLiteralLike } from "typescript";
-import { TYPE_LIST } from "../Types/type-qls";
-import { BRAND_LIST } from "../Brands/brand-gql";
 import { ModalCreateModel } from "./ModelCreateModal";
+import { EditOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import {
-  CloseOutlined,
-  EditOutlined,
-  PlusOutlined,
-  SaveOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
+  Brand,
+  Type,
+  useAllBrandsQuery,
+  useAllModelsQuery,
+  useAllTypesQuery,
+  useCreateModelMutation,
+  useUpdateModelMutation,
+} from "../../generated/graphql";
 const { Option } = Select;
 
 interface Item {
@@ -44,7 +43,7 @@ interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
   children: React.ReactNode;
 }
 
-const preparedData = (data: Item[]) => {
+const preparedData = (data: any[]) => {
   return data.map((value: Record<string, any>, i: number) => {
     return {
       key: value.id,
@@ -71,7 +70,7 @@ export const ModelTable = ({
     error,
     data: modeldData,
     refetch,
-  } = useQuery(MODEL_LIST, {
+  } = useAllModelsQuery({
     variables: {
       page,
       perPage,
@@ -85,7 +84,7 @@ export const ModelTable = ({
     loading: typeLoading,
     data: typeData,
     error: typeError,
-  } = useQuery(TYPE_LIST, {
+  } = useAllTypesQuery({
     variables: {
       page: 0,
       perPage: 50,
@@ -98,7 +97,7 @@ export const ModelTable = ({
     loading: brandLoading,
     data: brandData,
     error: brandError,
-  } = useQuery(BRAND_LIST, {
+  } = useAllBrandsQuery({
     variables: {
       sortField: "id",
       sortOrder: "asc",
@@ -106,8 +105,8 @@ export const ModelTable = ({
     },
   });
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [createModel] = useMutation(CREATE_MODEL);
-  const [updateModel] = useMutation(UPDATE_MODEL);
+  const [createModelMutation] = useCreateModelMutation();
+  const [updateModelMutation] = useUpdateModelMutation();
   const [form] = Form.useForm();
   const [data, setData] = useState<Item[]>();
   const [editingKey, setEditingKey] = useState("");
@@ -165,20 +164,45 @@ export const ModelTable = ({
     type: string;
   }) => {
     setLoading(true);
-    const brandObject = brandData.allBrands.find(
+    const brandObject = brandData?.allBrands.find(
       ({ name }: any) => name === createModelInput.brand
     );
-    const typeObject = typeData.allTypes.find(
+    const typeObject = typeData?.allTypes.find(
       ({ name }: any) => name === createModelInput.type
     );
     try {
-      createModel({
+      createModelMutation({
         variables: {
           name: createModelInput.name,
-          brandId: brandObject.id,
-          typeId: typeObject.id,
+          brandId: brandObject!.id,
+          typeId: typeObject!.id,
         },
-        refetchQueries: [MODEL_LIST, "allModels"],
+        update(cache, { data: { createModel } }: any) {
+          cache.modify({
+            fields: {
+              allModels(existingTypes = []) {
+                const newModelRef = cache.writeFragment({
+                  data: createModel,
+                  fragment: gql`
+                    fragment NewModel on Model {
+                      id
+                      name
+                      brand {
+                        id
+                        name
+                      }
+                      type {
+                        id
+                        name
+                      }
+                    }
+                  `,
+                });
+                return [...existingTypes, newModelRef];
+              },
+            },
+          });
+        },
       });
       setLoading(false);
       setIsModalVisible(false);
@@ -198,18 +222,19 @@ export const ModelTable = ({
     setLoading(true);
     try {
       let { key, name, brand: brandName, type: typeName } = newData;
-      const brand = brandData.allBrands.find(
+      const brand = brandData!.allBrands.find(
         ({ name }: any) => name === brandName
       );
-      const type = typeData.allTypes.find(({ name }: any) => name === typeName);
-      updateModel({
+      const type = typeData?.allTypes.find(
+        ({ name }: any) => name === typeName
+      );
+      updateModelMutation({
         variables: {
           id: key,
           name,
-          brand: brand.id,
-          type: type.id,
+          brand: brand?.id,
+          type: type?.id,
         },
-        refetchQueries: [MODEL_LIST, "allModels"],
       });
       setLoading(false);
       return succesMessage("Model updated");
@@ -257,7 +282,7 @@ export const ModelTable = ({
     }
   };
 
-  const preparedDataToSelect = (data: Record<string, any>[]) => {
+  const preparedDataToSelect = (data: Brand[] | Type[]) => {
     return data.map((v) => {
       return {
         id: v.id,
@@ -285,7 +310,7 @@ export const ModelTable = ({
           placeholder="Change a type"
           optionFilterProp="children"
         >
-          {preparedDataToSelect(typeData.allTypes).map((v) => {
+          {preparedDataToSelect(typeData?.allTypes as Brand[]).map((v) => {
             return (
               <Option key={v.id} value={v.name}>
                 {v.name}
@@ -297,7 +322,7 @@ export const ModelTable = ({
     } else if (inputType === "select" && dataIndex === "brand") {
       inputNode = (
         <Select showSearch style={{ width: 200 }} optionFilterProp="children">
-          {preparedDataToSelect(brandData.allBrands).map((v) => {
+          {preparedDataToSelect(typeData?.allTypes as Brand[]).map((v) => {
             return (
               <Option key={v.id} value={v.name}>
                 {v.name}
@@ -469,14 +494,14 @@ export const ModelTable = ({
             pageSizeOptions: ["10", "25", "50", "100", "200"],
             defaultPageSize: 50,
             onChange: onChangePage,
-            total: modeldData.allModelsMeta.count,
+            total: modeldData?.allModelsMeta.count as number,
           }}
           columns={mergedColumns}
         />
       </Form>
       <ModalCreateModel
-        brandData={preparedDataToSelect(brandData.allBrands)}
-        typeData={preparedDataToSelect(typeData.allTypes)}
+        brandData={preparedDataToSelect(brandData?.allBrands as Brand[])}
+        typeData={preparedDataToSelect(typeData?.allTypes as Type[])}
         isModalVisible={isModalVisible}
         handleOk={handleOk}
         handleCancel={handleCancel}

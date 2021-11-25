@@ -1,8 +1,8 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useEffect, useState } from "react";
 import {
   Table,
   Input,
-  InputNumber,
   Popconfirm,
   Form,
   Typography,
@@ -10,20 +10,16 @@ import {
   Row,
   BackTop,
 } from "antd";
-import { useMutation, useQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
 import { errorMessage, succesMessage } from "../../helpres/messages";
-import { debounce } from "ts-debounce";
-import { TYPE_LIST, UPDATE_TYPE } from "../Types/type-qls";
-import { BRAND_LIST, BRAND_UPDATE, CREATE_BRAND } from "./brand-gql";
 import { computePage } from "../../helpres/pagination-helper";
 import {
-  CloseOutlined,
   EditOutlined,
   PlusOutlined,
-  SaveOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
 import { ModalCreateBrand } from "./BrandCreateModal";
+import { Brand, useAllBrandsQuery, useCreateBrandMutation, useUpdateBrandMutation } from "../../generated/graphql";
 
 interface Item {
   key: string;
@@ -72,8 +68,8 @@ const EditableCell: React.FC<EditableCellProps> = ({
     </td>
   );
 };
-const preparedData = (data: Item[]) => {
-  return data.map((value: Record<string, any>, i: number) => {
+const preparedData = (data: Brand[]) => {
+  return data.map((value: Brand, i: number) => {
     return {
       key: value.id,
       name: value.name,
@@ -97,7 +93,7 @@ export const BrandTable = ({
     error,
     data: brandData,
     refetch,
-  } = useQuery(BRAND_LIST, {
+  } = useAllBrandsQuery({
     variables: {
       page,
       perPage,
@@ -106,10 +102,10 @@ export const BrandTable = ({
       filter: {},
     },
   });
-  const [updateBrand] = useMutation(BRAND_UPDATE);
+  const [updateBrandMutation] = useUpdateBrandMutation();
   const [form] = Form.useForm();
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [createBrand] = useMutation(CREATE_BRAND);
+  const [createBrandMutation] = useCreateBrandMutation();
   const [data, setData] = useState<Item[]>();
   const [searchName, setSearchName] = useState("");
   const [editingKey, setEditingKey] = useState("");
@@ -124,7 +120,7 @@ export const BrandTable = ({
 
   useEffect(() => {
     if (!brandsLoading && brandData) {
-      setData(preparedData(brandData.allBrands));
+      setData(preparedData(brandData.allBrands as Brand[]));
     }
   }, [brandsLoading, brandData]);
 
@@ -135,15 +131,32 @@ export const BrandTable = ({
   const handleOk = (newBrand: string) => {
     setLoading(true);
     try {
-      createBrand({
+      createBrandMutation({
         variables: {
           name: newBrand,
         },
-        refetchQueries: [BRAND_LIST, "allBrands"],
+        update(cache, { data: { createBrand } }: any) {
+          cache.modify({
+            fields: {
+              allBrands(existingTypes = []) {
+                const newBrandRef = cache.writeFragment({
+                  data: createBrand,
+                  fragment: gql`
+                    fragment NewBrand on Brand {
+                      id
+                      name
+                    }
+                  `,
+                });
+                return [...existingTypes, newBrandRef];
+              },
+            },
+          });
+        },
       });
       setLoading(false);
       setIsModalVisible(false);
-      return succesMessage("Brand was created");
+      return succesMessage("Бренд создан");
     } catch (error) {
       setLoading(false);
       setIsModalVisible(false);
@@ -159,15 +172,14 @@ export const BrandTable = ({
     let { name, key } = newData;
     setLoading(true);
     try {
-      updateBrand({
+      updateBrandMutation({
         variables: {
           id: key,
           name,
         },
-        refetchQueries: [BRAND_LIST, "allBrands"],
       });
       setLoading(false);
-      return succesMessage("Brand updated");
+      return succesMessage("Бренд обновлен");
     } catch (error) {
       setLoading(false);
       return errorMessage("Brand update error");
@@ -247,7 +259,7 @@ export const BrandTable = ({
       dataIndex: "create",
     },
     {
-      title: "Name",
+      title: "Бренд",
       dataIndex: "name",
       editable: true,
       filterDropdown: () => {
@@ -284,10 +296,10 @@ export const BrandTable = ({
               onClick={() => save(record.key)}
               style={{ marginRight: 8 }}
             >
-              Save
+              Сохранить
             </a>
-            <Popconfirm title="Sure to cancel?" onConfirm={cancel}>
-              <a>Cancel</a>
+            <Popconfirm title="Отменить?" onConfirm={cancel}>
+              <a>Отмена</a>
             </Popconfirm>
           </span>
         ) : (
@@ -335,7 +347,7 @@ export const BrandTable = ({
             pageSizeOptions: ["10", "25", "50", "100", "200"],
             defaultPageSize: 50,
             onChange: onChangePage,
-            total: brandData.allBrandsMeta.count,
+            total: brandData!.allBrandsMeta.count as number,
           }}
           columns={mergedColumns}
         />

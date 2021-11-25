@@ -1,17 +1,17 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { Form, Input, Button, Checkbox, Row, Col } from "antd";
-import {
-  getAuth,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-} from "firebase/auth";
-import { initializeApp } from "firebase/app";
-import { firebaseConfig } from "./../fireBase";
-import { useEffect } from "react";
+// import {
+//   getAuth,
+//   RecaptchaVerifier,
+//   signInWithPhoneNumber,
+// } from "firebase/auth";
+// import { initializeApp } from "firebase/app";
+// import { firebaseConfig } from "./../fireBase";
+// import { useEffect } from "react";
 
 export const LoginPage = () => {
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
+  // const app = initializeApp(firebaseConfig);
+  // const auth = getAuth(app);
   let navigate = useNavigate();
   let location = useLocation();
 
@@ -25,35 +25,35 @@ export const LoginPage = () => {
   };
 
 
-  const configureCaptcha = () => {
-    window.recaptchaVerifier = new RecaptchaVerifier(
-      "sign-in-button",
-      {
-        size: "invisible",
-        callback: (response: any) => {
-          // reCAPTCHA solved, allow signInWithPhoneNumber.
-          onSignInSubmit();
-          console.log("Recaptcha verified");
-        },
-        defaultCountry: "UA"
-      },
-      auth
-    );
-  }
+  // const configureCaptcha = () => {
+  //   window.recaptchaVerifier = new RecaptchaVerifier(
+  //     "sign-in-button",
+  //     {
+  //       size: "invisible",
+  //       callback: (response: any) => {
+  //         // reCAPTCHA solved, allow signInWithPhoneNumber.
+  //         onSignInSubmit();
+  //         console.log("Recaptcha verified");
+  //       },
+  //       defaultCountry: "UA"
+  //     },
+  //     auth
+  //   );
+  // }
 
-  const onSignInSubmit = () => {
-    configureCaptcha()
-    const appVerifier = window.recaptchaVerifier;
+  // const onSignInSubmit = () => {
+  //   configureCaptcha()
+  //   const appVerifier = window.recaptchaVerifier;
     
-    signInWithPhoneNumber(auth, "+380954775236", appVerifier)
-    .then((confirmationResult) => {
-      window.confirmationResult = confirmationResult;
-      console.log(confirmationResult);
-      // ...
-    }).catch((error) => {
-      console.log("own error" + error);
-    });
-  }
+  //   signInWithPhoneNumber(auth, "+380954775236", appVerifier)
+  //   .then((confirmationResult) => {
+  //     window.confirmationResult = confirmationResult;
+  //     console.log(confirmationResult);
+  //     // ...
+  //   }).catch((error) => {
+  //     console.log("own error" + error);
+  //   });
+  // }
 
   return (
     <Row
@@ -79,7 +79,6 @@ export const LoginPage = () => {
           wrapperCol={{ span: 16 }}
           initialValues={{ remember: true }}
           onFinish={onFinish}
-          onSubmitCapture={onSignInSubmit}
           size={"large"}
           style={{ padding: "1rem" }}
           autoComplete="off"
@@ -108,7 +107,7 @@ export const LoginPage = () => {
           </Form.Item>
           <Form.Item>
             <Button
-              id="sign-in-button"
+              // id="sign-in-button"
               type="primary"
               htmlType="submit"
             >

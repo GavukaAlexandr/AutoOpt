@@ -4,9 +4,8 @@ import { Card, Divider, Typography, Input, Button } from "antd";
 import { useEffect, useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { Order, useUpdateUserMutation } from "../../generated/graphql";
 import { errorMessage, succesMessage } from "../../helpres/messages";
-import { USER_UPDATE } from "../Users/user-gql";
-import { ORDER, UPDATE_ORDER } from "./order-qgl";
 
 const { TextArea } = Input;
 
@@ -16,13 +15,13 @@ export const UserCard = ({
   data,
   cardContent,
 }: {
-  data: Record<string, any>;
+  data: Order;
   cardContent: Record<string, any>;
 }) => {
-  const [updateUser] = useMutation(USER_UPDATE);
-  const [comment, setComment] = useState(data.Order.user.comment);
-  const [userFirstName, setUserFirstName] = useState(data.Order.user.firstName);
-  const [userLastName, setUsetLastName] = useState(data.Order.user.lastName);
+  const [updateUser] = useUpdateUserMutation();
+  const [comment, setComment] = useState(data.user.comment);
+  const [userFirstName, setUserFirstName] = useState(data.user.firstName);
+  const [userLastName, setUsetLastName] = useState(data.user.lastName);
   const [saveButtonState, setSaveButtonState] = useState(true);
   const [cancelButtonState, setCancelButtonState] = useState(true);
 
@@ -30,7 +29,7 @@ export const UserCard = ({
     updateUser({
       variables: {
         updateUserInput: {
-          id: data.Order.user.id,
+          id: data.user.id,
           comment: comment,
         },
       },
@@ -42,13 +41,12 @@ export const UserCard = ({
       updateUser({
         variables: {
           updateUserInput: {
-            id: data.Order.user.id,
+            id: data.user.id,
             firstName: userFirstName,
             lastName: userLastName,
             comment: comment,
           },
         },
-        refetchQueries: [ORDER, "Order"],
       });
       setSaveButtonState(true);
       setCancelButtonState(true);
@@ -59,9 +57,9 @@ export const UserCard = ({
   };
 
   const cancelChanges = () => {
-    setUserFirstName(data.Order.user.firstName);
-    setUsetLastName(data.Order.user.lastName);
-    setComment(data.Order.user.comment);
+    setUserFirstName(data.user.firstName);
+    setUsetLastName(data.user.lastName);
+    setComment(data.user.comment);
     return succesMessage('Changes was discard');
   }
 
@@ -76,17 +74,17 @@ export const UserCard = ({
   const changeButtonsState = () => {
     if (
       userFirstName.length !== 0 &&
-      userFirstName !== data.Order.user.firstName
+      userFirstName !== data.user.firstName
     ) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
     } else if (
       userLastName.length !== 0 &&
-      userLastName !== data.Order.user.lastName
+      userLastName !== data.user.lastName
     ) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
-    } else if (comment !== data.Order.user.comment) {
+    } else if (comment !== data.user.comment) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
     }
@@ -118,7 +116,7 @@ export const UserCard = ({
         hoverable={false}
       >
         <Title style={{ display: "inline" }} level={5}>
-          First Name:
+          Имя:
         </Title>{" "}
         <Paragraph editable={{ onChange: setUserFirstName }}>
           {userFirstName}
@@ -129,7 +127,7 @@ export const UserCard = ({
         hoverable={false}
       >
         <Title style={{ display: "inline" }} level={5}>
-          Last Name:
+          Фамилия:
         </Title>{" "}
         <Paragraph editable={{ onChange: setUsetLastName }}>
           {userLastName}
@@ -141,12 +139,12 @@ export const UserCard = ({
         hoverable={false}
       >
         <Title style={{ display: "inline" }} level={5}>
-          Phone:
+          Телефон:
         </Title>{" "}
         <h3 style={{ display: "inline" }}>
           <Paragraph style={{ display: "inline" }} copyable>
             {" "}
-            {data.Order.user.phoneNumber}
+            {data.user.phoneNumber}
           </Paragraph>
         </h3>
       </Card.Grid>
@@ -156,12 +154,12 @@ export const UserCard = ({
         hoverable={false}
       >
         <Title style={{ display: "inline" }} level={5}>
-          Email:
+          Почта:
         </Title>{" "}
         <h3 style={{ display: "inline" }}>
           <Paragraph style={{ display: "inline" }} copyable>
             {" "}
-            {data.Order.user.email}
+            {data.user.email}
           </Paragraph>
         </h3>
       </Card.Grid>
@@ -170,7 +168,7 @@ export const UserCard = ({
         <Title style={{ display: "inline" }} level={5}>
           Telegram:
         </Title>{" "}
-        {data.Order.user.telegramNotification ? (
+        {data.user.telegramNotification ? (
           <CheckCircleOutlined style={{ fontSize: "20px", color: "green" }} />
         ) : (
           <CloseCircleOutlined style={{ fontSize: "20px", color: "red" }} />
@@ -180,7 +178,7 @@ export const UserCard = ({
         <Title style={{ display: "inline" }} level={5}>
           Viber:
         </Title>{" "}
-        {data.Order.user.viberNotification ? (
+        {data.user.viberNotification ? (
           <CheckCircleOutlined style={{ fontSize: "20px", color: "green" }} />
         ) : (
           <CloseCircleOutlined style={{ fontSize: "20px", color: "red" }} />
@@ -190,7 +188,7 @@ export const UserCard = ({
         <Title style={{ display: "inline" }} level={5}>
           Viber:
         </Title>{" "}
-        {data.Order.user.phoneNotification ? (
+        {data.user.phoneNotification ? (
           <CheckCircleOutlined style={{ fontSize: "20px", color: "green" }} />
         ) : (
           <CloseCircleOutlined style={{ fontSize: "20px", color: "red" }} />
@@ -199,11 +197,11 @@ export const UserCard = ({
 
       <Card.Grid style={cardContent} hoverable={false}>
         <Title style={{ display: "inline" }} level={5}>
-          Comment about User:{" "}
+          Коментарий о пользователе:{" "}
         </Title>
         <ReactQuill
           theme="snow"
-          value={comment}
+          value={comment as string}
           onChange={(v) => setComment(v)}
         />{" "}
       </Card.Grid>
@@ -222,7 +220,7 @@ export const UserCard = ({
             border: "none",
           }}
         >
-          Cancel
+          Отмена
         </Button>
         <Button
           type="primary"
@@ -236,7 +234,7 @@ export const UserCard = ({
             border: "none",
           }}
         >
-          Save
+          Сохранить
         </Button>
       </Card.Grid>
     </Card>

@@ -10,16 +10,16 @@ import {
   Spin,
   BackTop,
 } from "antd";
-import { useMutation, useQuery } from "@apollo/client";
 import { errorMessage, succesMessage } from "../../helpres/messages";
-import { CREATE_TYPE, TYPE_LIST, UPDATE_TYPE } from "./type-qls";
+import { EditOutlined, PlusOutlined } from "@ant-design/icons";
 import {
-  CloseOutlined,
-  EditOutlined,
-  PlusOutlined,
-  SaveOutlined,
-} from "@ant-design/icons";
+  Type,
+  useAllTypesQuery,
+  useCreateTypeMutation,
+  useUpdateTypeMutation,
+} from "../../generated/graphql";
 import { ModalCreateType } from "./TypeCreateModal";
+import gql from "graphql-tag";
 
 interface Item {
   key: string;
@@ -30,7 +30,7 @@ interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
   editing: boolean;
   dataIndex: string;
   title: any;
-  inputType: "number" | "text";
+  inputType: "text";
   record: Item;
   index: number;
   children: React.ReactNode;
@@ -46,7 +46,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
   children,
   ...restProps
 }) => {
-  const inputNode = inputType === "number" ? <InputNumber /> : <Input />;
+  const inputNode = <Input />;
   return (
     <td {...restProps}>
       {editing ? (
@@ -56,7 +56,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
           rules={[
             {
               required: true,
-              message: `Please Input ${title}!`,
+              message: `Введите ${title}!`,
             },
           ]}
         >
@@ -68,8 +68,8 @@ const EditableCell: React.FC<EditableCellProps> = ({
     </td>
   );
 };
-const preparedData = (data: Item[]) => {
-  return data.map((value: Record<string, any>, i: number) => {
+const preparedData = (data: Array<Type>) => {
+  return data.map((value: Type, i: number) => {
     return {
       key: value.id,
       name: value.name,
@@ -92,18 +92,16 @@ export const TypeTable = ({
     loading,
     error,
     data: typeData,
-    refetch,
-  } = useQuery(TYPE_LIST, {
+  } = useAllTypesQuery({
     variables: {
       page,
       perPage,
       sortField,
       sortOrder,
-      filter: {},
     },
   });
-  const [createType] = useMutation(CREATE_TYPE);
-  const [updateType] = useMutation(UPDATE_TYPE);
+  const [createTypeMutation] = useCreateTypeMutation();
+  const [updateTypeMutation] = useUpdateTypeMutation();
   const [form] = Form.useForm();
   const [data, setData] = useState<Item[]>();
   const [editingKey, setEditingKey] = useState("");
@@ -118,7 +116,7 @@ export const TypeTable = ({
 
   useEffect(() => {
     if (!loading && typeData) {
-      setData(preparedData(typeData.allTypes));
+      setData(preparedData(typeData.allTypes as Type[]));
     }
   }, [loading, typeData]);
 
@@ -127,16 +125,33 @@ export const TypeTable = ({
   };
 
   const handleOk = (newType: string) => {
-    console.log(newType);
     try {
-      createType({
+      createTypeMutation({
         variables: {
           name: newType,
         },
-        refetchQueries: [TYPE_LIST, "allTypes"],
+        update(cache, { data: { createType } }: any) {
+          cache.modify({
+            fields: {
+              allTypes(existingTypes = []) {
+                const newTypeRef = cache.writeFragment({
+                  data: createType,
+                  fragment: gql`
+                    fragment NewType on Type {
+                      id
+                      name
+                    }
+                  `,
+                });
+                return [...existingTypes, newTypeRef];
+              },
+            },
+          });
+        },
       });
+      console.log(createTypeMutation);
       setIsModalVisible(false);
-      return succesMessage("Type was created");
+      return succesMessage("Тип транспорта создан");
     } catch (error) {
       setIsModalVisible(false);
       return errorMessage(`${error}`);
@@ -150,14 +165,13 @@ export const TypeTable = ({
   const typeUpdate = (newData: Item[]) => {
     let [{ name, key }] = newData;
     try {
-      updateType({
+      updateTypeMutation({
         variables: {
           id: key,
           name,
         },
-        refetchQueries: [TYPE_LIST, "allTypes"],
       });
-      return succesMessage("Type updated");
+      return succesMessage("Тип транспорта обновлен");
     } catch (error) {
       return errorMessage(`${error}`);
     }
@@ -210,7 +224,7 @@ export const TypeTable = ({
       dataIndex: "create",
     },
     {
-      title: "Name",
+      title: "Тип транспорта",
       dataIndex: "name",
       editable: true,
     },
@@ -226,10 +240,10 @@ export const TypeTable = ({
               onClick={() => save(record.key)}
               style={{ marginRight: 8 }}
             >
-              Save
+              Сохранить
             </a>
-            <Popconfirm title="Sure to cancel?" onConfirm={cancel}>
-              <a>Cancel</a>
+            <Popconfirm title="Отменить?" onConfirm={cancel}>
+              <a>Отмена</a>
             </Popconfirm>
           </span>
         ) : (
@@ -252,7 +266,7 @@ export const TypeTable = ({
       ...col,
       onCell: (record: Item) => ({
         record,
-        inputType: col.dataIndex === "age" ? "number" : "text",
+        inputType: col.dataIndex,
         dataIndex: col.dataIndex,
         title: col.title,
         editing: isEditing(record),

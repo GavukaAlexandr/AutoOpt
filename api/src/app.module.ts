@@ -43,7 +43,7 @@ import { EnumResolver } from './enum.resolver';
       debug: true,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       playground: true,
-      sortSchema: true
+      sortSchema: true,
       // typePaths: ['./**/*.graphql'],
       // definitions: {
       //   path: join(process.cwd(), 'src/graphql.ts'),

@@ -14,13 +14,25 @@ import {
 } from "antd";
 import { debounce } from "ts-debounce";
 import { errorMessage, succesMessage } from "../../helpres/messages";
-import { BRAND_LIST_OF_TYPE } from "../Brands/brand-gql";
-import { MODEL_LIST } from "../Models/model-gql";
-import { TYPE_LIST } from "../Types/type-qls";
-import { ORDER, UPDATE_ORDER } from "./order-qgl";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { coloredTags } from "../../helpres/ColoredTags";
+import {
+  BodyType,
+  Brand,
+  DriveType,
+  FuelType,
+  Model,
+  Order,
+  OrderStatus,
+  PartType,
+  Transmission,
+  Type,
+  useAllBrandsOfTypeQuery,
+  useAllModelsQuery,
+  useAllTypesQuery,
+  useUpdateOrderMutation,
+} from "../../generated/graphql";
 
 const { TextArea } = Input;
 
@@ -30,52 +42,44 @@ const { Option } = Select;
 export const OrderCard = ({
   data,
   cardContent,
-  statuses,
-  transmissions,
-  partTypes,
-  driveTypes,
-  bodyTypes,
-  fuelTypes,
 }: {
-  data: Record<string, any>;
+  data: Order;
   cardContent: Record<string, any>;
-  statuses: Record<string, any>[];
-  transmissions: Record<string, any>[];
-  partTypes: Record<string, any>[];
-  driveTypes: Record<string, any>[];
-  bodyTypes: Record<string, any>[];
-  fuelTypes: Record<string, any>[];
 }) => {
-  const [carPart, setCarPart] = useState(data.Order.carPart);
+  const [carPart, setCarPart] = useState(data.carPart);
   const [saveButtonState, setSaveButtonState] = useState(true);
   const [cancelButtonState, setCancelButtonState] = useState(true);
-  const [status, setStatus] = useState(data.Order.status);
-  const [transmission, setTransmission] = useState(data.Order.transmission);
-  const [partType, setTypePart] = useState(data.Order.partOfType);
-  const [bodyType, setBodyType] = useState(data.Order.bodyType);
-  const [driveType, setDriveType] = useState(data.Order.drive);
-  const [fuelType, setFuelType] = useState(data.Order.fuel);
-  const [comment, setComment] = useState(data.Order.comment);
-  const [engineVolume, setEngineVolume] = useState(
-    Number(data.Order.engineVolume)
+  const [status, setStatus] = useState<OrderStatus>(data.status);
+  const [transmission, setTransmission] = useState<Transmission>(
+    data.transmission
   );
+  const [partType, setTypePart] = useState<PartType>(data.partOfType);
+  const [bodyType, setBodyType] = useState<BodyType>(data.bodyType);
+  const [driveType, setDriveType] = useState<DriveType>(data.drive);
+  const [fuelType, setFuelType] = useState<FuelType[]>(data.fuel);
+  const [comment, setComment] = useState(data.comment);
+  const [engineVolume, setEngineVolume] = useState(Number(data.engineVolume));
+
   const [type, setType] = useState({
-    name: data.Order.model.type.name,
-    id: data.Order.model.type.id,
+    name: data.model.type.name,
+    id: data.model.type.id,
     isOpen: false,
   });
+
   const [brand, setBrand] = useState({
-    name: data.Order.model.brand.name,
-    id: data.Order.model.brand.id,
+    name: data.model.brand.name,
+    id: data.model.brand.id,
     isOpen: false,
   });
+
   const [model, setModel] = useState({
-    name: data.Order.model.name,
-    id: data.Order.model.id,
+    name: data.model.name,
+    id: data.model.id,
     isOpen: false,
   });
-  const [updateOrder] = useMutation(UPDATE_ORDER);
-  const { loading: typeLoading, data: typeData } = useQuery(TYPE_LIST, {
+
+  const [updateOrder] = useUpdateOrderMutation();
+  const { loading: typeLoading, data: typeData } = useAllTypesQuery({
     variables: {
       page: 0,
       perPage: 100,
@@ -83,34 +87,36 @@ export const OrderCard = ({
       sortOrder: "asc",
     },
   });
+
   const {
     loading: modelLoading,
     data: modelData,
     refetch: modelRefetch,
-  } = useQuery(MODEL_LIST, {
+  } = useAllModelsQuery({
     variables: {
       page: 0,
       perPage: 100,
       sortField: "id",
       sortOrder: "asc",
       filter: {
-        brandId: data.Order.model.brand.id,
-        typeId: data.Order.model.type.id,
+        brandId: data.model.brand.id,
+        typeId: data.model.type.id,
         q: "",
       },
     },
   });
+
   const {
     loading: brandLoading,
     data: brandData,
     refetch: brandRefetch,
-  } = useQuery(BRAND_LIST_OF_TYPE, {
+  } = useAllBrandsOfTypeQuery({
     variables: {
       page: 0,
       perPage: 100,
       filter: {
         q: "",
-        typeId: data.Order.model.type.id,
+        typeId: data.model.type.id,
       },
     },
   });
@@ -127,8 +133,8 @@ export const OrderCard = ({
     return coloredArrayTags(onPreventMouseDown, value, closable);
   };
 
-  const optionsForTagRender = (data: Record<string, any>[]) => {
-    return data.map((data: Record<string, any>) => ({ value: data.name }));
+  const optionsForTagRender = (data: string[]) => {
+    return data.map((data: string) => ({ value: data.toUpperCase() }));
   };
 
   const coloredArrayTags = (
@@ -170,12 +176,13 @@ export const OrderCard = ({
       saveComment();
     }, 5000);
     return () => clearTimeout(delayDebounceFn);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [comment]);
 
   const saveComment = () => {
     updateOrder({
       variables: {
-        id: data.Order.id,
+        id: data.id,
         updateOrderInput: {
           comment: comment,
         },
@@ -184,40 +191,50 @@ export const OrderCard = ({
   };
 
   const statusMenu = (
-    <Menu onClick={(v) => setStatus(v.key)}>
-      {statuses.map((data) => {
-        return <Menu.Item key={data.name}>{coloredTags(data.name)}</Menu.Item>;
+    <Menu onClick={(v) => setStatus(v.key as OrderStatus)}>
+      {Object.keys(OrderStatus).map((data: string) => {
+        return (
+          <Menu.Item key={data.toUpperCase()}>{coloredTags(data)}</Menu.Item>
+        );
       })}
     </Menu>
   );
 
   const bodyTypeMenu = (
-    <Menu onClick={(v) => setBodyType(v.key)}>
-      {bodyTypes.map((data) => {
-        return <Menu.Item key={data.name}>{coloredTags(data.name)}</Menu.Item>;
+    <Menu onClick={(v) => setBodyType(v.key as BodyType)}>
+      {Object.keys(BodyType).map((data: string) => {
+        return (
+          <Menu.Item key={data.toUpperCase()}>{coloredTags(data)}</Menu.Item>
+        );
       })}
     </Menu>
   );
 
   const transmissionMenu = (
-    <Menu onClick={(v) => setTransmission(v.key)}>
-      {transmissions.map((data) => {
-        return <Menu.Item key={data.name}>{coloredTags(data.name)}</Menu.Item>;
+    <Menu onClick={(v) => setTransmission(v.key as Transmission)}>
+      {Object.keys(Transmission).map((data: string) => {
+        return (
+          <Menu.Item key={data.toUpperCase()}>{coloredTags(data)}</Menu.Item>
+        );
       })}
     </Menu>
   );
 
   const partTypeMenu = (
-    <Menu onClick={(v) => setTypePart(v.key)}>
-      {partTypes.map((data) => {
-        return <Menu.Item key={data.name}>{coloredTags(data.name)}</Menu.Item>;
+    <Menu onClick={(v) => setTypePart(v.key as PartType)}>
+      {Object.keys(PartType).map((data: string) => {
+        return (
+          <Menu.Item key={data.toUpperCase()}>{coloredTags(data)}</Menu.Item>
+        );
       })}
     </Menu>
   );
   const driveTypeMenu = (
-    <Menu onClick={(v) => setDriveType(v.key)}>
-      {driveTypes.map((data) => {
-        return <Menu.Item key={data.name}>{coloredTags(data.name)}</Menu.Item>;
+    <Menu onClick={(v) => setDriveType(v.key as DriveType)}>
+      {Object.keys(DriveType).map((data: string) => {
+        return (
+          <Menu.Item key={data.toUpperCase()}>{coloredTags(data)}</Menu.Item>
+        );
       })}
     </Menu>
   );
@@ -235,7 +252,7 @@ export const OrderCard = ({
     try {
       updateOrder({
         variables: {
-          id: data.Order.id,
+          id: data.id,
           updateOrderInput: {
             modelId: model.id,
             carPart: carPart,
@@ -248,90 +265,83 @@ export const OrderCard = ({
             comment: comment,
           },
         },
-        refetchQueries: [ORDER, "Order"],
       });
       setCancelButtonState(true);
       setSaveButtonState(true);
-      return succesMessage("Order updated");
+      return succesMessage("Заказ обновлен");
     } catch (error) {
       return errorMessage(`${error}`);
     }
   };
 
   const cancelChanges = () => {
-    setCarPart(data.Order.carPart);
-    setStatus(data.Order.status);
-    setTransmission(data.Order.transmission);
-    setTypePart(data.Order.partOfType);
-    setBodyType(data.Order.bodyType);
-    setDriveType(data.Order.drive);
-    setFuelType(data.Order.fuel);
-    setComment(data.Order.comment);
-    setEngineVolume(Number(data.Order.engineVolume));
+    setCarPart(data.carPart);
+    setStatus(data.status);
+    setTransmission(data.transmission);
+    setTypePart(data.partOfType);
+    setBodyType(data.bodyType);
+    setDriveType(data.drive);
+    setFuelType(data.fuel);
+    setComment(data.comment);
+    setEngineVolume(Number(data.engineVolume));
     setType({
-      name: data.Order.model.type.name,
-      id: data.Order.model.type.id,
+      name: data.model.type.name,
+      id: data.model.type.id,
       isOpen: false,
     });
     setBrand({
-      name: data.Order.model.brand.name,
-      id: data.Order.model.brand.id,
+      name: data.model.brand.name,
+      id: data.model.brand.id,
       isOpen: false,
     });
     setModel({
-      name: data.Order.model.name,
-      id: data.Order.model.id,
+      name: data.model.name,
+      id: data.model.id,
       isOpen: false,
     });
-    return succesMessage("Chages was discard");
+    return succesMessage("Изменения были сброшены");
   };
 
   const arraysEqual = (a1: Array<any>, a2: Array<any>) => {
-    console.log(JSON.stringify(a1) == JSON.stringify(a2));
-    return JSON.stringify(a1) == JSON.stringify(a2);
+    console.log(JSON.stringify(a1) === JSON.stringify(a2));
+    return JSON.stringify(a1) === JSON.stringify(a2);
   };
 
   const changeButtonState = () => {
-    if (carPart.length !== 0 && carPart !== data.Order.carPart) {
+    if (carPart.length !== 0 && carPart !== data.carPart) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
-    } else if (type.id.length !== 0 && type.id !== data.Order.model.type.id) {
+    } else if (type.id.length !== 0 && type.id !== data.model.type.id) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
-    } else if (
-      brand.id.length !== 0 &&
-      brand.id !== data.Order.model.brand.id
-    ) {
+    } else if (brand.id.length !== 0 && brand.id !== data.model.brand.id) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
-    } else if (model.id.length !== 0 && model.id !== data.Order.model.id) {
+    } else if (model.id.length !== 0 && model.id !== data.model.id) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
-    } else if (status !== data.Order.status) {
+    } else if (status !== data.status) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
-    } else if (transmission !== data.Order.transmission) {
+    } else if (transmission !== data.transmission) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
-    } else if (partType !== data.Order.partOfType) {
+    } else if (partType !== data.partOfType) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
-    } else if (bodyType !== data.Order.bodyType) {
+    } else if (bodyType !== data.bodyType) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
-    } else if (driveType !== data.Order.drive) {
+    } else if (driveType !== data.drive) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
-    } else if (
-      fuelType !== data.Order.fuel &&
-      !arraysEqual(fuelType, data.Order.fuel)
-    ) {
+    } else if (fuelType !== data.fuel && !arraysEqual(fuelType, data.fuel)) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
-    } else if (engineVolume !== Number(data.Order.engineVolume)) {
+    } else if (engineVolume !== Number(data.engineVolume)) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
-    } else if (comment !== data.Order.comment) {
+    } else if (comment !== data.comment) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
     }
@@ -358,7 +368,7 @@ export const OrderCard = ({
   ]);
 
   const onChangeTypesSelect = (value: string) => {
-    const typeFromValue = getDataFromValue(typeData.allTypes, value);
+    const typeFromValue = getDataFromValue(typeData?.allTypes as Type[], value);
     setType({ isOpen: false, name: typeFromValue.name, id: typeFromValue.id });
     setBrand({ isOpen: true, name: "", id: "" });
     setModel({ isOpen: false, name: "", id: "" });
@@ -374,7 +384,10 @@ export const OrderCard = ({
     }
   };
   const onChangeModelsSelect = (value: any) => {
-    const modelFromValue = getDataFromValue(modelData.allModels, value);
+    const modelFromValue = getDataFromValue(
+      modelData?.allModels as Model[],
+      value
+    );
     setModel({
       isOpen: false,
       name: modelFromValue.name,
@@ -382,7 +395,7 @@ export const OrderCard = ({
     });
   };
 
-  const getDataFromValue = (data: Record<string, any>[], value: string) => {
+  const getDataFromValue = (data: any[], value: string) => {
     const result: Record<string, any> | undefined = data.find(
       ({ id }) => id === value
     );
@@ -391,7 +404,10 @@ export const OrderCard = ({
   };
 
   const onChangeBrandsSelect = (value: string) => {
-    const brandFromValue = getDataFromValue(brandData.allBrandsOfType, value);
+    const brandFromValue = getDataFromValue(
+      brandData?.allBrandsOfType as Brand[],
+      value
+    );
     setBrand({
       isOpen: false,
       name: brandFromValue.name,
@@ -457,7 +473,7 @@ export const OrderCard = ({
         hoverable={false}
       >
         <Title style={{ display: "inline" }} level={4}>
-          Car part:{" "}
+          Запчасть:{" "}
         </Title>
         <Paragraph
           copyable
@@ -472,7 +488,7 @@ export const OrderCard = ({
 
       <Card.Grid style={cardContent} hoverable={false}>
         <Title style={{ display: "inline" }} level={5}>
-          Type:{" "}
+          Тип транспорта:{" "}
         </Title>
 
         {!type.isOpen ? (
@@ -518,7 +534,7 @@ export const OrderCard = ({
 
       <Card.Grid style={cardContent} hoverable={false}>
         <Title style={{ display: "inline" }} level={5}>
-          Brand:{" "}
+          Бренд:{" "}
         </Title>
         {!brand.isOpen ? (
           <Tag
@@ -564,7 +580,7 @@ export const OrderCard = ({
 
       <Card.Grid style={cardContent} hoverable={false}>
         <Title style={{ display: "inline" }} level={5}>
-          Model:{" "}
+          Модель:{" "}
         </Title>
         {!model.isOpen ? (
           <Tag
@@ -588,7 +604,6 @@ export const OrderCard = ({
                 isOpen: false,
               }));
             }}
-            // onPopupScroll={onScroll}
             style={{ width: 200 }}
             placeholder="Change a Model"
             optionFilterProp="children"
@@ -611,7 +626,7 @@ export const OrderCard = ({
 
       <Card.Grid style={cardContent} hoverable={false}>
         <Title style={{ display: "inline" }} level={5}>
-          Status:{" "}
+          Статус:{" "}
         </Title>
         <Dropdown
           overlay={statusMenu}
@@ -624,7 +639,7 @@ export const OrderCard = ({
 
       <Card.Grid style={cardContent} hoverable={false}>
         <Title style={{ display: "inline" }} level={5}>
-          Transmission:{" "}
+          Коробка передач :{" "}
         </Title>
         <Dropdown
           overlay={transmissionMenu}
@@ -637,7 +652,7 @@ export const OrderCard = ({
 
       <Card.Grid style={cardContent} hoverable={false}>
         <Title style={{ display: "inline" }} level={5}>
-          Type Part:{" "}
+          Тип запчасти:{" "}
         </Title>
         <Dropdown
           overlay={partTypeMenu}
@@ -650,7 +665,7 @@ export const OrderCard = ({
 
       <Card.Grid style={cardContent} hoverable={false}>
         <Title style={{ display: "inline" }} level={5}>
-          Body Type:{" "}
+          Кузов:{" "}
         </Title>
         <Dropdown
           overlay={bodyTypeMenu}
@@ -663,7 +678,7 @@ export const OrderCard = ({
 
       <Card.Grid style={cardContent} hoverable={false}>
         <Title style={{ display: "inline" }} level={5}>
-          Drive:{" "}
+          Привод:{" "}
         </Title>
         <Dropdown
           overlay={driveTypeMenu}
@@ -675,22 +690,22 @@ export const OrderCard = ({
       </Card.Grid>
       <Card.Grid style={cardContent} hoverable={false}>
         <Title style={{ display: "inline" }} level={5}>
-          Fuel type:{" "}
+          Тип топлива:{" "}
           <Select
-           style={{minWidth: "100px"}}
+            style={{ minWidth: "100px" }}
             mode="multiple"
             showArrow
             tagRender={fuelTagRender}
             value={fuelType}
             onChange={(v) => setFuelType(v)}
-            options={optionsForTagRender(fuelTypes)}
+            options={optionsForTagRender(Object.keys(FuelType))}
           />
         </Title>
       </Card.Grid>
 
       <Card.Grid style={cardContent} hoverable={false}>
         <Title style={{ display: "inline" }} level={5}>
-          Engine volume:{" "}
+          Объем двигателя:{" "}
         </Title>
         <InputNumber
           min={0.1}
@@ -705,22 +720,22 @@ export const OrderCard = ({
 
       <Card.Grid style={cardContent} hoverable={false}>
         <Title style={{ display: "inline" }} level={5}>
-          Created at:{" "}
+          Дата заказа :{" "}
         </Title>
         <Tag>
           <strong>
-            {new Date(data.Order.createdAt).toLocaleDateString("ua-UA")}
+            {new Date(data.createdAt).toLocaleDateString("ua-UA")}
           </strong>
         </Tag>
       </Card.Grid>
 
       <Card.Grid style={cardContent} hoverable={false}>
         <Title style={{ display: "inline" }} level={5}>
-          Comment about current order:{" "}
+          Комментарий о текущем заказе:{" "}
         </Title>
         <ReactQuill
           theme="snow"
-          value={comment}
+          value={comment as string}
           onChange={(v) => setComment(v)}
         />
       </Card.Grid>
@@ -739,7 +754,7 @@ export const OrderCard = ({
             border: "none",
           }}
         >
-          Cancel
+          Отмена
         </Button>
         <Button
           type="primary"
@@ -753,7 +768,7 @@ export const OrderCard = ({
             border: "none",
           }}
         >
-          Save
+          Сохранить
         </Button>
       </Card.Grid>
     </Card>

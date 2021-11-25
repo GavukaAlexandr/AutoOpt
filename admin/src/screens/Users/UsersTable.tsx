@@ -2,15 +2,12 @@ import React, { useEffect, useState } from "react";
 import {
   Table,
   Input,
-  InputNumber,
   Popconfirm,
   Form,
   Typography,
   Row,
   Spin,
 } from "antd";
-import { USER_LIST, USER_UPDATE } from "./user-gql";
-import { useMutation, useQuery } from "@apollo/client";
 import { errorMessage, succesMessage } from "../../helpres/messages";
 import { computePage } from "../../helpres/pagination-helper";
 import {
@@ -20,6 +17,7 @@ import {
   SearchOutlined,
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
+import { useAllUsersQuery, User, useUpdateUserMutation } from "../../generated/graphql";
 
 interface Item {
   key: string;
@@ -63,7 +61,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
           rules={[
             {
               required: true,
-              message: `Please Input ${title}!`,
+              message: `Введите ${title}!`,
             },
           ]}
         >
@@ -75,7 +73,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
     </td>
   );
 };
-const preparedData = (data: Item[]) => {
+const preparedData = (data: any[]) => {
   return data.map((value: Record<string, any>, i: number) => {
     return {
       key: value.id,
@@ -108,7 +106,7 @@ export const UsersTable = ({
     error,
     data: userData,
     refetch,
-  } = useQuery(USER_LIST, {
+  } = useAllUsersQuery({
     variables: {
       page,
       perPage,
@@ -121,7 +119,7 @@ export const UsersTable = ({
   const [searchLastName, setSearchLastName] = useState("");
   const [searchPhone, setSearchPhone] = useState("");
   const [searchEmail, setSearchEmail] = useState("");
-  const [updateUser] = useMutation(USER_UPDATE);
+  const [updateUser] = useUpdateUserMutation();
   const [form] = Form.useForm();
   const [data, setData] = useState<Item[]>();
   const [editingKey, setEditingKey] = useState("");
@@ -157,7 +155,7 @@ export const UsersTable = ({
 
   useEffect(() => {
     if (!loading && userData) {
-      setData(preparedData(userData.allUsers));
+      setData(preparedData(userData.allUsers as User[]));
     }
   }, [loading, userData]);
 
@@ -178,13 +176,12 @@ export const UsersTable = ({
             lastName: lastName,
           },
         },
-        refetchQueries: [USER_LIST, "allUsers"],
       });
       setLoading(false);
-      return succesMessage("User updated");
+      return succesMessage("Пользователь обновлен");
     } catch (error) {
       setLoading(false);
-      return errorMessage(`$User update error`);
+      return errorMessage(`User update error`);
     }
   };
 
@@ -234,7 +231,7 @@ export const UsersTable = ({
   if (error) return <p>Error </p>;
   const columns = [
     {
-      title: "First Name",
+      title: "Имя",
       dataIndex: "firstName",
       editable: true,
       filterDropdown: () => {
@@ -259,7 +256,7 @@ export const UsersTable = ({
     },
 
     {
-      title: "Last Name",
+      title: "Фамилия",
       dataIndex: "lastName",
       editable: true,
       filterDropdown: () => {
@@ -284,7 +281,7 @@ export const UsersTable = ({
     },
 
     {
-      title: "Phone Number",
+      title: "Телефон",
       dataIndex: "phoneNumber",
       filterDropdown: () => {
         return (
@@ -308,7 +305,7 @@ export const UsersTable = ({
     },
 
     {
-      title: "Orders",
+      title: "Заказы",
       dataIndex: "orders",
       render(_: any, record: Item) {
         return <Link to="/">{record.orders}</Link>;
@@ -316,7 +313,7 @@ export const UsersTable = ({
     },
 
     {
-      title: "Email",
+      title: "Почта",
       dataIndex: "email",
       filterDropdown: () => {
         return (
@@ -339,7 +336,7 @@ export const UsersTable = ({
       },
     },
     {
-      title: "Phone",
+      title: "Телефон",
       dataIndex: "phoneNotification",
       width: "5%",
       render(_: any, record: Item) {
@@ -378,7 +375,6 @@ export const UsersTable = ({
     },
 
     {
-      title: "operation",
       dataIndex: "operation",
       width: "5%",
       render: (_: any, record: Item) => {
@@ -441,7 +437,7 @@ export const UsersTable = ({
           pageSizeOptions: ["10", "25", "50", "100", "200"],
           defaultPageSize: 50,
           onChange: onChangePage,
-          total: userData.allUsersMeta.count,
+          total: userData?.allUsersMeta.count as number,
         }}
       />
     </Form>
