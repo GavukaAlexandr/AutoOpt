@@ -4,7 +4,7 @@ import { Card, Divider, Typography, Input, Button } from "antd";
 import { useEffect, useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import { Order, useUpdateUserMutation } from "../../generated/graphql";
+import { Order, UserCarParams, useUpdateUserMutation } from "../../generated/graphql";
 import { errorMessage, succesMessage } from "../../helpres/messages";
 
 const { TextArea } = Input;
@@ -12,16 +12,16 @@ const { TextArea } = Input;
 const { Title, Paragraph } = Typography;
 
 export const UserCard = ({
-  data,
+  record,
   cardContent,
 }: {
-  data: Order;
+  record: Record<string, any>;
   cardContent: Record<string, any>;
 }) => {
   const [updateUser] = useUpdateUserMutation();
-  const [comment, setComment] = useState(data.user.comment);
-  const [userFirstName, setUserFirstName] = useState(data.user.firstName);
-  const [userLastName, setUsetLastName] = useState(data.user.lastName);
+  const [comment, setComment] = useState(record.userComment);
+  const [userFirstName, setUserFirstName] = useState(record.firstName);
+  const [userLastName, setUsetLastName] = useState(record.lastName);
   const [saveButtonState, setSaveButtonState] = useState(true);
   const [cancelButtonState, setCancelButtonState] = useState(true);
 
@@ -29,7 +29,7 @@ export const UserCard = ({
     updateUser({
       variables: {
         updateUserInput: {
-          id: data.user.id,
+          id: record.userId,
           comment: comment,
         },
       },
@@ -41,7 +41,7 @@ export const UserCard = ({
       updateUser({
         variables: {
           updateUserInput: {
-            id: data.user.id,
+            id: record.userId,
             firstName: userFirstName,
             lastName: userLastName,
             comment: comment,
@@ -57,9 +57,9 @@ export const UserCard = ({
   };
 
   const cancelChanges = () => {
-    setUserFirstName(data.user.firstName);
-    setUsetLastName(data.user.lastName);
-    setComment(data.user.comment);
+    setUserFirstName(record.firstName);
+    setUsetLastName(record.lastName);
+    setComment(record.userComment);
     return succesMessage('Changes was discard');
   }
 
@@ -74,17 +74,17 @@ export const UserCard = ({
   const changeButtonsState = () => {
     if (
       userFirstName.length !== 0 &&
-      userFirstName !== data.user.firstName
+      userFirstName !== record.firstName
     ) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
     } else if (
       userLastName.length !== 0 &&
-      userLastName !== data.user.lastName
+      userLastName !== record.lastName
     ) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
-    } else if (comment !== data.user.comment) {
+    } else if (comment !== record.userComment) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
     }
@@ -144,7 +144,7 @@ export const UserCard = ({
         <h3 style={{ display: "inline" }}>
           <Paragraph style={{ display: "inline" }} copyable>
             {" "}
-            {data.user.phoneNumber}
+            {record.phoneNumber}
           </Paragraph>
         </h3>
       </Card.Grid>
@@ -159,7 +159,7 @@ export const UserCard = ({
         <h3 style={{ display: "inline" }}>
           <Paragraph style={{ display: "inline" }} copyable>
             {" "}
-            {data.user.email}
+            {record.email}
           </Paragraph>
         </h3>
       </Card.Grid>
@@ -168,7 +168,7 @@ export const UserCard = ({
         <Title style={{ display: "inline" }} level={5}>
           Telegram:
         </Title>{" "}
-        {data.user.telegramNotification ? (
+        {record.telegramNotification ? (
           <CheckCircleOutlined style={{ fontSize: "20px", color: "green" }} />
         ) : (
           <CloseCircleOutlined style={{ fontSize: "20px", color: "red" }} />
@@ -178,7 +178,7 @@ export const UserCard = ({
         <Title style={{ display: "inline" }} level={5}>
           Viber:
         </Title>{" "}
-        {data.user.viberNotification ? (
+        {record.viberNotification ? (
           <CheckCircleOutlined style={{ fontSize: "20px", color: "green" }} />
         ) : (
           <CloseCircleOutlined style={{ fontSize: "20px", color: "red" }} />
@@ -188,7 +188,7 @@ export const UserCard = ({
         <Title style={{ display: "inline" }} level={5}>
           Viber:
         </Title>{" "}
-        {data.user.phoneNotification ? (
+        {record.phoneNotification ? (
           <CheckCircleOutlined style={{ fontSize: "20px", color: "green" }} />
         ) : (
           <CloseCircleOutlined style={{ fontSize: "20px", color: "red" }} />

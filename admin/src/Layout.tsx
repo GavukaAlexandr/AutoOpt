@@ -30,7 +30,7 @@ const MainLayout = () => {
           selectedKeys={[location.pathname]}
         >
           <Menu.Item key="/" icon={<ShoppingCartOutlined />}>
-            <NavLink to="/">{t('ns1:navOrders')}</NavLink>
+            <NavLink to="/">Заказы</NavLink>
           </Menu.Item>
           <Menu.Item key="/users" icon={<TeamOutlined />}>
             <NavLink to="/users">Пользователи</NavLink>

@@ -17,19 +17,6 @@ export type Scalars = {
   DateTime: any;
 };
 
-export enum BodyType {
-  Cabriolet = 'CABRIOLET',
-  Coupe = 'COUPE',
-  Hatchback = 'HATCHBACK',
-  Limousine = 'LIMOUSINE',
-  Minivan = 'MINIVAN',
-  Pickup = 'PICKUP',
-  Sedan = 'SEDAN',
-  Suv = 'SUV',
-  Universal = 'UNIVERSAL',
-  Van = 'VAN'
-}
-
 export type Brand = {
   __typename?: 'Brand';
   id: Scalars['ID'];
@@ -44,15 +31,33 @@ export type BrandFilter = {
   typeId?: InputMaybe<Scalars['String']>;
 };
 
-export type CreateOrderInput = {
-  bodyType: BodyType;
+export type CreateCarParamsInput = {
+  bodyTypeId: Scalars['ID'];
   carPart: Scalars['String'];
-  drive: DriveType;
+  driveTypeId: Scalars['ID'];
   engineVolume: Scalars['String'];
-  fuel: Array<FuelType>;
+  fuelId: Array<Scalars['ID']>;
   modelId: Scalars['String'];
-  partOfType: PartType;
-  transmission: Transmission;
+  partTypeId: Scalars['ID'];
+  transmissionId: Scalars['ID'];
+  userId: Scalars['String'];
+  vin: Scalars['String'];
+  year: Scalars['String'];
+};
+
+export type CreateOrderInput = {
+  bodyTypeId: Scalars['ID'];
+  carPart: Scalars['String'];
+  comment?: InputMaybe<Scalars['String']>;
+  driveTypeId: Scalars['ID'];
+  engineVolume: Scalars['String'];
+  fuelId: Array<Scalars['ID']>;
+  modelId: Scalars['String'];
+  orderNumber?: InputMaybe<Scalars['String']>;
+  partTypeId: Scalars['ID'];
+  status?: InputMaybe<Scalars['String']>;
+  transmissionId: Scalars['ID'];
+  userCarParamId: Scalars['String'];
   userId: Scalars['String'];
   vin: Scalars['String'];
   year: Scalars['String'];
@@ -69,18 +74,41 @@ export type CreateUserInput = {
   viberNotification: Scalars['Boolean'];
 };
 
-export enum DriveType {
-  Front = 'FRONT',
-  Full = 'FULL',
-  Rear = 'REAR'
-}
+export type IBodyType = {
+  __typename?: 'IBodyType';
+  id: Scalars['ID'];
+  name: Scalars['String'];
+};
 
-export enum FuelType {
-  Diesel = 'DIESEL',
-  Electro = 'ELECTRO',
-  Gasoline = 'GASOLINE',
-  Hybrid = 'HYBRID'
-}
+export type IDriveType = {
+  __typename?: 'IDriveType';
+  id: Scalars['ID'];
+  name: Scalars['String'];
+};
+
+export type IFuelType = {
+  __typename?: 'IFuelType';
+  id: Scalars['ID'];
+  name: Scalars['String'];
+};
+
+export type IOrderStatus = {
+  __typename?: 'IOrderStatus';
+  id: Scalars['ID'];
+  name: Scalars['String'];
+};
+
+export type IPartType = {
+  __typename?: 'IPartType';
+  id: Scalars['ID'];
+  name: Scalars['String'];
+};
+
+export type ITransmission = {
+  __typename?: 'ITransmission';
+  id: Scalars['ID'];
+  name: Scalars['String'];
+};
 
 export type ListMetadata = {
   __typename?: 'ListMetadata';
@@ -105,21 +133,27 @@ export type ModelFilter = {
 export type Mutation = {
   __typename?: 'Mutation';
   createBrand: Brand;
+  createCarParams: UserCarParams;
   createModel: Model;
   createOrder: Order;
   createType: Type;
   createUser: User;
-  deleteOrder: Order;
   updateBrand: Brand;
   updateModel: Model;
   updateOrder: Order;
   updateType: Type;
   updateUser: User;
+  updateUserCarParams: UserCarParams;
 };
 
 
 export type MutationCreateBrandArgs = {
   name?: InputMaybe<Scalars['String']>;
+};
+
+
+export type MutationCreateCarParamsArgs = {
+  createCarParamsInput: CreateCarParamsInput;
 };
 
 
@@ -145,11 +179,6 @@ export type MutationCreateUserArgs = {
 };
 
 
-export type MutationDeleteOrderArgs = {
-  id: Scalars['ID'];
-};
-
-
 export type MutationUpdateBrandArgs = {
   id?: InputMaybe<Scalars['ID']>;
   name?: InputMaybe<Scalars['String']>;
@@ -165,7 +194,6 @@ export type MutationUpdateModelArgs = {
 
 
 export type MutationUpdateOrderArgs = {
-  id: Scalars['ID'];
   updateOrderInput?: InputMaybe<UpdateOrderInput>;
 };
 
@@ -180,22 +208,29 @@ export type MutationUpdateUserArgs = {
   updateUserInput?: InputMaybe<UpdateUserInput>;
 };
 
+
+export type MutationUpdateUserCarParamsArgs = {
+  updateUserCarParamsInput?: InputMaybe<UpdateUserCarParamsInput>;
+};
+
 export type Order = {
   __typename?: 'Order';
-  bodyType: BodyType;
+  bodyType: IBodyType;
   carPart: Scalars['String'];
   comment?: Maybe<Scalars['String']>;
   createdAt: Scalars['DateTime'];
-  drive: DriveType;
+  drive: IDriveType;
   engineVolume: Scalars['String'];
-  fuel: Array<FuelType>;
+  fuels: Array<IFuelType>;
   id: Scalars['String'];
   model: Model;
-  partOfType: PartType;
-  status: OrderStatus;
-  transmission: Transmission;
+  orderNumber: Scalars['String'];
+  partOfType: IPartType;
+  status: IOrderStatus;
+  transmission: ITransmission;
   updatedAt: Scalars['DateTime'];
   user: User;
+  userCarParamId: Scalars['String'];
   vin: Scalars['String'];
   year: Scalars['String'];
 };
@@ -207,20 +242,9 @@ export type OrderFilter = {
   lastName?: InputMaybe<Scalars['String']>;
   phoneNumber?: InputMaybe<Scalars['String']>;
   startDate?: InputMaybe<Scalars['DateTime']>;
-  status?: InputMaybe<OrderStatus>;
+  status?: InputMaybe<Scalars['String']>;
   user?: InputMaybe<Scalars['ID']>;
 };
-
-export enum OrderStatus {
-  Done = 'DONE',
-  Processing = 'PROCESSING',
-  Sent = 'SENT'
-}
-
-export enum PartType {
-  Analogue = 'ANALOGUE',
-  Original = 'ORIGINAL'
-}
 
 export type Query = {
   __typename?: 'Query';
@@ -240,8 +264,14 @@ export type Query = {
   allTypesMeta: ListMetadata;
   allUsers: Array<User>;
   allUsersMeta: ListMetadata;
+  bodyTypes: Array<IBodyType>;
+  driveTypes: Array<IDriveType>;
+  fuelTypes: Array<IFuelType>;
   getFirstOrder: Array<Order>;
-  orderStatuses: Array<Scalars['String']>;
+  orderStatuses: Array<IOrderStatus>;
+  partTypes: Array<IPartType>;
+  transmissions: Array<ITransmission>;
+  userCarParams: UserCarParams;
 };
 
 
@@ -364,12 +394,10 @@ export type QueryGetFirstOrderArgs = {
   sortOrder?: InputMaybe<Scalars['String']>;
 };
 
-export enum Transmission {
-  Automatic = 'AUTOMATIC',
-  Mechanical = 'MECHANICAL',
-  Robot = 'ROBOT',
-  Variable = 'VARIABLE'
-}
+
+export type QueryUserCarParamsArgs = {
+  id?: InputMaybe<Scalars['ID']>;
+};
 
 export type Type = {
   __typename?: 'Type';
@@ -380,16 +408,21 @@ export type Type = {
 };
 
 export type UpdateOrderInput = {
-  bodyType?: InputMaybe<BodyType>;
-  carPart?: InputMaybe<Scalars['String']>;
   comment?: InputMaybe<Scalars['String']>;
-  drive?: InputMaybe<DriveType>;
+  id?: InputMaybe<Scalars['ID']>;
+  status?: InputMaybe<Scalars['String']>;
+};
+
+export type UpdateUserCarParamsInput = {
+  bodyType?: InputMaybe<Scalars['String']>;
+  carPart?: InputMaybe<Scalars['String']>;
+  drive?: InputMaybe<Scalars['String']>;
   engineVolume?: InputMaybe<Scalars['String']>;
-  fuel?: InputMaybe<Array<FuelType>>;
+  fuel?: InputMaybe<Array<Scalars['String']>>;
+  id?: InputMaybe<Scalars['ID']>;
   modelId?: InputMaybe<Scalars['String']>;
-  partOfType?: InputMaybe<PartType>;
-  status?: InputMaybe<OrderStatus>;
-  transmission?: InputMaybe<Transmission>;
+  partOfType?: InputMaybe<Scalars['String']>;
+  transmission?: InputMaybe<Scalars['String']>;
   vin?: InputMaybe<Scalars['String']>;
   year?: InputMaybe<Scalars['String']>;
 };
@@ -415,6 +448,24 @@ export type User = {
   telegramNotification: Scalars['Boolean'];
   updatedAt: Scalars['DateTime'];
   viberNotification: Scalars['Boolean'];
+};
+
+export type UserCarParams = {
+  __typename?: 'UserCarParams';
+  bodyType: IBodyType;
+  carPart: Scalars['String'];
+  createdAt: Scalars['DateTime'];
+  drive: IDriveType;
+  engineVolume: Scalars['String'];
+  fuels: Array<IFuelType>;
+  id: Scalars['String'];
+  model: Model;
+  partOfType: IPartType;
+  transmission: ITransmission;
+  updatedAt: Scalars['DateTime'];
+  user: User;
+  vin: Scalars['String'];
+  year: Scalars['String'];
 };
 
 export type UserFilter = {
@@ -471,7 +522,7 @@ export type CreateModelMutationVariables = Exact<{
 }>;
 
 
-export type CreateModelMutation = { __typename?: 'Mutation', createModel: { __typename?: 'Model', id: string } };
+export type CreateModelMutation = { __typename?: 'Mutation', createModel: { __typename?: 'Model', id: string, name: string, brand: { __typename?: 'Brand', id: string, name: string }, type: { __typename?: 'Type', id: string, name: string } } };
 
 export type UpdateUserMutationVariables = Exact<{
   updateUserInput?: InputMaybe<UpdateUserInput>;
@@ -480,20 +531,26 @@ export type UpdateUserMutationVariables = Exact<{
 
 export type UpdateUserMutation = { __typename?: 'Mutation', updateUser: { __typename?: 'User', id: string } };
 
-export type UpdateOrderMutationVariables = Exact<{
-  id: Scalars['ID'];
-  updateOrderInput?: InputMaybe<UpdateOrderInput>;
+export type CreateOrderMutationVariables = Exact<{
+  createOrderInput: CreateOrderInput;
 }>;
 
 
-export type UpdateOrderMutation = { __typename?: 'Mutation', updateOrder: { __typename?: 'Order', id: string } };
+export type CreateOrderMutation = { __typename?: 'Mutation', createOrder: { __typename?: 'Order', id: string, userCarParamId: string, orderNumber: string, comment?: string | null | undefined, createdAt: any, model: { __typename?: 'Model', id: string, name: string, type: { __typename?: 'Type', id: string, name: string }, brand: { __typename?: 'Brand', id: string, name: string } }, status: { __typename?: 'IOrderStatus', id: string, name: string }, user: { __typename?: 'User', id: string, firstName: string, lastName: string, phoneNumber: string, email: string, phoneNotification: boolean, viberNotification: boolean, telegramNotification: boolean, comment?: string | null | undefined } } };
+
+export type UpdateUserCarParamsMutationVariables = Exact<{
+  updateUserCarParamsInput?: InputMaybe<UpdateUserCarParamsInput>;
+}>;
+
+
+export type UpdateUserCarParamsMutation = { __typename?: 'Mutation', updateUserCarParams: { __typename?: 'UserCarParams', id: string } };
 
 export type OrderQueryVariables = Exact<{
   id?: InputMaybe<Scalars['ID']>;
 }>;
 
 
-export type OrderQuery = { __typename?: 'Query', Order: { __typename?: 'Order', id: string, status: OrderStatus, transmission: Transmission, carPart: string, partOfType: PartType, fuel: Array<FuelType>, createdAt: any, bodyType: BodyType, drive: DriveType, comment?: string | null | undefined, engineVolume: string, model: { __typename?: 'Model', id: string, name: string, type: { __typename?: 'Type', id: string, name: string }, brand: { __typename?: 'Brand', id: string, name: string } }, user: { __typename?: 'User', firstName: string, lastName: string, telegramNotification: boolean, viberNotification: boolean, phoneNotification: boolean, phoneNumber: string, email: string, id: string, comment?: string | null | undefined } } };
+export type OrderQuery = { __typename?: 'Query', Order: { __typename?: 'Order', id: string, userCarParamId: string, orderNumber: string, comment?: string | null | undefined, createdAt: any, carPart: string, engineVolume: string, vin: string, year: string, fuels: Array<{ __typename?: 'IFuelType', name: string, id: string }>, model: { __typename?: 'Model', id: string, name: string, type: { __typename?: 'Type', id: string, name: string }, brand: { __typename?: 'Brand', id: string, name: string } }, status: { __typename?: 'IOrderStatus', id: string, name: string }, user: { __typename?: 'User', id: string, firstName: string, lastName: string, phoneNumber: string, email: string, phoneNotification: boolean, viberNotification: boolean, telegramNotification: boolean, comment?: string | null | undefined }, transmission: { __typename?: 'ITransmission', name: string, id: string }, drive: { __typename?: 'IDriveType', name: string, id: string }, partOfType: { __typename?: 'IPartType', name: string, id: string }, bodyType: { __typename?: 'IBodyType', name: string, id: string } } };
 
 export type AllOrdersQueryVariables = Exact<{
   page?: InputMaybe<Scalars['Int']>;
@@ -504,7 +561,7 @@ export type AllOrdersQueryVariables = Exact<{
 }>;
 
 
-export type AllOrdersQuery = { __typename?: 'Query', allOrders: Array<{ __typename?: 'Order', id: string, status: OrderStatus, comment?: string | null | undefined, carPart: string, createdAt: any, model: { __typename?: 'Model', id: string, name: string, type: { __typename?: 'Type', id: string, name: string }, brand: { __typename?: 'Brand', id: string, name: string } }, user: { __typename?: 'User', id: string, firstName: string, lastName: string, phoneNumber: string } }>, allOrdersMeta: { __typename?: 'ListMetadata', count?: number | null | undefined } };
+export type AllOrdersQuery = { __typename?: 'Query', allOrders: Array<{ __typename?: 'Order', id: string, comment?: string | null | undefined, createdAt: any, carPart: string, status: { __typename?: 'IOrderStatus', id: string, name: string }, model: { __typename?: 'Model', id: string, name: string, type: { __typename?: 'Type', id: string, name: string }, brand: { __typename?: 'Brand', id: string, name: string } }, user: { __typename?: 'User', id: string, firstName: string, lastName: string, phoneNumber: string, email: string, phoneNotification: boolean, viberNotification: boolean, telegramNotification: boolean, comment?: string | null | undefined } }>, allOrdersMeta: { __typename?: 'ListMetadata', count?: number | null | undefined }, orderStatuses: Array<{ __typename?: 'IOrderStatus', id: string, name: string }>, partTypes: Array<{ __typename?: 'IPartType', id: string, name: string }>, bodyTypes: Array<{ __typename?: 'IBodyType', id: string, name: string }>, driveTypes: Array<{ __typename?: 'IDriveType', id: string, name: string }>, fuelTypes: Array<{ __typename?: 'IFuelType', id: string, name: string }>, transmissions: Array<{ __typename?: 'ITransmission', id: string, name: string }> };
 
 export type GetFirstOrderQueryVariables = Exact<{
   sortField?: InputMaybe<Scalars['String']>;
@@ -743,6 +800,15 @@ export const CreateModelDocument = gql`
     mutation createModel($name: String, $brandId: ID, $typeId: ID) {
   createModel(name: $name, brandId: $brandId, typeId: $typeId) {
     id
+    name
+    brand {
+      id
+      name
+    }
+    type {
+      id
+      name
+    }
   }
 }
     `;
@@ -807,54 +873,12 @@ export function useUpdateUserMutation(baseOptions?: Apollo.MutationHookOptions<U
 export type UpdateUserMutationHookResult = ReturnType<typeof useUpdateUserMutation>;
 export type UpdateUserMutationResult = Apollo.MutationResult<UpdateUserMutation>;
 export type UpdateUserMutationOptions = Apollo.BaseMutationOptions<UpdateUserMutation, UpdateUserMutationVariables>;
-export const UpdateOrderDocument = gql`
-    mutation updateOrder($id: ID!, $updateOrderInput: UpdateOrderInput) {
-  updateOrder(id: $id, updateOrderInput: $updateOrderInput) {
+export const CreateOrderDocument = gql`
+    mutation createOrder($createOrderInput: CreateOrderInput!) {
+  createOrder(createOrderInput: $createOrderInput) {
     id
-  }
-}
-    `;
-export type UpdateOrderMutationFn = Apollo.MutationFunction<UpdateOrderMutation, UpdateOrderMutationVariables>;
-
-/**
- * __useUpdateOrderMutation__
- *
- * To run a mutation, you first call `useUpdateOrderMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useUpdateOrderMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [updateOrderMutation, { data, loading, error }] = useUpdateOrderMutation({
- *   variables: {
- *      id: // value for 'id'
- *      updateOrderInput: // value for 'updateOrderInput'
- *   },
- * });
- */
-export function useUpdateOrderMutation(baseOptions?: Apollo.MutationHookOptions<UpdateOrderMutation, UpdateOrderMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UpdateOrderMutation, UpdateOrderMutationVariables>(UpdateOrderDocument, options);
-      }
-export type UpdateOrderMutationHookResult = ReturnType<typeof useUpdateOrderMutation>;
-export type UpdateOrderMutationResult = Apollo.MutationResult<UpdateOrderMutation>;
-export type UpdateOrderMutationOptions = Apollo.BaseMutationOptions<UpdateOrderMutation, UpdateOrderMutationVariables>;
-export const OrderDocument = gql`
-    query Order($id: ID) {
-  Order(id: $id) {
-    id
-    status
-    transmission
-    carPart
-    partOfType
-    fuel
-    createdAt
-    bodyType
-    drive
-    comment
-    engineVolume
+    userCarParamId
+    orderNumber
     model {
       id
       name
@@ -867,17 +891,144 @@ export const OrderDocument = gql`
         name
       }
     }
+    status {
+      id
+      name
+    }
+    comment
+    createdAt
     user {
+      id
       firstName
       lastName
-      telegramNotification
-      viberNotification
-      phoneNotification
       phoneNumber
       email
-      id
+      phoneNotification
+      viberNotification
+      telegramNotification
       comment
     }
+  }
+}
+    `;
+export type CreateOrderMutationFn = Apollo.MutationFunction<CreateOrderMutation, CreateOrderMutationVariables>;
+
+/**
+ * __useCreateOrderMutation__
+ *
+ * To run a mutation, you first call `useCreateOrderMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateOrderMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createOrderMutation, { data, loading, error }] = useCreateOrderMutation({
+ *   variables: {
+ *      createOrderInput: // value for 'createOrderInput'
+ *   },
+ * });
+ */
+export function useCreateOrderMutation(baseOptions?: Apollo.MutationHookOptions<CreateOrderMutation, CreateOrderMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateOrderMutation, CreateOrderMutationVariables>(CreateOrderDocument, options);
+      }
+export type CreateOrderMutationHookResult = ReturnType<typeof useCreateOrderMutation>;
+export type CreateOrderMutationResult = Apollo.MutationResult<CreateOrderMutation>;
+export type CreateOrderMutationOptions = Apollo.BaseMutationOptions<CreateOrderMutation, CreateOrderMutationVariables>;
+export const UpdateUserCarParamsDocument = gql`
+    mutation updateUserCarParams($updateUserCarParamsInput: UpdateUserCarParamsInput) {
+  updateUserCarParams(updateUserCarParamsInput: $updateUserCarParamsInput) {
+    id
+  }
+}
+    `;
+export type UpdateUserCarParamsMutationFn = Apollo.MutationFunction<UpdateUserCarParamsMutation, UpdateUserCarParamsMutationVariables>;
+
+/**
+ * __useUpdateUserCarParamsMutation__
+ *
+ * To run a mutation, you first call `useUpdateUserCarParamsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateUserCarParamsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateUserCarParamsMutation, { data, loading, error }] = useUpdateUserCarParamsMutation({
+ *   variables: {
+ *      updateUserCarParamsInput: // value for 'updateUserCarParamsInput'
+ *   },
+ * });
+ */
+export function useUpdateUserCarParamsMutation(baseOptions?: Apollo.MutationHookOptions<UpdateUserCarParamsMutation, UpdateUserCarParamsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateUserCarParamsMutation, UpdateUserCarParamsMutationVariables>(UpdateUserCarParamsDocument, options);
+      }
+export type UpdateUserCarParamsMutationHookResult = ReturnType<typeof useUpdateUserCarParamsMutation>;
+export type UpdateUserCarParamsMutationResult = Apollo.MutationResult<UpdateUserCarParamsMutation>;
+export type UpdateUserCarParamsMutationOptions = Apollo.BaseMutationOptions<UpdateUserCarParamsMutation, UpdateUserCarParamsMutationVariables>;
+export const OrderDocument = gql`
+    query Order($id: ID) {
+  Order(id: $id) {
+    id
+    userCarParamId
+    orderNumber
+    fuels {
+      name
+      id
+    }
+    model {
+      id
+      name
+      type {
+        id
+        name
+      }
+      brand {
+        id
+        name
+      }
+    }
+    status {
+      id
+      name
+    }
+    comment
+    createdAt
+    user {
+      id
+      firstName
+      lastName
+      phoneNumber
+      email
+      phoneNotification
+      viberNotification
+      telegramNotification
+      comment
+    }
+    transmission {
+      name
+      id
+    }
+    drive {
+      name
+      id
+    }
+    partOfType {
+      name
+      id
+    }
+    bodyType {
+      name
+      id
+    }
+    carPart
+    engineVolume
+    vin
+    year
   }
 }
     `;
@@ -919,8 +1070,12 @@ export const AllOrdersDocument = gql`
     filter: $filter
   ) {
     id
-    status
+    status {
+      id
+      name
+    }
     comment
+    createdAt
     carPart
     model {
       id
@@ -939,11 +1094,39 @@ export const AllOrdersDocument = gql`
       firstName
       lastName
       phoneNumber
+      email
+      phoneNotification
+      viberNotification
+      telegramNotification
+      comment
     }
-    createdAt
   }
   allOrdersMeta(sortField: "id", sortOrder: "asc", filter: $filter) {
     count
+  }
+  orderStatuses {
+    id
+    name
+  }
+  partTypes {
+    id
+    name
+  }
+  bodyTypes {
+    id
+    name
+  }
+  driveTypes {
+    id
+    name
+  }
+  fuelTypes {
+    id
+    name
+  }
+  transmissions {
+    id
+    name
   }
 }
     `;

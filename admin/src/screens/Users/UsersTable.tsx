@@ -386,10 +386,10 @@ export const UsersTable = ({
               onClick={() => save(record.key)}
               style={{ marginRight: 8 }}
             >
-              Save
+              Сохранить
             </a>
-            <Popconfirm title="Sure to cancel?" onConfirm={cancel}>
-              <a>Cancel</a>
+            <Popconfirm title="Отменить?" onConfirm={cancel}>
+              <a href="#;">Отмена</a>
             </Popconfirm>
           </span>
         ) : (

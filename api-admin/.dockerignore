@@ -1,0 +1,10 @@
+.git
+node_modules
+postgres-data
+**/README.md
+**/LICENSE
+**/.vscode
+**/npm-debug.log
+**/coverage
+**/.editorconfig
+**/dist

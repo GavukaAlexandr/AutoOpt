@@ -16,7 +16,7 @@ import { SearchOutlined } from "@ant-design/icons";
 import { CustomRangePicker } from "./RangePicker";
 import { errorMessage } from "../../helpres/messages";
 import { coloredTags } from "../../helpres/ColoredTags";
-import { Order, OrderStatus, useAllOrdersQuery } from "../../generated/graphql";
+import { Order, useAllOrdersQuery } from "../../generated/graphql";
 
 const { Paragraph } = Typography;
 
@@ -35,7 +35,7 @@ export const OrdersTable = ({
   const [searchLastName, setSearchLastName] = useState("");
   const [searchPhone, setSearchPhone] = useState("");
   const [searchCarPart, setSearchCarPart] = useState("");
-  const [status, setStatus] = useState<OrderStatus>(OrderStatus.Processing);
+  const [status, setStatus] = useState({id: "", name: "Статус"});
   const [loading, setLoading] = useState(false);
   const {
     loading: loadingList,
@@ -74,19 +74,27 @@ export const OrdersTable = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchFirstName, searchLastName, searchPhone, searchCarPart]);
 
-  const tableFromResponse = (data: any[]) => {
+  const tableFromResponse = (data: Order[]) => {
     return data.map((v, i) => {
       return {
         key: v.id,
         firstName: v.user.firstName,
         lastName: v.user.lastName,
-        status: v.status,
+        userComment: v.user.comment,
+        comment: v.comment,
+        userId: v.user.id,
+        email: v.user.email,
+        telegramNotification: v.user.telegramNotification,
+        viberNotification: v.user.viberNotification,
+        phoneNotification: v.user.phoneNotification,
+        status: v.status.name,
         model: v.model.name,
         brand: v.model.brand.name,
         createdAt: new Date(v.createdAt).toLocaleDateString("ua-UA"),
         phoneNumber: v.user.phoneNumber,
         type: v.model.type.name,
         carPart: v.carPart,
+        userCarParamId: v.id
       };
     });
   };
@@ -128,15 +136,16 @@ export const OrdersTable = ({
       </Row>
     );
   if (error) return <p>Oppps Something Wrong </p>;
-
   const statusMenu = (
     <Menu
-      onClick={(v) => {
-        setStatus(v.key as OrderStatus);
+    onClick={(v) => {
+        const arrayOfStatus: Record<string, any>[] = data?.orderStatuses.filter(value => value.id == v.key) as Record<string, any>[]; 
+        const [{id, name}] = arrayOfStatus;
+        setStatus({id, name});
         try {
           refetch({
             filter: {
-              status: v.key as OrderStatus,
+              status: id,
             },
           });
         } catch (error) {
@@ -144,8 +153,8 @@ export const OrdersTable = ({
         }
       }}
     >
-      {Object.keys(OrderStatus).map((data: string) => {
-        return <Menu.Item key={data}>{coloredTags(data)}</Menu.Item>;
+      {data?.orderStatuses.map(data => {
+        return <Menu.Item key={data.id}>{coloredTags(data.name)}</Menu.Item>;
       })}
     </Menu>
   );
@@ -290,29 +299,13 @@ export const OrdersTable = ({
             trigger={["click"]}
             placement="bottomCenter"
           >
-            {coloredTags(status)}
+            {coloredTags(status.name)}
           </Dropdown>
         </>
       ),
       key: "status",
       dataIndex: "status",
-      render: (status: string) => {
-        let color;
-        if (status === "PROCESSING") {
-          color = "orange";
-        }
-        if (status === "SENT") {
-          color = "blue";
-        }
-        if (status === "DONE") {
-          color = "green";
-        }
-        return (
-          <Tag color={color} key={status}>
-            {status.toLowerCase()}
-          </Tag>
-        );
-      },
+      render: (status: string) => coloredTags(status)
     },
     {
       title: () => {
@@ -332,6 +325,12 @@ export const OrdersTable = ({
         expandedRowRender={(record) => (
           <ExpandedOrder
             record={record}
+            orderStatuses={data!.orderStatuses}
+            transmissions={data!.transmissions}
+            fuelTypes={data!.fuelTypes}
+            bodyTypes={data!.bodyTypes}
+            driveTypes={data!.driveTypes}
+            partTypes={data!.partTypes}
           />
         )}
         dataSource={tableFromResponse(data?.allOrders as Order[])}

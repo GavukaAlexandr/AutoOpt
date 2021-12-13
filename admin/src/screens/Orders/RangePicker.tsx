@@ -3,7 +3,6 @@ import { useQuery } from "@apollo/client";
 import { DatePicker } from "antd";
 import moment from "moment";
 import { errorMessage } from "../../helpres/messages";
-import locale from 'antd/es/date-picker/locale/uk_UA';
 import { Order, useGetFirstOrderQuery } from "../../generated/graphql";
 const { RangePicker } = DatePicker;
 
@@ -18,11 +17,11 @@ export const CustomRangePicker = ({ handleDate }: any) => {
   });
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error </p>;
-  const [{ createdAt }] = data?.getFirstOrder as Order[];
+  if (data!.getFirstOrder.length === 0) return null;
+  const [{ createdAt }] = data?.getFirstOrder as Order[]
   return (
     <>
       <RangePicker
-        locale={locale}
         size={"large"}
         style={{ width: "100%", maxWidth: "220px" }}
         defaultValue={[

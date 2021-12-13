@@ -8,7 +8,8 @@ import { UserCard } from "./UserCard";
 import {
   Order,
   useOrderQuery,
-  useUpdateOrderMutation,
+  UserCarParams,
+  useUpdateUserCarParamsMutation,
 } from "../../generated/graphql";
 
 const cardContent = {
@@ -19,27 +20,47 @@ const cardContent = {
 
 export const ExpandedOrder = ({
   record,
-}: Record<string, any>) => {
-  const [updateOrder] = useUpdateOrderMutation();
-  const { loading, error, data } = useOrderQuery({
+  orderStatuses,
+  transmissions,
+  fuelTypes,
+  bodyTypes,
+  driveTypes,
+  partTypes,
+}: {
+  record: Record<string, any>;
+  orderStatuses: Record<string, any>[]
+  transmissions: Record<string, any>[]
+  fuelTypes: Record<string, any>[]
+  bodyTypes: Record<string, any>[]
+  driveTypes: Record<string, any>[]
+  partTypes: Record<string, any>[]
+}) => {
+  const { loading: oderLoading, error: orderError, data: orderData } = useOrderQuery({
     variables: {
-      id: record.key,
-    },
-  });
+      id: record.key
+    }
+  })
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error </p>;
+  if (oderLoading) return <p>Loading...</p>;
+  if (orderError) return <p>Error </p>;
+  
   return (
     <>
       <Row gutter={[16, 8]} className="site-card-border-less-wrapper">
         <Col span={16}>
           <OrderCard
-            data={data?.Order as Order}
+            order={orderData?.Order as Order}
             cardContent={cardContent}
+            orderStatuses={orderStatuses}
+            transmissions={transmissions}
+            fuelTypes={fuelTypes}
+            bodyTypes={bodyTypes}
+            driveTypes={driveTypes}
+            partTypes={partTypes}
           />
         </Col>
         <Col span={8}>
-          <UserCard data={data?.Order as Order} cardContent={cardContent} />
+          <UserCard record={record} cardContent={cardContent} />
         </Col>
       </Row>
     </>

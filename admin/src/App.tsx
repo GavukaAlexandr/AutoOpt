@@ -33,7 +33,7 @@ const App = () => {
               />
             }
           />
-          <Route
+          {/* <Route
             path="/users"
             element={
               <UsersTable
@@ -65,7 +65,8 @@ const App = () => {
                 sortOrder={"asc"}
               />
             }
-          />
+            />
+            */
           <Route
             path="/models"
             element={
@@ -77,6 +78,7 @@ const App = () => {
               />
             }
           />
+          }
         </Route>
       </Route>
       <Route path="/login" element={<LoginPage />} />

@@ -2,24 +2,24 @@ import { Tag } from "antd";
 
   export const coloredTags = (value: string) => {
     let color;
-    if (value === "PROCESSING") {
+    if (value === "processing") {
       color = "orange";
     }
-    if (value === "SENT") {
+    if (value === "sent") {
       color = "blue";
     }
-    if (value === "DONE") {
+    if (value === "done") {
       color = "green";
     }
-    if (value === "ANALOGUE") {
+    if (value === "analogue") {
       color = "purple";
     }
-    if (value === "ORIGINAL") {
+    if (value === "original") {
       color = "lime";
     }
     return (
       <Tag color={color} key={value}>
-        <strong>{value.toLowerCase()}</strong>
+        <strong>{value}</strong>
       </Tag>
     );
   };

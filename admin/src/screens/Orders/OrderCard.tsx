@@ -1,5 +1,4 @@
 import { MouseEventHandler, useEffect, useState } from "react";
-import { useMutation, useQuery } from "@apollo/client";
 import {
   Card,
   Select,
@@ -18,21 +17,18 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { coloredTags } from "../../helpres/ColoredTags";
 import {
-  BodyType,
   Brand,
-  DriveType,
-  FuelType,
   Model,
   Order,
-  OrderStatus,
-  PartType,
-  Transmission,
   Type,
   useAllBrandsOfTypeQuery,
   useAllModelsQuery,
   useAllTypesQuery,
-  useUpdateOrderMutation,
+  useCreateOrderMutation,
+  UserCarParams,
+  useUpdateUserCarParamsMutation,
 } from "../../generated/graphql";
+import gql from "graphql-tag";
 
 const { TextArea } = Input;
 
@@ -40,45 +36,56 @@ const { Title, Paragraph } = Typography;
 const { Option } = Select;
 
 export const OrderCard = ({
-  data,
   cardContent,
+  order,
+  orderStatuses,
+  transmissions,
+  fuelTypes,
+  bodyTypes,
+  driveTypes,
+  partTypes,
 }: {
-  data: Order;
   cardContent: Record<string, any>;
+  order: Order;
+  orderStatuses: Record<string, any>[]
+  transmissions: Record<string, any>[]
+  fuelTypes: Record<string, any>[]
+  bodyTypes: Record<string, any>[]
+  driveTypes: Record<string, any>[]
+  partTypes: Record<string, any>[]
 }) => {
-  const [carPart, setCarPart] = useState(data.carPart);
+  const [carPart, setCarPart] = useState(order.carPart);
   const [saveButtonState, setSaveButtonState] = useState(true);
   const [cancelButtonState, setCancelButtonState] = useState(true);
-  const [status, setStatus] = useState<OrderStatus>(data.status);
-  const [transmission, setTransmission] = useState<Transmission>(
-    data.transmission
-  );
-  const [partType, setTypePart] = useState<PartType>(data.partOfType);
-  const [bodyType, setBodyType] = useState<BodyType>(data.bodyType);
-  const [driveType, setDriveType] = useState<DriveType>(data.drive);
-  const [fuelType, setFuelType] = useState<FuelType[]>(data.fuel);
-  const [comment, setComment] = useState(data.comment);
-  const [engineVolume, setEngineVolume] = useState(Number(data.engineVolume));
-
+  const [status, setStatus] = useState(order.status);
+  const [transmission, setTransmission] = useState(order.transmission);
+  const [partType, setTypePart] = useState(order.partOfType);
+  const [bodyType, setBodyType] = useState(order.bodyType);
+  const [driveType, setDriveType] = useState(order.drive);
+  const [fuelType, setFuelType] = useState(order.fuels.map(v => v.name));
+  const [comment, setComment] = useState(order.comment);
+  const [engineVolume, setEngineVolume] = useState(Number(order.engineVolume));
   const [type, setType] = useState({
-    name: data.model.type.name,
-    id: data.model.type.id,
+    name: order.model.type.name,
+    id: order.model.type.id,
     isOpen: false,
   });
 
   const [brand, setBrand] = useState({
-    name: data.model.brand.name,
-    id: data.model.brand.id,
+    name: order.model.brand.name,
+    id: order.model.brand.id,
     isOpen: false,
   });
 
   const [model, setModel] = useState({
-    name: data.model.name,
-    id: data.model.id,
+    name: order.model.name,
+    id: order.model.id,
     isOpen: false,
   });
 
-  const [updateOrder] = useUpdateOrderMutation();
+  const [createOrder] = useCreateOrderMutation();
+  const [updateUserCarParams] = useUpdateUserCarParamsMutation();
+
   const { loading: typeLoading, data: typeData } = useAllTypesQuery({
     variables: {
       page: 0,
@@ -99,8 +106,8 @@ export const OrderCard = ({
       sortField: "id",
       sortOrder: "asc",
       filter: {
-        brandId: data.model.brand.id,
-        typeId: data.model.type.id,
+        brandId: order.model.brand.id,
+        typeId: order.model.type.id,
         q: "",
       },
     },
@@ -116,7 +123,7 @@ export const OrderCard = ({
       perPage: 100,
       filter: {
         q: "",
-        typeId: data.model.type.id,
+        typeId: order.model.type.id,
       },
     },
   });
@@ -133,8 +140,8 @@ export const OrderCard = ({
     return coloredArrayTags(onPreventMouseDown, value, closable);
   };
 
-  const optionsForTagRender = (data: string[]) => {
-    return data.map((data: string) => ({ value: data.toUpperCase() }));
+  const optionsForTagRender = (data: Record<string, any>[]) => {
+    return data.map((data: Record<string, any>) => ({ value: data.name }));
   };
 
   const coloredArrayTags = (
@@ -143,16 +150,16 @@ export const OrderCard = ({
     closable: boolean | undefined
   ) => {
     let color;
-    if (value === "DIESEL") {
+    if (value === "diesel") {
       color = "geekblue";
     }
-    if (value === "ELECTRO") {
+    if (value === "electro") {
       color = "green";
     }
-    if (value === "GASOLINE") {
+    if (value === "gasoline") {
       color = "volcano";
     }
-    if (value === "HYBRID") {
+    if (value === "hybrid") {
       color = "cyan";
     }
     return (
@@ -171,69 +178,90 @@ export const OrderCard = ({
     );
   };
 
-  useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      saveComment();
-    }, 5000);
-    return () => clearTimeout(delayDebounceFn);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [comment]);
+  // useEffect(() => {
+  //   const delayDebounceFn = setTimeout(() => {
+  //     saveComment();
+  //   }, 5000);
+  //   return () => clearTimeout(delayDebounceFn);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [comment]);
 
-  const saveComment = () => {
-    updateOrder({
-      variables: {
-        id: data.id,
-        updateOrderInput: {
-          comment: comment,
-        },
-      },
-    });
-  };
+  // const saveComment = () => {
+  //   updateOrder({
+  //     variables: {
+  //       updateOrderInput: {
+  //         id: order.id,
+  //         comment: comment,
+  //       },
+  //     },
+  //   });
+  // };
 
   const statusMenu = (
-    <Menu onClick={(v) => setStatus(v.key as OrderStatus)}>
-      {Object.keys(OrderStatus).map((data: string) => {
+    <Menu onClick={(v) => {
+      const arrayOfStatus: Record<string, any>[] = orderStatuses.filter(value => value.id == v.key) as Record<string, any>[];
+      const [{ id, name }] = arrayOfStatus;
+      setStatus({ id, name })
+    }}>
+      {orderStatuses.map((data) => {
         return (
-          <Menu.Item key={data.toUpperCase()}>{coloredTags(data)}</Menu.Item>
+          <Menu.Item key={data.id}>{coloredTags(data.name)}</Menu.Item>
         );
       })}
     </Menu>
   );
 
   const bodyTypeMenu = (
-    <Menu onClick={(v) => setBodyType(v.key as BodyType)}>
-      {Object.keys(BodyType).map((data: string) => {
+    <Menu onClick={(v) => {
+      const arrayOfBodyTypes: Record<string, any>[] = bodyTypes.filter(value => value.id == v.key) as Record<string, any>[];
+      const [{ id, name }] = arrayOfBodyTypes;
+      setBodyType({ id, name })
+    }}>
+      {bodyTypes.map((data) => {
         return (
-          <Menu.Item key={data.toUpperCase()}>{coloredTags(data)}</Menu.Item>
+          <Menu.Item key={data.id}>{coloredTags(data.name)}</Menu.Item>
         );
       })}
     </Menu>
   );
 
   const transmissionMenu = (
-    <Menu onClick={(v) => setTransmission(v.key as Transmission)}>
-      {Object.keys(Transmission).map((data: string) => {
+    <Menu onClick={(v) => {
+      const arrayOfTransmissions: Record<string, any>[] = transmissions.filter(value => value.id == v.key) as Record<string, any>[];
+      const [{ id, name }] = arrayOfTransmissions;
+      setTransmission({ id, name })
+    }}>
+      {transmissions.map((data) => {
         return (
-          <Menu.Item key={data.toUpperCase()}>{coloredTags(data)}</Menu.Item>
+          <Menu.Item key={data.id}>{coloredTags(data.name)}</Menu.Item>
         );
       })}
     </Menu>
   );
 
   const partTypeMenu = (
-    <Menu onClick={(v) => setTypePart(v.key as PartType)}>
-      {Object.keys(PartType).map((data: string) => {
+    <Menu onClick={(v) => {
+      const arrayOfPartTypes: Record<string, any>[] = partTypes.filter(value => value.id == v.key) as Record<string, any>[];
+      const [{ id, name }] = arrayOfPartTypes;
+      setTypePart({ id, name })
+    }}>
+      {partTypes.map((data) => {
         return (
-          <Menu.Item key={data.toUpperCase()}>{coloredTags(data)}</Menu.Item>
+          <Menu.Item key={data.id}>{coloredTags(data.name)}</Menu.Item>
         );
       })}
     </Menu>
   );
+
   const driveTypeMenu = (
-    <Menu onClick={(v) => setDriveType(v.key as DriveType)}>
-      {Object.keys(DriveType).map((data: string) => {
+    <Menu onClick={(v) => {
+      const arrayOfDriveTypes: Record<string, any>[] = driveTypes.filter(value => value.id == v.key) as Record<string, any>[];
+      const [{ id, name }] = arrayOfDriveTypes;
+      setDriveType({ id, name })
+    }}>
+      {driveTypes.map((data) => {
         return (
-          <Menu.Item key={data.toUpperCase()}>{coloredTags(data)}</Menu.Item>
+          <Menu.Item key={data.id}>{coloredTags(data.name)}</Menu.Item>
         );
       })}
     </Menu>
@@ -249,23 +277,100 @@ export const OrderCard = ({
   };
 
   const saveData = () => {
+    const fuels = fuelType.map(fuel => {
+      return fuelTypes.find(v => v.name === fuel)
+    })
+    const fuelIds = fuels.map(v => v?.id)
     try {
-      updateOrder({
+      createOrder({
         variables: {
-          id: data.id,
-          updateOrderInput: {
-            modelId: model.id,
-            carPart: carPart,
-            status: status,
-            transmission: transmission,
-            partOfType: partType,
-            bodyType: bodyType,
-            drive: driveType,
-            fuel: fuelType,
+          createOrderInput: {
+            orderNumber: order.orderNumber,
+            status: status.id,
             comment: comment,
+            bodyTypeId: bodyType.id,
+            carPart: carPart,
+            driveTypeId: driveType.id,
+            engineVolume: engineVolume.toString(),
+            modelId: model.id,
+            partTypeId: partType.id,
+            transmissionId: transmission.id,
+            userCarParamId: order.userCarParamId,
+            userId: order.user.id,
+            vin: order.vin,
+            year: order.year,
+            fuelId: fuelIds
           },
         },
+        update(cache, { data: { createOrder } }: any) {
+          cache.modify({
+            fields: {
+              allOrders(existingOrdersRefs = [], { readField }) {
+                const indexOrder = existingOrdersRefs.findIndex(
+                  (orderNumber: any) => {
+                    console.log(readField('orderNumber', orderNumber));
+                    return order.orderNumber === readField('orderNumber', orderNumber)
+                  },
+                );
+                const newTypeRef = cache.writeFragment({
+                  data: createOrder,
+                  fragment: gql`
+                    fragment NewOrder on Order {
+                      id
+		                userCarParamId
+		                orderNumber
+		                model {
+		                	id
+		                	name
+		                	type {
+		                		id
+		                		name
+		                	}
+		                	brand {
+		                		id
+		                		name
+		                	}
+		                }
+		                status {
+		                	id
+		                	name
+		                }
+		                comment
+		                createdAt
+		                user {
+		                	id
+		                	firstName
+		                	lastName
+		                	phoneNumber
+		                	email
+		                	phoneNotification
+		                	viberNotification
+		                	telegramNotification
+		                	comment
+		                }
+                  }`,
+                });
+                console.log(newTypeRef);
+                return existingOrdersRefs.splice(indexOrder, 1, newTypeRef);
+              },
+            },
+          });
+        },
+
       });
+      // updateUserCarParams({
+      //   variables: {
+      //     updateUserCarParamsInput: {
+      //       modelId: model.id,
+      //       carPart: carPart,
+      //       transmission: transmission.id,
+      //       partOfType: partType.id,
+      //       bodyType: bodyType.id,
+      //       drive: driveType.id,
+      //       // fuel: fuelType,
+      //     }
+      //   }
+      // })
       setCancelButtonState(true);
       setSaveButtonState(true);
       return succesMessage("Заказ обновлен");
@@ -275,73 +380,75 @@ export const OrderCard = ({
   };
 
   const cancelChanges = () => {
-    setCarPart(data.carPart);
-    setStatus(data.status);
-    setTransmission(data.transmission);
-    setTypePart(data.partOfType);
-    setBodyType(data.bodyType);
-    setDriveType(data.drive);
-    setFuelType(data.fuel);
-    setComment(data.comment);
-    setEngineVolume(Number(data.engineVolume));
+    setCarPart(carPart);
+    setStatus(status);
+    setTransmission(order.transmission);
+    setTypePart(order.partOfType);
+    setBodyType(order.bodyType);
+    setDriveType(order.drive);
+    setFuelType(order.fuels.map(v => v.name));
+    setComment(comment);
+    setEngineVolume(Number(order.engineVolume));
     setType({
-      name: data.model.type.name,
-      id: data.model.type.id,
+      name: order.model.type.name,
+      id: order.model.type.id,
       isOpen: false,
     });
     setBrand({
-      name: data.model.brand.name,
-      id: data.model.brand.id,
+      name: order.model.brand.name,
+      id: order.model.brand.id,
       isOpen: false,
     });
     setModel({
-      name: data.model.name,
-      id: data.model.id,
+      name: order.model.name,
+      id: order.model.id,
       isOpen: false,
     });
     return succesMessage("Изменения были сброшены");
   };
 
   const arraysEqual = (a1: Array<any>, a2: Array<any>) => {
-    console.log(JSON.stringify(a1) === JSON.stringify(a2));
     return JSON.stringify(a1) === JSON.stringify(a2);
   };
 
   const changeButtonState = () => {
-    if (carPart.length !== 0 && carPart !== data.carPart) {
+    const fuels = order.fuels.map(v => v.name);
+    if (carPart.length !== 0 && carPart !== order.carPart) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
-    } else if (type.id.length !== 0 && type.id !== data.model.type.id) {
+    } else if (type.id.length !== 0 && type.id !== order.model.type.id) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
-    } else if (brand.id.length !== 0 && brand.id !== data.model.brand.id) {
+    } else if (brand.id.length !== 0 && brand.id !== order.model.brand.id) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
-    } else if (model.id.length !== 0 && model.id !== data.model.id) {
+    } else if (model.id.length !== 0 && model.id !== order.model.id) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
-    } else if (status !== data.status) {
+    } else if (status !== order.status) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
-    } else if (transmission !== data.transmission) {
+    }
+    else if (transmission !== order.transmission) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
-    } else if (partType !== data.partOfType) {
+    } else if (partType !== order.partOfType) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
-    } else if (bodyType !== data.bodyType) {
+    } else if (bodyType !== order.bodyType) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
-    } else if (driveType !== data.drive) {
+    } else if (driveType !== order.drive) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
-    } else if (fuelType !== data.fuel && !arraysEqual(fuelType, data.fuel)) {
+    } else if (fuelType !== fuels && !arraysEqual(fuelType, fuels)) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
-    } else if (engineVolume !== Number(data.engineVolume)) {
+    } else if (engineVolume !== Number(order.engineVolume)) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
-    } else if (comment !== data.comment) {
+    }
+    else if (comment !== order.comment) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
     }
@@ -633,7 +740,7 @@ export const OrderCard = ({
           trigger={["click"]}
           placement="bottomCenter"
         >
-          {coloredTags(status)}
+          {coloredTags(status.name)}
         </Dropdown>
       </Card.Grid>
 
@@ -646,7 +753,7 @@ export const OrderCard = ({
           trigger={["click"]}
           placement="bottomCenter"
         >
-          {coloredTags(transmission)}
+          {coloredTags(transmission.name)}
         </Dropdown>
       </Card.Grid>
 
@@ -659,7 +766,7 @@ export const OrderCard = ({
           trigger={["click"]}
           placement="bottomCenter"
         >
-          {coloredTags(partType)}
+          {coloredTags(partType.name)}
         </Dropdown>
       </Card.Grid>
 
@@ -672,7 +779,7 @@ export const OrderCard = ({
           trigger={["click"]}
           placement="bottomCenter"
         >
-          {coloredTags(bodyType)}
+          {coloredTags(bodyType.name)}
         </Dropdown>
       </Card.Grid>
 
@@ -685,7 +792,7 @@ export const OrderCard = ({
           trigger={["click"]}
           placement="bottomCenter"
         >
-          {coloredTags(driveType)}
+          {coloredTags(driveType.name)}
         </Dropdown>
       </Card.Grid>
       <Card.Grid style={cardContent} hoverable={false}>
@@ -698,7 +805,7 @@ export const OrderCard = ({
             tagRender={fuelTagRender}
             value={fuelType}
             onChange={(v) => setFuelType(v)}
-            options={optionsForTagRender(Object.keys(FuelType))}
+            options={optionsForTagRender(fuelTypes)}
           />
         </Title>
       </Card.Grid>
@@ -714,7 +821,10 @@ export const OrderCard = ({
           precision={1}
           step={0.1}
           max={100}
-          onChange={(v) => setEngineVolume(v)}
+          onChange={(v) => {
+            setEngineVolume(Number(v));
+            console.log(typeof v)
+          }}
         />
       </Card.Grid>
 
@@ -724,7 +834,7 @@ export const OrderCard = ({
         </Title>
         <Tag>
           <strong>
-            {new Date(data.createdAt).toLocaleDateString("ua-UA")}
+            {new Date(order.createdAt).toLocaleDateString("ua-UA")}
           </strong>
         </Tag>
       </Card.Grid>

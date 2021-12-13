@@ -174,8 +174,8 @@ export const ModelTable = ({
       createModelMutation({
         variables: {
           name: createModelInput.name,
-          brandId: brandObject!.id,
-          typeId: typeObject!.id,
+          brandId: brandObject?.id,
+          typeId: typeObject?.id,
         },
         update(cache, { data: { createModel } }: any) {
           cache.modify({
@@ -237,7 +237,7 @@ export const ModelTable = ({
         },
       });
       setLoading(false);
-      return succesMessage("Model updated");
+      return succesMessage("Модель обновлена");
     } catch (error) {
       setLoading(false);
       return errorMessage("Error Model Update");
@@ -372,7 +372,7 @@ export const ModelTable = ({
       dataIndex: "create",
     },
     {
-      title: "Name",
+      title: "Модель",
       dataIndex: "name",
       editable: true,
       filterDropdown: () => {
@@ -398,7 +398,7 @@ export const ModelTable = ({
       },
     },
     {
-      title: "Brand",
+      title: "Бренд",
       dataIndex: "brand",
       editable: true,
       filterDropdown: () => {
@@ -424,7 +424,7 @@ export const ModelTable = ({
       },
     },
     {
-      title: "Type",
+      title: "Тип транспорта",
       dataIndex: "type",
       editable: true,
     },
@@ -440,10 +440,10 @@ export const ModelTable = ({
               onClick={() => save(record.key)}
               style={{ marginRight: 8 }}
             >
-              Save
+              Сохранить
             </a>
-            <Popconfirm title="Sure to cancel?" onConfirm={cancel}>
-              <a>Cancel</a>
+            <Popconfirm title="Отменить?" onConfirm={cancel}>
+              <a href="#;">Отмена</a>
             </Popconfirm>
           </span>
         ) : (

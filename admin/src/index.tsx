@@ -6,9 +6,9 @@ import reportWebVitals from "./reportWebVitals";
 import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
 import { BrowserRouter } from "react-router-dom";
 import { ConfigProvider } from "antd";
-import uk_UA from "antd/lib/locale/uk_UA";
+import ru_RU from "antd/lib/locale/ru_RU";
 const client = new ApolloClient({
-  uri: "http://localhost:3000/graphql",
+  uri: "http://192.168.88.30:3000/graphql",
   cache: new InMemoryCache(),
 });
 
@@ -16,7 +16,7 @@ ReactDOM.render(
   <React.StrictMode>
     <ApolloProvider client={client}>
       <BrowserRouter>
-        <ConfigProvider locale={uk_UA}>
+        <ConfigProvider locale={ru_RU}>
           <App />
         </ConfigProvider>
       </BrowserRouter>
