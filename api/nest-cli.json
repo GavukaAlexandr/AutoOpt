@@ -1,4 +1,39 @@
 {
-  "collection": "@nestjs/schematics",
-  "sourceRoot": "src"
+    "collection": "@nestjs/schematics",
+    "sourceRoot": "apps/api-auto-opt/src",
+    "monorepo": true,
+    "root": "apps/api-auto-opt",
+    "compilerOptions": {
+        "webpack": true,
+        "tsConfigPath": "apps/api-auto-opt/tsconfig.app.json"
+    },
+    "projects": {
+        "api-auto-opt": {
+            "type": "application",
+            "root": "apps/api-auto-opt",
+            "entryFile": "main",
+            "sourceRoot": "apps/api-auto-opt/src",
+            "compilerOptions": {
+                "tsConfigPath": "apps/api-auto-opt/tsconfig.app.json"
+            }
+        },
+        "api-admin": {
+            "type": "application",
+            "root": "apps/api-admin",
+            "entryFile": "main",
+            "sourceRoot": "apps/api-admin/src",
+            "compilerOptions": {
+                "tsConfigPath": "apps/api-admin/tsconfig.app.json"
+            }
+        },
+        "prisma": {
+            "type": "library",
+            "root": "libs/db",
+            "entryFile": "index",
+            "sourceRoot": "libs/db/src",
+            "compilerOptions": {
+                "tsConfigPath": "libs/db/tsconfig.lib.json"
+            }
+        }
+    }
 }

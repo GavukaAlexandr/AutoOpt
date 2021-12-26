@@ -1,0 +1,220 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Type {
+  id     String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name   String  @unique @db.VarChar(255)
+  models Model[]
+
+  @@map("type")
+}
+
+model Brand {
+  id    String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name  String  @unique @db.VarChar(255)
+  Model Model[]
+
+  @@map("brand")
+}
+
+model Model {
+  id            String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String          @unique @db.VarChar(255)
+  typeId        String          @map("type_id") @db.Uuid
+  brandId       String          @map("brand_id") @db.Uuid
+  userCarParams UserCarParams[]
+  orders        Order[]
+  type          Type            @relation(fields: [typeId], references: [id])
+  brand         Brand           @relation(fields: [brandId], references: [id])
+
+  @@map("model")
+}
+
+model FuelType {
+  id                   String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                 String                 @unique @db.VarChar(255)
+  fuelsOnuserCarParams FuelsOnUserCarParams[]
+  fuelsOnOrders        FuelsOnOrders[]
+
+  @@map("fuel_type")
+}
+
+model PartType {
+  id            String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String          @unique @db.VarChar(255)
+  userCarParams UserCarParams[]
+  orders        Order[]
+
+  @@map("part_type")
+}
+
+model Transmission {
+  id            String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String          @unique @db.VarChar(255)
+  userCarParams UserCarParams[]
+  orders        Order[]
+
+  @@map("transmission")
+}
+
+model BodyType {
+  id            String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String          @unique @db.VarChar(255)
+  userCarParams UserCarParams[]
+  orders        Order[]
+
+  @@map("body_type")
+}
+
+model DriveType {
+  id            String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String          @unique @db.VarChar(255)
+  userCarParams UserCarParams[]
+  orders        Order[]
+
+  @@map("drive_type")
+}
+
+model OrderStatus {
+  id      String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name    String  @unique @db.VarChar(255)
+  default Boolean @default(false)
+  orders  Order[]
+
+  @@map("order_status")
+}
+
+model Order {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId          String          @map("user_id") @db.Uuid
+  orderNumber     String          @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  userCarParamId  String          @db.Uuid
+  comment         String?         @db.Text
+  orderStatusId   String?         @map("order_status_id") @db.Uuid
+  status          OrderStatus?    @relation(fields: [orderStatusId], references: [id])
+  isDisabled      Boolean?        @default(false) @map("is_disabled")
+  user            User            @relation(fields: [userId], references: [id])
+  modelId         String          @map("model_id") @db.Uuid
+  year            String
+  partOfType      PartType?       @relation(fields: [partTypeId], references: [id])
+  engineVolume    String          @map("engine_volume")
+  vin             String
+  carPart         String          @map("car_part") @db.Text
+  model           Model           @relation(fields: [modelId], references: [id])
+  drive           DriveType?      @relation(fields: [driveTypeId], references: [id])
+  bodyType        BodyType?       @relation(fields: [bodyTypeId], references: [id])
+  transmission    Transmission?   @relation(fields: [transmissionId], references: [id])
+  fuels           FuelsOnOrders[]
+  transmissionId  String?         @map("transmission_id") @db.Uuid
+  bodyTypeId      String?         @map("body_type_id") @db.Uuid
+  driveTypeId     String?         @map("drive_type_id") @db.Uuid
+  partTypeId      String?         @map("part_type_id") @db.Uuid
+
+  @@map("order")
+}
+
+model User {
+  id                   String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  firstName            String          @db.VarChar(255)
+  lastName             String          @db.VarChar(255)
+  token                String?
+  firebaseUid          String          @unique @map("firebase_uid")
+  email                String          @unique @db.VarChar(255)
+  phoneNumber          String          @unique @map("phone_number") @db.VarChar(255)
+  telegramNotification Boolean?        @map("telegram_notification")
+  viberNotification    Boolean?        @map("viber_notification")
+  phoneNotification    Boolean?        @map("phone_notification")
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+  comment              String?         @db.Text
+  orders               Order[]
+  userCarParams        UserCarParams[]
+  history              History[]
+
+  @@map("user")
+}
+
+model FuelsOnUserCarParams {
+  userCarParamId String @map("user_car_param_id") @db.Uuid
+  fuelId         String @map("fuel_id") @db.Uuid
+
+  userCarParams UserCarParams? @relation(fields: [userCarParamId], references: [id])
+  fuel          FuelType?      @relation(fields: [fuelId], references: [id])
+  @@id([userCarParamId, fuelId])
+  @@map("fuels_on_user_car_params")
+}
+
+model FuelsOnOrders {
+  orderId String @map("order_id") @db.Uuid
+  fuelId  String @map("fuel_id") @db.Uuid
+
+  fuel  FuelType? @relation(fields: [fuelId], references: [id])
+  order Order?    @relation(fields: [orderId], references: [id])
+  @@id([fuelId, orderId])
+  @@map("fuels_on_orders")
+}
+
+model UserCarParams {
+  id             String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String                 @map("user_id") @db.Uuid
+  modelId        String                 @map("model_id") @db.Uuid
+  year           String
+  partOfType     PartType?              @relation(fields: [partTypeId], references: [id])
+  engineVolume   String                 @map("engine_volume")
+  vin            String
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+  carPart        String                 @map("car_part") @db.Text
+  user           User                   @relation(fields: [userId], references: [id])
+  model          Model                  @relation(fields: [modelId], references: [id])
+  drive          DriveType?             @relation(fields: [driveTypeId], references: [id])
+  bodyType       BodyType?              @relation(fields: [bodyTypeId], references: [id])
+  transmission   Transmission?          @relation(fields: [transmissionId], references: [id])
+  fuels          FuelsOnUserCarParams[]
+  transmissionId String?                @map("transmission_id") @db.Uuid
+  bodyTypeId     String?                @map("body_type_id") @db.Uuid
+  driveTypeId    String?                @map("drive_type_id") @db.Uuid
+  partTypeId     String?                @map("part_type_id") @db.Uuid
+  isDisabled     Boolean?               @default(false) @map("is_disabled")
+
+  @@map("user_car_params")
+}
+
+model Admin {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  firstName    String    @db.VarChar(255)
+  lastName     String    @db.VarChar(255)
+  password     String
+  token        String?
+  email        String    @unique @db.VarChar(255)
+  phoneNumber  String?   @unique @map("phone_number") @db.VarChar(255)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  isActive     Boolean   @default(false)
+  idSuperAdmin Boolean   @default(false)
+  history      History[]
+
+}
+
+model History {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String?  @map("user_id") @db.Uuid
+  adminId   String?  @map("admin_id") @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  eventName String   @map("event_name")
+  eventData Json     @map("event_data")
+  user      User?    @relation(fields: [userId], references: [id])
+  admin     Admin?   @relation(fields: [adminId], references: [id])
+}

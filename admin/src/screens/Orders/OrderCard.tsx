@@ -25,7 +25,6 @@ import {
   useAllModelsQuery,
   useAllTypesQuery,
   useCreateOrderMutation,
-  UserCarParams,
   useUpdateUserCarParamsMutation,
 } from "../../generated/graphql";
 import gql from "graphql-tag";
@@ -317,60 +316,18 @@ export const OrderCard = ({
                   fragment: gql`
                     fragment NewOrder on Order {
                       id
-		                userCarParamId
-		                orderNumber
-		                model {
-		                	id
-		                	name
-		                	type {
-		                		id
-		                		name
-		                	}
-		                	brand {
-		                		id
-		                		name
-		                	}
-		                }
-		                status {
-		                	id
-		                	name
-		                }
-		                comment
-		                createdAt
-		                user {
-		                	id
-		                	firstName
-		                	lastName
-		                	phoneNumber
-		                	email
-		                	phoneNotification
-		                	viberNotification
-		                	telegramNotification
-		                	comment
-		                }
-                  }`,
+                    }`,
                 });
-                console.log(newTypeRef);
-                return existingOrdersRefs.splice(indexOrder, 1, newTypeRef);
+                let prepared = [...existingOrdersRefs];
+                prepared.splice(indexOrder, 1, newTypeRef);
+                existingOrdersRefs = [...prepared];
+                return existingOrdersRefs;
               },
             },
           });
         },
 
       });
-      // updateUserCarParams({
-      //   variables: {
-      //     updateUserCarParamsInput: {
-      //       modelId: model.id,
-      //       carPart: carPart,
-      //       transmission: transmission.id,
-      //       partOfType: partType.id,
-      //       bodyType: bodyType.id,
-      //       drive: driveType.id,
-      //       // fuel: fuelType,
-      //     }
-      //   }
-      // })
       setCancelButtonState(true);
       setSaveButtonState(true);
       return succesMessage("Заказ обновлен");
@@ -378,6 +335,35 @@ export const OrderCard = ({
       return errorMessage(`${error}`);
     }
   };
+
+  const saveForUserToo = () => {
+    const fuels = fuelType.map(fuel => {
+      return fuelTypes.find(v => v.name === fuel)
+    })
+    const fuelIds = fuels.map(v => v?.id)
+    try {
+      updateUserCarParams({
+        variables: {
+          updateUserCarParamsInput: {
+            id: order.userCarParamId,
+            fuel: fuelIds,
+            transmission: transmission.id,
+            bodyType: bodyType.id,
+            carPart: carPart,
+            drive: driveType.id,
+		        engineVolume: engineVolume.toString(),
+            modelId: model.id,
+            partOfType: partType.id,
+            vin: order.vin,
+            year: order.year
+          }
+        }
+      })
+    } catch (error) {
+      return errorMessage(`${error}`);
+    } 
+      saveData();
+  }
 
   const cancelChanges = () => {
     setCarPart(carPart);
@@ -874,11 +860,26 @@ export const OrderCard = ({
           style={{
             paddingLeft: "1rem",
             paddingRight: "1rem",
+            marginRight: "1rem",
             backgroundColor: "green",
             border: "none",
           }}
         >
           Сохранить
+        </Button>
+         <Button
+          type="primary"
+          size="large"
+          disabled={saveButtonState}
+          onClick={saveForUserToo}
+          style={{
+            paddingLeft: "1rem",
+            paddingRight: "1rem",
+            backgroundColor: "green",
+            border: "none",
+          }}
+        >
+          Сохранить и применить
         </Button>
       </Card.Grid>
     </Card>
