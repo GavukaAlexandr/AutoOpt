@@ -73,7 +73,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
     </td>
   );
 };
-const preparedData = (data: any[]) => {
+const preparedData = (data: User[]) => {
   return data.map((value: Record<string, any>, i: number) => {
     return {
       key: value.id,
@@ -431,7 +431,7 @@ export const UsersTable = ({
         }}
         bordered
         dataSource={data}
-        columns={mergedColumns}
+        columns={mergedColumns} 
         pagination={{
           showSizeChanger: true,
           pageSizeOptions: ["10", "25", "50", "100", "200"],

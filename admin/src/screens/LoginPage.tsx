@@ -1,59 +1,32 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { Form, Input, Button, Checkbox, Row, Col } from "antd";
-// import {
-//   getAuth,
-//   RecaptchaVerifier,
-//   signInWithPhoneNumber,
-// } from "firebase/auth";
-// import { initializeApp } from "firebase/app";
-// import { firebaseConfig } from "./../fireBase";
-// import { useEffect } from "react";
+import { Form, Input, Button, Row, Col, Spin } from "antd";
+import { useLoginLazyQuery } from "../generated/graphql";
 
 export const LoginPage = () => {
-  // const app = initializeApp(firebaseConfig);
-  // const auth = getAuth(app);
   let navigate = useNavigate();
   let location = useLocation();
+  const [ login, { loading, data }] = useLoginLazyQuery();
 
   let state = location.state as { from: Location };
   let from = state ? state.from.pathname : "/";
 
   const onFinish = (values: any) => {
-    localStorage.setItem("phone", values.email);
-    localStorage.setItem("password", values.password);
-    navigate(from, { replace: true });
-  };
-
-
-  // const configureCaptcha = () => {
-  //   window.recaptchaVerifier = new RecaptchaVerifier(
-  //     "sign-in-button",
-  //     {
-  //       size: "invisible",
-  //       callback: (response: any) => {
-  //         // reCAPTCHA solved, allow signInWithPhoneNumber.
-  //         onSignInSubmit();
-  //         console.log("Recaptcha verified");
-  //       },
-  //       defaultCountry: "UA"
-  //     },
-  //     auth
-  //   );
-  // }
-
-  // const onSignInSubmit = () => {
-  //   configureCaptcha()
-  //   const appVerifier = window.recaptchaVerifier;
-    
-  //   signInWithPhoneNumber(auth, "+380954775236", appVerifier)
-  //   .then((confirmationResult) => {
-  //     window.confirmationResult = confirmationResult;
-  //     console.log(confirmationResult);
-  //     // ...
-  //   }).catch((error) => {
-  //     console.log("own error" + error);
-  //   });
-  // }
+      login({
+        variables: {
+         variables: {
+          phoneNumber: values.phone,
+          password: values.password
+         }
+        }
+      })
+    };
+  
+  if (!loading && data) {
+    if (data.login.token.length > 0) {
+      localStorage.setItem('token', `Bearer ${data.login.token}`);
+      navigate(from, { replace: true });
+    }
+  }
 
   return (
     <Row
@@ -81,29 +54,25 @@ export const LoginPage = () => {
           onFinish={onFinish}
           size={"large"}
           style={{ padding: "1rem" }}
-          autoComplete="off"
+          autoComplete="new-login"
         >
           <Form.Item
-            label="Phone"
+            label="Номер телефона"
             wrapperCol={{ span: 24 }}
             labelCol={{ span: 24 }}
             name="phone"
-            rules={[{ required: true, message: "Please input your Phone!" }]}
+            rules={[{ required: true, message: "Пожалуйста введите ваш номер телефона!" }]}
           >
-            <Input />
+            <Input name="phone"/>
           </Form.Item>
           <Form.Item
-            label="Password"
+            label="Пароль"
             wrapperCol={{ span: 24 }}
             labelCol={{ span: 24 }}
             name="password"
-            rules={[{ required: true, message: "Please input your password!" }]}
+            rules={[{ required: true, message: "Пожалуйста введите ваш номер пароль!" }]}
           >
-            <Input.Password />
-          </Form.Item>
-
-          <Form.Item name="remember" valuePropName="checked">
-            <Checkbox>Remember me</Checkbox>
+            <Input.Password type={"password"}/>
           </Form.Item>
           <Form.Item>
             <Button
@@ -114,6 +83,13 @@ export const LoginPage = () => {
               Submit
             </Button>
           </Form.Item>
+          {
+           loading ? (
+            <Row justify="center" align="middle" style={{ minHeight: "100%" }}>
+              <Spin />
+            </Row>
+          ) : null
+          }
         </Form>
       </Col>
     </Row>

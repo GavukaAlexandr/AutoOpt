@@ -1,13 +1,10 @@
 import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
-import { useMutation } from "@apollo/client";
-import { Card, Divider, Typography, Input, Button } from "antd";
+import { Card, Typography, Button } from "antd";
 import { useEffect, useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import { Order, UserCarParams, useUpdateUserMutation } from "../../generated/graphql";
+import { useUpdateUserMutation } from "../../generated/graphql";
 import { errorMessage, succesMessage } from "../../helpres/messages";
-
-const { TextArea } = Input;
 
 const { Title, Paragraph } = Typography;
 
@@ -24,17 +21,6 @@ export const UserCard = ({
   const [userLastName, setUsetLastName] = useState(record.lastName);
   const [saveButtonState, setSaveButtonState] = useState(true);
   const [cancelButtonState, setCancelButtonState] = useState(true);
-
-  const saveComment = () => {
-    updateUser({
-      variables: {
-        updateUserInput: {
-          id: record.userId,
-          comment: comment,
-        },
-      },
-    });
-  };
 
   const saveData = () => {
     try {
@@ -62,14 +48,6 @@ export const UserCard = ({
     setComment(record.userComment);
     return succesMessage('Changes was discard');
   }
-
-  useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      saveComment();
-    }, 5000);
-    return () => clearTimeout(delayDebounceFn);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [comment]);
 
   const changeButtonsState = () => {
     if (

@@ -1,15 +1,12 @@
-import { RedoOutlined } from "@ant-design/icons";
-import { useQuery } from "@apollo/client";
 import { DatePicker } from "antd";
 import moment from "moment";
-import { errorMessage } from "../../helpres/messages";
 import { Order, useGetFirstOrderQuery } from "../../generated/graphql";
 const { RangePicker } = DatePicker;
 
 const dateFormat = "MM/DD/YYYY";
 
 export const CustomRangePicker = ({ handleDate }: any) => {
-  const { loading, error, data, refetch } = useGetFirstOrderQuery({
+  const { loading, error, data } = useGetFirstOrderQuery({
     variables: {
       sortField: "createdAt",
       sortOrder: "asc",

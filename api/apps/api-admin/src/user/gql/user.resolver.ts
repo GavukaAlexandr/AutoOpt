@@ -9,7 +9,6 @@ import { PrismaService } from '@app/prisma';
 export class UserResolver {
   constructor(private prismaService: PrismaService) { }
 
-  @Public()
   @Query(returns => User)
   async User(@Args('id') id: string) {
     return this.prismaService.user.findUnique({
@@ -17,14 +16,6 @@ export class UserResolver {
     });
   }
 
-  @Public()
-  @ResolveField('orders', returns => [Order])
-  async order(@Parent() user: User) {
-    const { id } = user;
-    return this.prismaService.order.findMany({ where: { userId: id } });
-  }
-
-  @Public()
   @Query(returns => [User])
   async allUsers(
     @Args('perPage', { type: () => Int, nullable: true }) perPage,
@@ -43,11 +34,11 @@ export class UserResolver {
         lastName: { contains: lastName, mode: 'insensitive' },
         phoneNumber: { contains: phoneNumber, mode: 'insensitive' },
         email: { contains: email, mode: 'insensitive' }
-      }
+      },
+      include: {orders: { where : { isHistory: false } } }
     });
   }
 
-  @Public()
   @Query(returns => ListMetadata)
   async allUsersMeta(
     @Args('perPage', { type: () => Int, nullable: true }) perPage,
@@ -69,7 +60,6 @@ export class UserResolver {
     return { count: count };
   }
 
-  @Public()
   @Mutation(() => User)
   async updateUser(@Args({ name: 'updateUserInput', type: () => UpdateUserInput, nullable: true }) updateUserInput) {
     const { id, ...preparedUser } = updateUserInput;
@@ -80,7 +70,6 @@ export class UserResolver {
     })
   }
 
-  @Public()
   @Mutation(() => User)
   async createUser(@Args({ name: 'createUserInput', type: () => CreateUserInput, nullable: true }) createUserInput) {
     return this.prismaService.user.create({

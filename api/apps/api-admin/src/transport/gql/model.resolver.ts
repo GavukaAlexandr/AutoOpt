@@ -10,7 +10,6 @@ import { PrismaService } from '@app/prisma';
 export class ModelResolver {
     constructor(private prismaService: PrismaService) { }
 
-    @Public()
     @Query(returns => Model)
     async Model(@Args('id') id: string) {
         return this.prismaService.model.findUnique({
@@ -18,14 +17,12 @@ export class ModelResolver {
         });
     }
 
-    @Public()
     @ResolveField('brand', () => Brand)
     async brand(@Parent() model: Model) {
         const { brandId } = model;
         return this.prismaService.brand.findUnique({ where: { id: brandId } });
     }
 
-    @Public()
     @Query(returns => [Model])
     async allModels(
         @Args('perPage', { type: () => Int, nullable: true }) perPage,
@@ -49,7 +46,6 @@ export class ModelResolver {
 
     }
 
-    @Public()
     @Query(returns => ListMetadata)
     async allModelsMeta(
         @Args('sortField', { type: () => String, nullable: true }) sortField: string,
@@ -68,7 +64,6 @@ export class ModelResolver {
         return { count: count };
     }
 
-    @Public()
     @Mutation(() => Model)
     async updateModel(
         @Args({ name: 'id', type: () => ID, nullable: true }) id,
@@ -88,7 +83,6 @@ export class ModelResolver {
         )
     }
 
-    @Public()
     @Mutation(() => Model)
     async createModel(
         @Args({ name: 'name', type: () => String, nullable: true }) name,

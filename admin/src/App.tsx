@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "./App.less";
 import { OrdersTable } from "./screens/Orders/OrdersTable";
 import { UsersTable } from "./screens/Users/UsersTable";
@@ -9,6 +9,11 @@ import { TypeTable } from "./screens/Types/TypeTable";
 import { BrandTable } from "./screens/Brands/BrandTable";
 import { ModelTable } from "./screens/Models/ModelTable";
 import MainLayout from "./Layout";
+import { ApolloClient, ApolloLink, ApolloProvider, from, HttpLink, InMemoryCache } from "@apollo/client";
+import { onError } from "@apollo/client/link/error";
+import { useNavigate } from "react-router-dom";
+import LocalizedStrings from "react-localization";
+const httpLink = new HttpLink({ uri: 'http://192.168.88.30:3000/graphql' });
 declare global {
   interface Window {
     recaptchaVerifier: any;
@@ -17,8 +22,60 @@ declare global {
 }
 
 const App = () => {
+  const [localization, setLocalization] = useState<Record<string, any>>();
+
+  useEffect(() => {
+    (async function loadTranslations() {
+      const response = await fetch('http://localhost:3000/public/app-localizations/ru_RU.json');
+      const result = await response.json();
+      setLocalization(result);
+    })();
+
+  }, [])
+  const translations = new LocalizedStrings({
+    ru: {
+      ...localization
+    }
+  });
+
+  translations.setLanguage('ru')
+
+  let navigate = useNavigate();
+
+  const authMiddleware = new ApolloLink((operation, forward) => {
+    operation.setContext(({ headers = {} }) => ({
+      headers: {
+        ...headers,
+        Authorization: localStorage.getItem('token') || null
+      }
+    }));
+  
+    return forward(operation);
+  })
+  
+  const errorLink = onError(({ graphQLErrors, networkError }) => {
+    if (graphQLErrors) {
+      graphQLErrors.map(({ message, locations, path }) => {
+        if (message === "Unauthorized") {
+          localStorage.removeItem('token');
+          return navigate("/login");
+        }
+        return null
+      });
+    }
+  });
+  
+  const client = new ApolloClient({
+    cache: new InMemoryCache(),
+    link: from([
+      authMiddleware,
+      errorLink,
+      httpLink
+    ]),
+  });
 
   return (
+    <ApolloProvider client={client}>
     <Routes>
       <Route element={<MainLayout />}>
         <Route element={<RequireAuth />}>
@@ -30,10 +87,11 @@ const App = () => {
                 perPage={50}
                 sortField={"createdAt"}
                 sortOrder={"desc"}
+                translations={translations}
               />
             }
           />
-          {/* <Route
+          <Route
             path="/users"
             element={
               <UsersTable
@@ -52,6 +110,7 @@ const App = () => {
                 perPage={50}
                 sortField={"name"}
                 sortOrder={"asc"}
+                translations={translations}
               />
             }
           />
@@ -66,7 +125,6 @@ const App = () => {
               />
             }
             />
-            */
           <Route
             path="/models"
             element={
@@ -78,11 +136,11 @@ const App = () => {
               />
             }
           />
-          }
         </Route>
       </Route>
       <Route path="/login" element={<LoginPage />} />
     </Routes>
+    </ApolloProvider>
   );
 };
 

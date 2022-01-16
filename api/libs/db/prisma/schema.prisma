@@ -98,7 +98,7 @@ model Order {
   userId          String          @map("user_id") @db.Uuid
   orderNumber     String          @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  updatedAt       DateTime        @default(now())
   userCarParamId  String          @db.Uuid
   comment         String?         @db.Text
   orderStatusId   String?         @map("order_status_id") @db.Uuid
@@ -116,6 +116,7 @@ model Order {
   bodyType        BodyType?       @relation(fields: [bodyTypeId], references: [id])
   transmission    Transmission?   @relation(fields: [transmissionId], references: [id])
   fuels           FuelsOnOrders[]
+  isHistory       Boolean   @default(false)
   transmissionId  String?         @map("transmission_id") @db.Uuid
   bodyTypeId      String?         @map("body_type_id") @db.Uuid
   driveTypeId     String?         @map("drive_type_id") @db.Uuid

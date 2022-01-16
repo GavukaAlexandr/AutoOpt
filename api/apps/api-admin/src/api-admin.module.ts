@@ -5,7 +5,6 @@ import { ApiAdminController } from './api-admin.controller';
 import { ApiAdminService } from './api-admin.service';
 import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
 import { PrismaService } from '@app/prisma';
-import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { OrderResolver } from './order/gql/order.resolver';
 import { UserResolver } from './user/gql/user.resolver';
@@ -15,33 +14,40 @@ import { ModelResolver } from './transport/gql/model.resolver';
 import { UserCarParamsResolver } from './user/gql/user.car.params.resolver';
 import { CarParamsResolver } from './transport/gql/car.params.resolver';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { AuthResolver } from './auth/gql/auth.resolver';
+import { AdminModule } from './admin/admin.module';
+import { AdminService } from './admin/admin.service';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { ServeStaticModule } from '@nestjs/serve-static';
 
 @Module({
   imports: [
-    UserModule,
+    AdminModule,
     AuthModule,
     ThrottlerModule.forRootAsync({
-      // imports: [ConfigModule],
-      // inject: [ConfigService],
-      useFactory: (/* config: ConfigService */) => ({
-        ttl: 60, //config.get('THROTTLE_TTL'),
-        limit: 60, //config.get('THROTTLE_LIMIT'),
+      useFactory: () => ({
+        ttl: 60,
+        limit: 60,
       }),
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', '../../public'),
+      serveRoot: '/public',
     }),
     GraphQLModule.forRoot({
       debug: true,
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      autoSchemaFile: join(process.cwd(), '/api/apps/api-admin/src/schema.gql'),
       playground: true,
+      context: ({req}) => ({req}),
       sortSchema: true,
-      // typePaths: ['./**/*.graphql'],
-      // definitions: {
-      //   path: join(process.cwd(), 'src/graphql.ts'),
-      //   outputAs: 'class',
-      // },
-      // plugins: [ApolloServerPluginLandingPageLocalDefault()],
     }),
   ],
   controllers: [ApiAdminController],
-  providers: [ApiAdminService, PrismaService, OrderResolver, UserResolver, TypeResolver, BrandResolver, ModelResolver, UserCarParamsResolver, CarParamsResolver],
+  providers: [{
+    provide: APP_GUARD,
+    useClass: JwtAuthGuard,
+  },
+    AdminService, AuthResolver, ApiAdminService, PrismaService, OrderResolver, UserResolver, TypeResolver, BrandResolver, ModelResolver, UserCarParamsResolver, CarParamsResolver],
 })
-export class ApiAdminModule {}
+export class ApiAdminModule { }

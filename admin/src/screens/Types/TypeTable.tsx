@@ -1,8 +1,8 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useEffect, useState } from "react";
 import {
   Table,
   Input,
-  InputNumber,
   Popconfirm,
   Form,
   Typography,
@@ -68,16 +68,17 @@ const EditableCell: React.FC<EditableCellProps> = ({
     </td>
   );
 };
-const preparedData = (data: Array<Type>) => {
+const preparedData = (data: Array<Type>, translations: Record<string, any> ) => {
   return data.map((value: Type, i: number) => {
     return {
       key: value.id,
-      name: value.name,
+      name: translations[value.name] ?? value.name,
     };
   });
 };
 
 export const TypeTable = ({
+  translations,
   page,
   perPage,
   sortField,
@@ -87,6 +88,7 @@ export const TypeTable = ({
   perPage: number;
   sortField: string;
   sortOrder: string;
+  translations: Record<string, any>
 }) => {
   const {
     loading,
@@ -116,9 +118,9 @@ export const TypeTable = ({
 
   useEffect(() => {
     if (!loading && typeData) {
-      setData(preparedData(typeData.allTypes as Type[]));
+      setData(preparedData(typeData.allTypes as Type[], translations));
     }
-  }, [loading, typeData]);
+  }, [loading, typeData, translations]);
 
   const cancel = () => {
     setEditingKey("");
@@ -149,7 +151,6 @@ export const TypeTable = ({
           });
         },
       });
-      console.log(createTypeMutation);
       setIsModalVisible(false);
       return succesMessage("Тип транспорта создан");
     } catch (error) {
@@ -162,8 +163,8 @@ export const TypeTable = ({
     setIsModalVisible(false);
   };
 
-  const typeUpdate = (newData: Item[]) => {
-    let [{ name, key }] = newData;
+  const typeUpdate = (newData: Item) => {
+    let { name, key } = newData;
     try {
       updateTypeMutation({
         variables: {
@@ -188,7 +189,7 @@ export const TypeTable = ({
           ...item,
           ...row,
         });
-        typeUpdate(newData);
+        typeUpdate(newData[index]);
         setData(newData);
         setEditingKey("");
       } else {

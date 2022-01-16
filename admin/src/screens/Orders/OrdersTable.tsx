@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Table,
   BackTop,
@@ -21,6 +21,7 @@ import { Order, useAllOrdersQuery } from "../../generated/graphql";
 const { Paragraph } = Typography;
 
 export const OrdersTable = ({
+  translations,
   page,
   perPage,
   sortField,
@@ -30,6 +31,7 @@ export const OrdersTable = ({
   perPage: number;
   sortField: string;
   sortOrder: string;
+  translations: Record<string, any>
 }) => {
   const [searchFirstName, setSearchFirstName] = useState("");
   const [searchLastName, setSearchLastName] = useState("");
@@ -139,7 +141,7 @@ export const OrdersTable = ({
   const statusMenu = (
     <Menu
     onClick={(v) => {
-        const arrayOfStatus: Record<string, any>[] = data?.orderStatuses.filter(value => value.id == v.key) as Record<string, any>[]; 
+        const arrayOfStatus: Record<string, any>[] = data?.orderStatuses.filter(value => value.id === v.key) as Record<string, any>[]; 
         const [{id, name}] = arrayOfStatus;
         setStatus({id, name});
         try {
@@ -154,7 +156,7 @@ export const OrdersTable = ({
       }}
     >
       {data?.orderStatuses.map(data => {
-        return <Menu.Item key={data.id}>{coloredTags(data.name)}</Menu.Item>;
+        return <Menu.Item key={data.id}>{coloredTags(data.name, translations)}</Menu.Item>;
       })}
     </Menu>
   );
@@ -164,6 +166,7 @@ export const OrdersTable = ({
       title: "Имя",
       dataIndex: "firstName",
       key: "firstName",
+      // eslint-disable-next-line jsx-a11y/anchor-is-valid
       render: (text: string) => <a>{text}</a>,
       filterDropdown: () => {
         return (
@@ -191,6 +194,7 @@ export const OrdersTable = ({
       title: "Фамилия",
       dataIndex: "lastName",
       key: "lastName",
+      // eslint-disable-next-line jsx-a11y/anchor-is-valid
       render: (text: string) => <a>{text}</a>,
       filterDropdown: () => {
         return (
@@ -277,7 +281,7 @@ export const OrdersTable = ({
       title: "Тип",
       dataIndex: "type",
       key: "type",
-      render: (text: string) => <Tag>{text}</Tag>,
+      render: (text: string) => <Tag>{translations[text] ?? text}</Tag>,
     },
     {
       title: "Бренд",
@@ -299,13 +303,13 @@ export const OrdersTable = ({
             trigger={["click"]}
             placement="bottomCenter"
           >
-            {coloredTags(status.name)}
+            {coloredTags(status.name, translations)}
           </Dropdown>
         </>
       ),
       key: "status",
       dataIndex: "status",
-      render: (status: string) => coloredTags(status)
+      render: (status: string) => coloredTags(status, translations)
     },
     {
       title: () => {
@@ -320,10 +324,12 @@ export const OrdersTable = ({
     <>
       <Table
         className="table-striped-rows"
+        expandRowByClick={true}
         columns={mainColumns}
         loading={loading}
         expandedRowRender={(record) => (
           <ExpandedOrder
+          translations={translations}
             record={record}
             orderStatuses={data!.orderStatuses}
             transmissions={data!.transmissions}

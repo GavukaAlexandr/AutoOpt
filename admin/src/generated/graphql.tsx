@@ -17,6 +17,29 @@ export type Scalars = {
   DateTime: any;
 };
 
+export type Admin = {
+  __typename?: 'Admin';
+  email: Scalars['String'];
+  firstName: Scalars['String'];
+  id: Scalars['ID'];
+  lastName: Scalars['String'];
+  password: Scalars['String'];
+  phoneNumber: Scalars['String'];
+};
+
+export type AdminCreateInput = {
+  email: Scalars['String'];
+  firstName: Scalars['String'];
+  lastName: Scalars['String'];
+  password: Scalars['String'];
+  phoneNumber: Scalars['String'];
+};
+
+export type AdminInput = {
+  password: Scalars['String'];
+  phoneNumber: Scalars['String'];
+};
+
 export type Brand = {
   __typename?: 'Brand';
   id: Scalars['ID'];
@@ -132,6 +155,7 @@ export type ModelFilter = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  create: Admin;
   createBrand: Brand;
   createCarParams: UserCarParams;
   createModel: Model;
@@ -144,6 +168,11 @@ export type Mutation = {
   updateType: Type;
   updateUser: User;
   updateUserCarParams: UserCarParams;
+};
+
+
+export type MutationCreateArgs = {
+  adminCreateInput: AdminCreateInput;
 };
 
 
@@ -268,6 +297,7 @@ export type Query = {
   driveTypes: Array<IDriveType>;
   fuelTypes: Array<IFuelType>;
   getFirstOrder: Array<Order>;
+  login: Token;
   orderStatuses: Array<IOrderStatus>;
   partTypes: Array<IPartType>;
   transmissions: Array<ITransmission>;
@@ -395,8 +425,18 @@ export type QueryGetFirstOrderArgs = {
 };
 
 
+export type QueryLoginArgs = {
+  variables?: InputMaybe<AdminInput>;
+};
+
+
 export type QueryUserCarParamsArgs = {
   id?: InputMaybe<Scalars['ID']>;
+};
+
+export type Token = {
+  __typename?: 'Token';
+  token: Scalars['String'];
 };
 
 export type Type = {
@@ -622,6 +662,13 @@ export type AllUsersQueryVariables = Exact<{
 
 
 export type AllUsersQuery = { __typename?: 'Query', allUsers: Array<{ __typename?: 'User', id: string, comment?: string | null | undefined, createdAt: any, email: string, firstName: string, lastName: string, phoneNotification: boolean, phoneNumber: string, telegramNotification: boolean, viberNotification: boolean, orders: Array<{ __typename?: 'Order', id: string }> }>, allUsersMeta: { __typename?: 'ListMetadata', count?: number | null | undefined } };
+
+export type LoginQueryVariables = Exact<{
+  variables?: InputMaybe<AdminInput>;
+}>;
+
+
+export type LoginQuery = { __typename?: 'Query', login: { __typename?: 'Token', token: string } };
 
 
 export const CreateTypeDocument = gql`
@@ -1449,3 +1496,38 @@ export function useAllUsersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<A
 export type AllUsersQueryHookResult = ReturnType<typeof useAllUsersQuery>;
 export type AllUsersLazyQueryHookResult = ReturnType<typeof useAllUsersLazyQuery>;
 export type AllUsersQueryResult = Apollo.QueryResult<AllUsersQuery, AllUsersQueryVariables>;
+export const LoginDocument = gql`
+    query login($variables: AdminInput) {
+  login(variables: $variables) {
+    token
+  }
+}
+    `;
+
+/**
+ * __useLoginQuery__
+ *
+ * To run a query within a React component, call `useLoginQuery` and pass it any options that fit your needs.
+ * When your component renders, `useLoginQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLoginQuery({
+ *   variables: {
+ *      variables: // value for 'variables'
+ *   },
+ * });
+ */
+export function useLoginQuery(baseOptions?: Apollo.QueryHookOptions<LoginQuery, LoginQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<LoginQuery, LoginQueryVariables>(LoginDocument, options);
+      }
+export function useLoginLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<LoginQuery, LoginQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<LoginQuery, LoginQueryVariables>(LoginDocument, options);
+        }
+export type LoginQueryHookResult = ReturnType<typeof useLoginQuery>;
+export type LoginLazyQueryHookResult = ReturnType<typeof useLoginLazyQuery>;
+export type LoginQueryResult = Apollo.QueryResult<LoginQuery, LoginQueryVariables>;

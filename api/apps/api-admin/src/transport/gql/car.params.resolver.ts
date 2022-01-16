@@ -10,37 +10,31 @@ import { UserCarParams } from '../../user/gql/user.car.params.model';
 export class CarParamsResolver {
     constructor(private prismaService: PrismaService) { }
 
-    @Public()
     @Query(() => [ITransmission])
     async transmissions() {
         return this.prismaService.transmission.findMany({});
     }
 
-    @Public()
     @Query(() => [IFuelType])
     async fuelTypes() {
         return this.prismaService.fuelType.findMany({});
     }
 
-    @Public()
     @Query(() => [IDriveType])
     async driveTypes() {
         return this.prismaService.driveType.findMany({});
     }
 
-    @Public()
     @Query(() => [IBodyType])
     async bodyTypes() {
         return this.prismaService.bodyType.findMany({});
     }
 
-    @Public()
     @Query(() => [IPartType])
     async partTypes() {
         return this.prismaService.partType.findMany({});
     }
 
-    @Public()
     @Query(() => [IOrderStatus])
     async orderStatuses() {
         return this.prismaService.orderStatus.findMany({});

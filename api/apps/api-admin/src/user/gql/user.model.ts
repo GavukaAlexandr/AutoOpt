@@ -43,7 +43,6 @@ export class User implements UserEntity {
     @Field(type => [Order])
     orders: Order[]
 
-
 }
 
 @InputType()

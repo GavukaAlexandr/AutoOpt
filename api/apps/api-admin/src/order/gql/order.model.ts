@@ -6,6 +6,7 @@ import { IBodyType, IDriveType, IFuelType, IOrderStatus, IPartType, ITransmissio
 
 @ObjectType()
 export class Order implements OrderEntity {
+    isHistory: boolean;
     isDisabled: boolean
     driveTypeId: string
     transmissionId: string
@@ -156,6 +157,7 @@ export class CreateOrderInput {
 
     @Field(type => String, { nullable: true })
     comment?: string
+
 }
 
 @InputType()

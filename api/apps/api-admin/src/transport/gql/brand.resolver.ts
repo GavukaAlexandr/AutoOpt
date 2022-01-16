@@ -11,7 +11,6 @@ import { PrismaService } from '@app/prisma';
 export class BrandResolver {
     constructor(private prismaService: PrismaService) { }
 
-    @Public()
     @Query(returns => Brand)
     async Brand(@Args('id') id: string) {
         return this.prismaService.brand.findUnique({
@@ -19,7 +18,6 @@ export class BrandResolver {
         });
     }
 
-    @Public()
     @ResolveField('type', returns => [Type])
     async type(@Parent() brand: Brand) {
         const { id } = brand;
@@ -38,14 +36,12 @@ export class BrandResolver {
         return preparedTypes;
     }
 
-    @Public()
     @ResolveField('models', returns => [Model])
     async model(@Parent() brand: Brand) {
         const { id } = brand;
         return this.prismaService.model.findMany({ where: { brandId: id } });
     }
 
-    @Public()
     @Query(returns => [Brand])
     async allBrands(
         @Args('perPage', { type: () => Int, nullable: true }) perPage,
@@ -64,7 +60,6 @@ export class BrandResolver {
         });
     }
 
-    @Public()
     @Query(returns => [Brand])
     async allBrandsOfType(
         @Args('perPage', { type: () => Int, nullable: true }) perPage,
@@ -88,7 +83,6 @@ export class BrandResolver {
         return preparedBrands;
     }
 
-    @Public()
     @Query(returns => ListMetadata)
     async allBrandsMeta(
         @Args('perPage', { type: () => Int, nullable: true }) perPage,
@@ -107,7 +101,6 @@ export class BrandResolver {
     }
 
 
-    @Public()
     @Mutation(() => Brand)
     async createBrand(
         @Args({ name: 'name', type: () => String, nullable: true }) name) {
@@ -118,7 +111,6 @@ export class BrandResolver {
         });
     }
 
-    @Public()
     @Mutation(() => Brand)
     async updateBrand(
         @Args({ name: 'id', type: () => ID, nullable: true }) id,

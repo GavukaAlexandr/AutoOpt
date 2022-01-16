@@ -1,6 +1,6 @@
 import { Tag } from "antd";
 
-  export const coloredTags = (value: string) => {
+  export const coloredTags = (value: string, translations: Record<string, any>) => {
     let color;
     if (value === "processing") {
       color = "orange";
@@ -19,7 +19,7 @@ import { Tag } from "antd";
     }
     return (
       <Tag color={color} key={value}>
-        <strong>{value}</strong>
+        <strong>{translations[value] ?? value}</strong>
       </Tag>
     );
   };

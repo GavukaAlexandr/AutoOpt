@@ -12,7 +12,6 @@ const prisma = new PrismaClient()
 export class UserCarParamsResolver {
     constructor(private prismaService: PrismaService) { }
 
-    @Public()
     @Query(() => UserCarParams)
     async userCarParams(@Args('id', { type: () => ID, nullable: true }) id: string) {
         const userCarParams = await this.prismaService.userCarParams.findFirst({
@@ -49,7 +48,6 @@ export class UserCarParamsResolver {
     //     return plainToClass(UserCarParams, { ...userCarParams, fuels: result });
     // }
 
-    @Public()
     @Mutation(() => UserCarParams)
     async createCarParams(@Args({ name: 'createCarParamsInput', type: () => CreateCarParamsInput }) createCarParamsInput) {
         const { modelId, userId, fuelId, transmissionId, bodyTypeId, driveTypeId, partTypeId, ...preparedCarParms } = createCarParamsInput;
@@ -72,7 +70,6 @@ export class UserCarParamsResolver {
         });
     }
 
-    @Public()
     @Mutation(() => UserCarParams)
     async updateUserCarParams(@Args({ name: 'updateUserCarParamsInput', type: () => UpdateUserCarParamsInput, nullable: true }) updateUserCarParamsInput) {
         const { id, bodyType, carPart, drive, fuel, engineVolume, year, modelId, partOfType, transmission, vin} = updateUserCarParamsInput;

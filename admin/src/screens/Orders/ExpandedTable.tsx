@@ -1,15 +1,10 @@
-import React, { useEffect, useState } from "react";
 
-import { useMutation, useQuery } from "@apollo/client";
 import { Col, Row } from "antd";
-import { errorMessage, succesMessage } from "../../helpres/messages";
 import { OrderCard } from "./OrderCard";
 import { UserCard } from "./UserCard";
 import {
   Order,
   useOrderQuery,
-  UserCarParams,
-  useUpdateUserCarParamsMutation,
 } from "../../generated/graphql";
 
 const cardContent = {
@@ -19,6 +14,7 @@ const cardContent = {
 };
 
 export const ExpandedOrder = ({
+  translations,
   record,
   orderStatuses,
   transmissions,
@@ -27,6 +23,7 @@ export const ExpandedOrder = ({
   driveTypes,
   partTypes,
 }: {
+  translations: Record<string, any>
   record: Record<string, any>;
   orderStatuses: Record<string, any>[]
   transmissions: Record<string, any>[]
@@ -47,8 +44,17 @@ export const ExpandedOrder = ({
   return (
     <>
       <Row gutter={[16, 8]} className="site-card-border-less-wrapper">
-        <Col span={16}>
+        <Col 
+        span={16}
+        xs={16}
+        sm={14}
+        md={14}
+        lg={14}
+        xl={14}
+        xxl={14}
+        >
           <OrderCard
+            translations={translations}
             order={orderData?.Order as Order}
             cardContent={cardContent}
             orderStatuses={orderStatuses}
@@ -59,7 +65,14 @@ export const ExpandedOrder = ({
             partTypes={partTypes}
           />
         </Col>
-        <Col span={8}>
+        <Col span={8} 
+        xs={8}
+        sm={10}
+        md={10}
+        lg={10}
+        xl={10}
+        xxl={10}
+        >
           <UserCard record={record} cardContent={cardContent} />
         </Col>
       </Row>

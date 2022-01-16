@@ -4,7 +4,6 @@ import {
   Select,
   Tag,
   Typography,
-  Input,
   Spin,
   Button,
   Menu,
@@ -29,12 +28,11 @@ import {
 } from "../../generated/graphql";
 import gql from "graphql-tag";
 
-const { TextArea } = Input;
-
 const { Title, Paragraph } = Typography;
 const { Option } = Select;
 
 export const OrderCard = ({
+  translations,
   cardContent,
   order,
   orderStatuses,
@@ -44,6 +42,7 @@ export const OrderCard = ({
   driveTypes,
   partTypes,
 }: {
+  translations:Record<string, any>; 
   cardContent: Record<string, any>;
   order: Order;
   orderStatuses: Record<string, any>[]
@@ -54,6 +53,8 @@ export const OrderCard = ({
   partTypes: Record<string, any>[]
 }) => {
   const [carPart, setCarPart] = useState(order.carPart);
+  const [year, setYear] = useState(order.year);
+  const [vinNumber, setVinNumber] = useState(order.vin);
   const [saveButtonState, setSaveButtonState] = useState(true);
   const [cancelButtonState, setCancelButtonState] = useState(true);
   const [status, setStatus] = useState(order.status);
@@ -140,7 +141,7 @@ export const OrderCard = ({
   };
 
   const optionsForTagRender = (data: Record<string, any>[]) => {
-    return data.map((data: Record<string, any>) => ({ value: data.name }));
+    return data.map((data: Record<string, any>) => ({ label: translations[data.name] ?? data.name, value: data.name }));
   };
 
   const coloredArrayTags = (
@@ -172,39 +173,20 @@ export const OrderCard = ({
         }
         key={value}
       >
-        {value.toLowerCase()}
+        {translations[value] ?? value}
       </Tag>
     );
   };
 
-  // useEffect(() => {
-  //   const delayDebounceFn = setTimeout(() => {
-  //     saveComment();
-  //   }, 5000);
-  //   return () => clearTimeout(delayDebounceFn);
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [comment]);
-
-  // const saveComment = () => {
-  //   updateOrder({
-  //     variables: {
-  //       updateOrderInput: {
-  //         id: order.id,
-  //         comment: comment,
-  //       },
-  //     },
-  //   });
-  // };
-
   const statusMenu = (
     <Menu onClick={(v) => {
-      const arrayOfStatus: Record<string, any>[] = orderStatuses.filter(value => value.id == v.key) as Record<string, any>[];
+      const arrayOfStatus: Record<string, any>[] = orderStatuses.filter(value => value.id === v.key) as Record<string, any>[];
       const [{ id, name }] = arrayOfStatus;
       setStatus({ id, name })
     }}>
       {orderStatuses.map((data) => {
         return (
-          <Menu.Item key={data.id}>{coloredTags(data.name)}</Menu.Item>
+          <Menu.Item key={data.id}>{coloredTags(data.name, translations)}</Menu.Item>
         );
       })}
     </Menu>
@@ -212,13 +194,13 @@ export const OrderCard = ({
 
   const bodyTypeMenu = (
     <Menu onClick={(v) => {
-      const arrayOfBodyTypes: Record<string, any>[] = bodyTypes.filter(value => value.id == v.key) as Record<string, any>[];
+      const arrayOfBodyTypes: Record<string, any>[] = bodyTypes.filter(value => value.id === v.key) as Record<string, any>[];
       const [{ id, name }] = arrayOfBodyTypes;
       setBodyType({ id, name })
     }}>
       {bodyTypes.map((data) => {
         return (
-          <Menu.Item key={data.id}>{coloredTags(data.name)}</Menu.Item>
+          <Menu.Item key={data.id}>{coloredTags(data.name, translations)}</Menu.Item>
         );
       })}
     </Menu>
@@ -226,13 +208,13 @@ export const OrderCard = ({
 
   const transmissionMenu = (
     <Menu onClick={(v) => {
-      const arrayOfTransmissions: Record<string, any>[] = transmissions.filter(value => value.id == v.key) as Record<string, any>[];
+      const arrayOfTransmissions: Record<string, any>[] = transmissions.filter(value => value.id === v.key) as Record<string, any>[];
       const [{ id, name }] = arrayOfTransmissions;
       setTransmission({ id, name })
     }}>
       {transmissions.map((data) => {
         return (
-          <Menu.Item key={data.id}>{coloredTags(data.name)}</Menu.Item>
+          <Menu.Item key={data.id}>{coloredTags(data.name, translations)}</Menu.Item>
         );
       })}
     </Menu>
@@ -240,13 +222,13 @@ export const OrderCard = ({
 
   const partTypeMenu = (
     <Menu onClick={(v) => {
-      const arrayOfPartTypes: Record<string, any>[] = partTypes.filter(value => value.id == v.key) as Record<string, any>[];
+      const arrayOfPartTypes: Record<string, any>[] = partTypes.filter(value => value.id === v.key) as Record<string, any>[];
       const [{ id, name }] = arrayOfPartTypes;
       setTypePart({ id, name })
     }}>
       {partTypes.map((data) => {
         return (
-          <Menu.Item key={data.id}>{coloredTags(data.name)}</Menu.Item>
+          <Menu.Item key={data.id}>{coloredTags(data.name, translations)}</Menu.Item>
         );
       })}
     </Menu>
@@ -254,13 +236,13 @@ export const OrderCard = ({
 
   const driveTypeMenu = (
     <Menu onClick={(v) => {
-      const arrayOfDriveTypes: Record<string, any>[] = driveTypes.filter(value => value.id == v.key) as Record<string, any>[];
+      const arrayOfDriveTypes: Record<string, any>[] = driveTypes.filter(value => value.id === v.key) as Record<string, any>[];
       const [{ id, name }] = arrayOfDriveTypes;
       setDriveType({ id, name })
     }}>
       {driveTypes.map((data) => {
         return (
-          <Menu.Item key={data.id}>{coloredTags(data.name)}</Menu.Item>
+          <Menu.Item key={data.id}>{coloredTags(data.name, translations)}</Menu.Item>
         );
       })}
     </Menu>
@@ -270,6 +252,25 @@ export const OrderCard = ({
     if (value === carPart) return;
     if (value.length !== 0 && value !== carPart) {
       setCarPart(value);
+    } else {
+      return errorMessage("Uncorrect Fields");
+    }
+  };
+
+
+  const updateVinNumber = (value: string) => {
+    if (value === vinNumber) return;
+    if (value.length !== 0 && value !== vinNumber) {
+      setVinNumber(value);
+    } else {
+      return errorMessage("Uncorrect Fields");
+    }
+  };
+
+  const updateYear = (value: string) => {
+    if (value === year) return;
+    if (value.length !== 0 && value !== year) {
+      setYear(value);
     } else {
       return errorMessage("Uncorrect Fields");
     }
@@ -296,8 +297,8 @@ export const OrderCard = ({
             transmissionId: transmission.id,
             userCarParamId: order.userCarParamId,
             userId: order.user.id,
-            vin: order.vin,
-            year: order.year,
+            vin: vinNumber,
+            year: year,
             fuelId: fuelIds
           },
         },
@@ -354,8 +355,8 @@ export const OrderCard = ({
 		        engineVolume: engineVolume.toString(),
             modelId: model.id,
             partOfType: partType.id,
-            vin: order.vin,
-            year: order.year
+            vin: vinNumber,
+            year: year
           }
         }
       })
@@ -368,6 +369,8 @@ export const OrderCard = ({
   const cancelChanges = () => {
     setCarPart(carPart);
     setStatus(status);
+    setYear(order.year);
+    setVinNumber(order.vin);
     setTransmission(order.transmission);
     setTypePart(order.partOfType);
     setBodyType(order.bodyType);
@@ -399,7 +402,16 @@ export const OrderCard = ({
 
   const changeButtonState = () => {
     const fuels = order.fuels.map(v => v.name);
-    if (carPart.length !== 0 && carPart !== order.carPart) {
+    if (type.name.length === 0) {
+      setCancelButtonState(true);
+      return setSaveButtonState(true);
+    } else if (brand.name.length === 0) {
+      setCancelButtonState(true);
+      return setSaveButtonState(true);
+    } else if (model.name.length === 0) {
+      setCancelButtonState(true);
+      return setSaveButtonState(true);
+    } else if (carPart.length !== 0 && carPart !== order.carPart) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
     } else if (type.id.length !== 0 && type.id !== order.model.type.id) {
@@ -427,14 +439,19 @@ export const OrderCard = ({
     } else if (driveType !== order.drive) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
-    } else if (fuelType !== fuels && !arraysEqual(fuelType, fuels)) {
+    } else if (fuelType.length > 0 && fuelType !== fuels && !arraysEqual(fuelType, fuels)) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
     } else if (engineVolume !== Number(order.engineVolume)) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
-    }
-    else if (comment !== order.comment) {
+    } else if (comment !== order.comment) {
+      setCancelButtonState(false);
+      return setSaveButtonState(false);
+    } else if (year !== order.year) {
+      setCancelButtonState(false);
+      return setSaveButtonState(false);
+    } else if (vinNumber !== order.vin) {
       setCancelButtonState(false);
       return setSaveButtonState(false);
     }
@@ -458,6 +475,8 @@ export const OrderCard = ({
     fuelType,
     engineVolume,
     comment,
+    vinNumber,
+    year
   ]);
 
   const onChangeTypesSelect = (value: string) => {
@@ -559,7 +578,7 @@ export const OrderCard = ({
         }}
         hoverable={false}
       >
-        <Title level={3}>Order</Title>
+        <Title level={4}>Заказ</Title>
       </Card.Grid>
       <Card.Grid
         style={{ ...cardContent, paddingTop: "1rem" }}
@@ -579,6 +598,42 @@ export const OrderCard = ({
         </Paragraph>
       </Card.Grid>
 
+      <Card.Grid
+        style={{ ...cardContent, paddingTop: "1rem" }}
+        hoverable={false}
+      >
+        <Title style={{ display: "inline" }} level={4}>
+          Vin номер:{" "}
+        </Title>
+        <Paragraph
+          copyable
+          style={{ display: "inline" }}
+          editable={{
+            onChange: updateVinNumber,
+          }}
+        >
+          {vinNumber}
+        </Paragraph>
+      </Card.Grid>
+
+      <Card.Grid
+        style={{ ...cardContent, paddingTop: "1rem" }}
+        hoverable={false}
+      >
+        <Title style={{ display: "inline" }} level={4}>
+          Год выпуска:{" "}
+        </Title>
+        <Paragraph
+          copyable
+          style={{ display: "inline" }}
+          editable={{
+            onChange: updateYear,
+          }}
+        >
+          {year}
+        </Paragraph>
+      </Card.Grid>
+
       <Card.Grid style={cardContent} hoverable={false}>
         <Title style={{ display: "inline" }} level={5}>
           Тип транспорта:{" "}
@@ -593,7 +648,7 @@ export const OrderCard = ({
               }));
             }}
           >
-            {type.name}
+            {translations[type.name] ?? type.name}
           </Tag>
         ) : !typeLoading && typeData ? (
           <Select
@@ -615,7 +670,7 @@ export const OrderCard = ({
             {preparedDataToSelect(typeData.allTypes).map((v) => {
               return (
                 <Option key={v.id} value={v.id}>
-                  {v.name}
+                  {translations[v.name] ?? v.name}
                 </Option>
               );
             })}
@@ -726,7 +781,7 @@ export const OrderCard = ({
           trigger={["click"]}
           placement="bottomCenter"
         >
-          {coloredTags(status.name)}
+          {coloredTags(status.name, translations)}
         </Dropdown>
       </Card.Grid>
 
@@ -739,7 +794,7 @@ export const OrderCard = ({
           trigger={["click"]}
           placement="bottomCenter"
         >
-          {coloredTags(transmission.name)}
+          {coloredTags(transmission.name, translations)}
         </Dropdown>
       </Card.Grid>
 
@@ -752,7 +807,7 @@ export const OrderCard = ({
           trigger={["click"]}
           placement="bottomCenter"
         >
-          {coloredTags(partType.name)}
+          {coloredTags(partType.name, translations)}
         </Dropdown>
       </Card.Grid>
 
@@ -765,7 +820,7 @@ export const OrderCard = ({
           trigger={["click"]}
           placement="bottomCenter"
         >
-          {coloredTags(bodyType.name)}
+          {coloredTags(bodyType.name, translations)}
         </Dropdown>
       </Card.Grid>
 
@@ -778,7 +833,7 @@ export const OrderCard = ({
           trigger={["click"]}
           placement="bottomCenter"
         >
-          {coloredTags(driveType.name)}
+          {coloredTags(driveType.name, translations)}
         </Dropdown>
       </Card.Grid>
       <Card.Grid style={cardContent} hoverable={false}>
@@ -809,7 +864,6 @@ export const OrderCard = ({
           max={100}
           onChange={(v) => {
             setEngineVolume(Number(v));
-            console.log(typeof v)
           }}
         />
       </Card.Grid>

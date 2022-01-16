@@ -2,8 +2,6 @@ import { Modal, Input, Typography, Row, Col, Select } from "antd";
 import { useState } from "react";
 const { Option } = Select;
 
-const { confirm } = Modal;
-
 export const ModalCreateModel = ({
   brandData,
   typeData,

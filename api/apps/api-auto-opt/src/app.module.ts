@@ -11,6 +11,7 @@ import { AuthModule } from './auth/auth.module';
 import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { PrismaService } from 'libs/db/src/prisma.service';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [

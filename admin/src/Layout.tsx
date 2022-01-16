@@ -1,24 +1,18 @@
-import React, { useEffect, useState } from "react";
 import "./App.less";
-import { Layout, Menu, Typography } from "antd";
+import { Layout, Menu } from "antd";
 import {
   CarOutlined,
   MenuOutlined,
-  ShoppingCartOutlined,
+  ShoppingCartOutlined, 
   TagOutlined,
   TeamOutlined,
 } from "@ant-design/icons";
 import { useLocation, NavLink, Outlet } from "react-router-dom";
-import './i18n/config';
-import { useTranslation } from 'react-i18next';
-
-
-const { Title } = Typography;
 const { Header, Content } = Layout;
+
 
 const MainLayout = () => {
   let location = useLocation();
-  const { t } = useTranslation(['ns1']);
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
@@ -30,7 +24,7 @@ const MainLayout = () => {
           selectedKeys={[location.pathname]}
         >
           <Menu.Item key="/" icon={<ShoppingCartOutlined />}>
-            <NavLink to="/">Заказы</NavLink>
+            <NavLink to="/">Заказы </NavLink>
           </Menu.Item>
           <Menu.Item key="/users" icon={<TeamOutlined />}>
             <NavLink to="/users">Пользователи</NavLink>

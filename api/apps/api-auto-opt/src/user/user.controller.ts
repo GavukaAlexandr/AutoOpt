@@ -5,26 +5,40 @@ import {
   Get,
   HttpException,
   HttpStatus,
+  Logger,
   Param,
   Post,
   Put,
+  Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './user.decorator';
 import { CreateUserDto } from './dto/CreateUserDto';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import { FireBaseService } from './firebase.service';
+import { FirebaseError } from 'firebase-admin';
 
 @Controller('user')
 export class UserController {
-  constructor(private userService: UserService) {}
+  private readonly logger = new Logger(UserController.name);
+  constructor(private userService: UserService, private fireBase: FireBaseService) { }
 
   @Public()
   @UseGuards(ThrottlerGuard)
-  @Throttle(3, 60)
+  @Throttle(20, 60)
   @Post('/register')
   async createUser(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+    try {
+      const isExist = await this.fireBase.isUserByPhoneExist(createUserDto.phoneNumber)
+      if (isExist) return await this.userService.create(createUserDto);
+      return
+    } catch (err) {
+      if (err && err.code === 'P2002') return this.logger.error('ERROR: Attempt to create an existing user', err)
+      this.logger.error(err)
+      return
+    }
   }
 
   @Get('/self')

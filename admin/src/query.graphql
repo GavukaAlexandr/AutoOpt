@@ -193,3 +193,10 @@ query allUsers($page: Int, $perPage: Int, $sortField: String, $sortOrder: String
 		count
 	}
 }
+
+query login($variables: AdminInput) {
+	login(variables: $variables) {
+		token
+	}
+}
+

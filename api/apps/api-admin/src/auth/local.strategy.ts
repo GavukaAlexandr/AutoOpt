@@ -7,16 +7,16 @@ import { AuthService } from './auth.service';
 export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(private authService: AuthService) {
     super({
+      passwordField: 'password', //needed for passport local strategy with one field
       usernameField: 'phoneNumber',
-      passwordField: 'firebaseUid', //needed for passport local strategy with one field
     });
   }
 
-  async validate(phoneNumber: string, firebaseUid: string): Promise<any> {
-    const user = await this.authService.validateUser(phoneNumber, firebaseUid);
-    if (!user) {
+  async validate(phoneNumber: string, password: string, ): Promise<any> {
+    const admin = await this.authService.validateUser(phoneNumber, password);
+    if (!admin) {
       throw new UnauthorizedException();
     }
-    return user;
+    return admin;
   }
 }

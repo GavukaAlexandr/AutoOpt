@@ -11,7 +11,6 @@ import { PrismaService } from '@app/prisma';
 export class TypeResolver {
     constructor(private prismaService: PrismaService) { }
 
-    @Public()
     @Query(returns => Type)
     async Type(@Args('id') id: string) {
         return this.prismaService.type.findUnique({
@@ -19,7 +18,6 @@ export class TypeResolver {
         });
     }
 
-    @Public()
     @Query(returns => [Type])
     async allTypes(
         @Args('perPage', { type: () => Int, nullable: true }) perPage,
@@ -34,7 +32,6 @@ export class TypeResolver {
         });
     }
 
-    @Public()
     @Query(returns => ListMetadata)
     async allTypesMeta(
         @Args('sortField', { type: () => String, nullable: true }) sortField: string,
@@ -46,7 +43,6 @@ export class TypeResolver {
         return { count: count };
     }
 
-    @Public()
     @ResolveField('brands', () => [Brand])
     async brand(@Parent() type: Type) {
         const { id } = type;
@@ -65,14 +61,12 @@ export class TypeResolver {
         return preparedBrands;
     }
 
-    @Public()
     @ResolveField('models', returns => [Model])
     async models(@Parent() type: Type) {
         const { id } = type;
         return this.prismaService.model.findMany({ where: { typeId: id } });
     }
 
-    @Public()
     @Mutation(() => Type)
     async createType(@Args({ name: 'name', type: () => String, nullable: true }) name) {
         return this.prismaService.type.create({
@@ -82,7 +76,6 @@ export class TypeResolver {
         });
     }
 
-    @Public()
     @Mutation(returns => Type)
     async updateType(
         @Args({ name: 'id', type: () => ID, nullable: true }) id,
@@ -94,28 +87,4 @@ export class TypeResolver {
             },
         });
     }
-
-    // @Public()
-    // @Mutation(returns => Boolean)
-    // async deleteOrder(@Args({ name: 'id', type: () => ID }) id: string) {
-    //     return this.prismaService.order.update({
-    //         where: { id: deleteOrderInput.id },
-    //         data: {
-    //             isDeleted: true,
-    //         },
-    //     });
-    // }
 }
-
-/* createType {
-    data: createType {
-        brands {
-            id
-        }
-        id
-        models {
-            id
-        }
-        name
-    }
-} */
