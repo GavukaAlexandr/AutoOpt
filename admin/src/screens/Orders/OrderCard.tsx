@@ -584,7 +584,7 @@ export const OrderCard = ({
         style={{ ...cardContent, paddingTop: "1rem" }}
         hoverable={false}
       >
-        <Title style={{ display: "inline" }} level={4}>
+        <Title style={{ display: "inline" }} level={5}>
           Запчасть:{" "}
         </Title>
         <Paragraph
@@ -602,7 +602,7 @@ export const OrderCard = ({
         style={{ ...cardContent, paddingTop: "1rem" }}
         hoverable={false}
       >
-        <Title style={{ display: "inline" }} level={4}>
+        <Title style={{ display: "inline" }} level={5}>
           Vin номер:{" "}
         </Title>
         <Paragraph
@@ -620,7 +620,7 @@ export const OrderCard = ({
         style={{ ...cardContent, paddingTop: "1rem" }}
         hoverable={false}
       >
-        <Title style={{ display: "inline" }} level={4}>
+        <Title style={{ display: "inline" }} level={5}>
           Год выпуска:{" "}
         </Title>
         <Paragraph

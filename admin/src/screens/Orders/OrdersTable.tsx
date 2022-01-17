@@ -222,7 +222,6 @@ export const OrdersTable = ({
       title: "Телефон",
       dataIndex: "phoneNumber",
       key: "phoneNumber",
-      render: (text: string) => <Paragraph copyable>{text}</Paragraph>,
       filterDropdown: () => {
         return (
           <Input
@@ -246,12 +245,11 @@ export const OrdersTable = ({
       },
     },
     {
-      width: "30%",
       title: "Запчасть",
       dataIndex: "carPart",
       key: "carPart",
       render: (text: string) => (
-        <Paragraph ellipsis={{ rows: 2, expandable: true, symbol: "больше" }}>
+        <Paragraph ellipsis={{ rows: 2, expandable: false }}>
           {text}
         </Paragraph>
       ),
@@ -312,19 +310,18 @@ export const OrdersTable = ({
       render: (status: string) => coloredTags(status, translations)
     },
     {
-      title: () => {
-        return <CustomRangePicker handleDate={handleDate} />;
-      },
+      title: "Дата",
       dataIndex: "createdAt",
       key: "createdAt",
-      render: (text: string) => <div style={{ marginLeft: "25%" }}>{text}</div>,
     },
   ];
   return (
     <>
+    <div style={{display: "flex", paddingBottom: "10px", justifyContent: "end"}}>
+      <CustomRangePicker handleDate={handleDate} />
+    </div>
       <Table
         className="table-striped-rows"
-        expandRowByClick={true}
         columns={mainColumns}
         loading={loading}
         expandedRowRender={(record) => (

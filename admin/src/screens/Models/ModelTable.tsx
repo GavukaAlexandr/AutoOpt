@@ -206,7 +206,7 @@ export const ModelTable = ({
       });
       setLoading(false);
       setIsModalVisible(false);
-      return succesMessage("Model was created");
+      return succesMessage("Модель была создана");
     } catch (error) {
       setLoading(false);
       setIsModalVisible(false);
