@@ -115,6 +115,14 @@ export class OrderResolver {
     };
   }
 
+  /*
+  When called create order from Admin
+  - Firstly we need to get first Order from db and get this createdAt this data need in "createOrder".
+  - Secondary we need to get status that have "default in db" this data need in "createOrder".
+  - Thirdly we change all order who have orderNumber like from parameters and change their isHistory to true.
+    Then we create order with date from the most first order by this orderNumber, this order will have isHistory false by default 
+    it's need to get this order in Front-end. 
+  */
   @Mutation(() => Order)
   async createOrder(@Args({ name: 'createOrderInput', type: () => CreateOrderInput }) createOrderInput) {
     const { orderNumber, userId, userCarParamId, modelId, fuelId, transmissionId, bodyTypeId, driveTypeId, partTypeId, status: statusId, ...preparedOrder } = createOrderInput;
