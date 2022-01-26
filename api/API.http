@@ -73,15 +73,15 @@ Content-Type: application/json
 ###
 
 
-POST https://auto-opt.cyber-geeks-lab.synology.me/user/register
+POST http://localhost:3000/user/register
 content-type: application/json
 
 {
   "firstName": "ron",
   "lastName": "ronich",
   "email": "user222@gmail222.com",
-  "phoneNumber": "+380685065277",
-  "firebaseUid": "6ghzH4WbNEb2lTDT8ENkMRmfWmN2"
+  "phoneNumber": "+380966511000",
+  "firebaseUid": "a8QjhFlyckTezPmJWgl094iqGJu3"
 }
 
 ###
@@ -113,6 +113,9 @@ Authorization: Bearer {{accessToken}}
 ###
 GET http://localhost:3000/public/app-localizations/ru_RU.json
 ###
+
+###
+GET https://auto-opt.cyber-geeks-lab.synology.me/public/app-localizations/ru_RU.json
 
 ###
 PUT http://localhost:3000/user/notifications

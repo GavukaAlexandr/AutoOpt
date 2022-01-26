@@ -1,0 +1,95 @@
+mutation createType($name: String) {
+	createType(name: $name) {
+		id
+		name
+	}
+}
+
+mutation updateType($name: String, $id: ID) {
+	updateType(id: $id, name: $name) {
+		id
+		name
+	}
+}
+
+mutation updateBrand($id: ID, $name: String) {
+	updateBrand(id: $id, name: $name) {
+		id
+	}
+}
+
+mutation createBrand($name: String) {
+	createBrand(name: $name) {
+		id
+	}
+}
+
+mutation updateModel($id: ID, $name: String, $brand: ID, $type: ID) {
+	updateModel(id: $id, name: $name, brand: $brand, type: $type) {
+		id
+	}
+}
+
+mutation createModel($name: String, $brandId: ID, $typeId: ID) {
+	createModel(name: $name, brandId: $brandId, typeId: $typeId) {
+		id
+		name
+		brand {
+			id
+			name
+		}
+		type {
+			id
+			name
+		}
+	}
+}
+
+mutation updateUser($updateUserInput: UpdateUserInput) {
+	updateUser(updateUserInput: $updateUserInput) {
+		id
+	}
+}
+
+mutation createOrder($createOrderInput: CreateOrderInput!) {
+	createOrder(createOrderInput: $createOrderInput) {
+		id
+		userCarParamId
+		orderNumber
+		model {
+			id
+			name
+			type {
+				id
+				name
+			}
+			brand {
+				id
+				name
+			}
+		}
+		status {
+			id
+			name
+		}
+		comment
+		createdAt
+		user {
+			id
+			firstName
+			lastName
+			phoneNumber
+			email
+			phoneNotification
+			viberNotification
+			telegramNotification
+			comment
+		}
+	}
+}
+
+mutation updateUserCarParams($updateUserCarParamsInput: UpdateUserCarParamsInput) {
+	updateUserCarParams(updateUserCarParamsInput: $updateUserCarParamsInput) {
+		id
+	}
+}

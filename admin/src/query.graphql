@@ -1,0 +1,202 @@
+query Order($id: ID) {
+	Order(id: $id) {
+		id
+		userCarParamId
+		orderNumber
+		fuels {
+			name
+			id
+		}
+		model {
+			id
+			name
+			type {
+				id
+				name
+			}
+			brand {
+				id
+				name
+			}
+		}
+		status {
+			id
+			name
+		}
+		comment
+		createdAt
+		user {
+			id
+			firstName
+			lastName
+			phoneNumber
+			email
+			phoneNotification
+			viberNotification
+			telegramNotification
+			comment
+		}
+		transmission {
+			name
+			id
+		}
+		drive {
+			name
+			id
+		}
+		partOfType {
+			name
+			id
+		}
+		bodyType {
+			name
+			id
+		}
+		carPart
+		engineVolume
+		vin
+		year
+	}
+}
+
+query allOrders($page: Int, $perPage: Int, $sortField: String, $sortOrder: String, $filter: OrderFilter) {
+	allOrders(page: $page, perPage: $perPage, sortField: $sortField, sortOrder: $sortOrder, filter: $filter) {
+		id
+		status {
+			id
+			name
+		}
+		comment
+		createdAt
+		carPart
+		model {
+			id
+			name
+			type {
+				id
+				name
+			}
+			brand {
+				id
+				name
+			}
+		}
+		user {
+			id
+			firstName
+			lastName
+			phoneNumber
+			email
+			phoneNotification
+			viberNotification
+			telegramNotification
+			comment
+		}
+	}
+	allOrdersMeta(sortField: "id", sortOrder: "asc", filter: $filter) {
+		count
+	}
+	orderStatuses {
+		id
+		name
+	}
+	partTypes {
+		id
+		name
+	}
+	bodyTypes {
+		id
+		name
+	}
+	driveTypes {
+		id
+		name
+	}
+	fuelTypes {
+		id
+		name
+	}
+	transmissions {
+		id
+		name
+	}
+}
+
+query getFirstOrder($sortField: String, $sortOrder: String) {
+	getFirstOrder(sortField: $sortField, sortOrder: $sortOrder) {
+		createdAt
+	}
+}
+
+query allTypes($page: Int, $perPage: Int, $sortField: String, $sortOrder: String) {
+	allTypes(page: $page, perPage: $perPage, sortField: $sortField, sortOrder: $sortOrder) {
+		id
+		name
+	}
+	allOrdersMeta(sortField: "id", sortOrder: "asc", filter: {}) {
+		count
+	}
+}
+
+query allBrandsOfType($page: Int, $perPage: Int, $filter: BrandFilter) {
+	allBrandsOfType(page: $page, perPage: $perPage, filter: $filter) {
+		id
+		name
+	}
+}
+
+query allBrands($page: Int, $perPage: Int, $sortField: String, $sortOrder: String, $filter: BrandFilter) {
+	allBrands(page: $page, perPage: $perPage, sortField: $sortField, sortOrder: $sortOrder, filter: $filter) {
+		id
+		name
+	}
+	allBrandsMeta(sortField: "id", sortOrder: "desc", filter: $filter) {
+		count
+	}
+}
+
+query allModels($page: Int, $perPage: Int, $sortField: String, $sortOrder: String, $filter: ModelFilter) {
+	allModels(page: $page, perPage: $perPage, sortField: $sortField, sortOrder: $sortOrder, filter: $filter) {
+		id
+		name
+		brand {
+			id
+			name
+		}
+		type {
+			id
+			name
+		}
+	}
+	allModelsMeta(sortField: "id", sortOrder: "asc", filter: $filter) {
+		count
+	}
+}
+
+query allUsers($page: Int, $perPage: Int, $sortField: String, $sortOrder: String, $filter: UserFilter) {
+	allUsers(page: $page, perPage: $perPage, sortField: $sortField, sortOrder: $sortOrder, filter: $filter) {
+		id
+		orders {
+			id
+		}
+		comment
+		createdAt
+		email
+		firstName
+		lastName
+		phoneNotification
+		phoneNumber
+		telegramNotification
+		viberNotification
+	}
+	allUsersMeta(sortField: "id", sortOrder: "asc", filter: $filter) {
+		count
+	}
+}
+
+query login($variables: AdminInput) {
+	login(variables: $variables) {
+		token
+	}
+}
+
