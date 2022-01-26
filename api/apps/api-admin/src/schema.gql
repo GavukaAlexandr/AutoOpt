@@ -2,6 +2,28 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Admin {
+  email: String!
+  firstName: String!
+  id: ID!
+  lastName: String!
+  password: String!
+  phoneNumber: String!
+}
+
+input AdminCreateInput {
+  email: String!
+  firstName: String!
+  lastName: String!
+  password: String!
+  phoneNumber: String!
+}
+
+input AdminInput {
+  password: String!
+  phoneNumber: String!
+}
+
 type Brand {
   id: ID!
   models: [Model!]!
@@ -112,6 +134,7 @@ input ModelFilter {
 }
 
 type Mutation {
+  create(adminCreateInput: AdminCreateInput!): Admin!
   createBrand(name: String): Brand!
   createCarParams(createCarParamsInput: CreateCarParamsInput!): UserCarParams!
   createModel(brandId: ID, name: String, typeId: ID): Model!
@@ -179,10 +202,15 @@ type Query {
   driveTypes: [IDriveType!]!
   fuelTypes: [IFuelType!]!
   getFirstOrder(sortField: String, sortOrder: String): [Order!]!
+  login(variables: AdminInput): Token!
   orderStatuses: [IOrderStatus!]!
   partTypes: [IPartType!]!
   transmissions: [ITransmission!]!
   userCarParams(id: ID): UserCarParams!
+}
+
+type Token {
+  token: String!
 }
 
 type Type {

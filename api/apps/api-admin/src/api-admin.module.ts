@@ -3,7 +3,6 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { join } from 'path';
 import { ApiAdminController } from './api-admin.controller';
 import { ApiAdminService } from './api-admin.service';
-import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
 import { PrismaService } from '@app/prisma';
 import { AuthModule } from './auth/auth.module';
 import { OrderResolver } from './order/gql/order.resolver';
@@ -37,17 +36,29 @@ import { ServeStaticModule } from '@nestjs/serve-static';
     }),
     GraphQLModule.forRoot({
       debug: true,
-      autoSchemaFile: join(process.cwd(), '/api/apps/api-admin/src/schema.gql'),
+      autoSchemaFile: join(process.cwd(), '/apps/api-admin/src/schema.gql'),
       playground: true,
-      context: ({req}) => ({req}),
+      context: ({ req }) => ({ req }),
       sortSchema: true,
     }),
   ],
   controllers: [ApiAdminController],
-  providers: [{
-    provide: APP_GUARD,
-    useClass: JwtAuthGuard,
-  },
-    AdminService, AuthResolver, ApiAdminService, PrismaService, OrderResolver, UserResolver, TypeResolver, BrandResolver, ModelResolver, UserCarParamsResolver, CarParamsResolver],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    AdminService,
+    AuthResolver,
+    ApiAdminService,
+    PrismaService,
+    OrderResolver,
+    UserResolver,
+    TypeResolver,
+    BrandResolver,
+    ModelResolver,
+    UserCarParamsResolver,
+    CarParamsResolver,
+  ],
 })
-export class ApiAdminModule { }
+export class ApiAdminModule {}
