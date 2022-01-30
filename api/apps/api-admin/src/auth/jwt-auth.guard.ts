@@ -1,6 +1,8 @@
 import { IS_PUBLIC_KEY } from './decorators';
 import {
   ExecutionContext,
+  HttpException,
+  HttpStatus,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -17,6 +19,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   canActivate(context: ExecutionContext) {
     const ctx = GqlExecutionContext.create(context);
     const { req } = ctx.getContext();
+    //TODO FIX context for Rest endpoints | return super.canActivate(context);
+    if (!req) {
+      throw new HttpException('Bad request', HttpStatus.BAD_REQUEST);
+    }
 
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       ctx.getHandler(),
@@ -27,7 +33,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
 
     return super.canActivate(new ExecutionContextHost([req]));
-    }
+  }
 
   handleRequest(err, user, info) {
     if (err || !user) {

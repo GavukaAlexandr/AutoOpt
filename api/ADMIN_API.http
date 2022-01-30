@@ -1,0 +1,26 @@
+@accessToken = {{login.body.data.login.token}}
+###
+###
+GET http://localhost:3000/
+###
+
+###
+# @name login
+POST http://localhost:3000/graphql
+content-type: application/json
+
+{
+  "query": "{ login(variables: { phoneNumber: \"2534053049539804\", password : \"123\" }) {token} }"
+}
+###
+
+###
+POST http://localhost:3000/graphql
+content-type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "query": "query allOrders($page: Int, $perPage: Int, $sortField: String, $sortOrder: String, $filter: OrderFilter) { allOrders( page: $page perPage: $perPage sortField: $sortField sortOrder: $sortOrder filter: $filter ) { id status { id name __typename } comment createdAt carPart model { id name type { id name __typename } brand { id name __typename } __typename } user { id firstName lastName phoneNumber email phoneNotification viberNotification telegramNotification comment __typename } __typename } allOrdersMeta(sortField: \"id\", sortOrder: \"asc\", filter: $filter) { count __typename } orderStatuses { id name __typename } partTypes { id name __typename } bodyTypes { id name __typename } driveTypes { id name __typename } fuelTypes { id name __typename } transmissions { id name __typename } }",
+  "variables": { "page": 0, "perPage": 50, "sortField": "createdAt", "sortOrder": "desc", "filter": {} }
+}
+###

@@ -13,7 +13,8 @@ import { ApolloClient, ApolloLink, ApolloProvider, from, HttpLink, InMemoryCache
 import { onError } from "@apollo/client/link/error";
 import { useNavigate } from "react-router-dom";
 import LocalizedStrings from "react-localization";
-const httpLink = new HttpLink({ uri: 'http://192.168.88.30:3000/graphql' });
+//TODO add Base URI to ENV
+const httpLink = new HttpLink({ uri: 'http://localhost:3000/graphql' });
 declare global {
   interface Window {
     recaptchaVerifier: any;

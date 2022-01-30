@@ -1,16 +1,20 @@
 import { Resolver, Query, Args, Int, Mutation, ID } from '@nestjs/graphql';
 import { ListMetadata } from '../../list.metaData';
-import { CreateOrderInput, Order, OrderFilter, UpdateOrderInput } from './order.model';
-import { startOfDay, endOfDay } from 'date-fns'
+import {
+  CreateOrderInput,
+  Order,
+  OrderFilter,
+  UpdateOrderInput,
+} from './order.model';
+import { startOfDay, endOfDay } from 'date-fns';
 import { plainToClass } from 'class-transformer';
-import { PrismaService } from 'libs/db/src/prisma.service';
-import { Public } from '../../auth/decorators';
+import { PrismaService } from '@app/prisma';
 
-@Resolver(of => Order)
+@Resolver((of) => Order)
 export class OrderResolver {
-  constructor(private prismaService: PrismaService) { }
+  constructor(private prismaService: PrismaService) {}
 
-  @Query(returns => Order)
+  @Query((returns) => Order)
   async Order(@Args('id', { type: () => ID, nullable: true }) id: string) {
     const order = await this.prismaService.order.findUnique({
       where: { id: id },
@@ -47,9 +51,19 @@ export class OrderResolver {
     @Args('page', { type: () => Int, nullable: true }) page,
     @Args('sortField', { type: () => String, nullable: true }) sortField,
     @Args('sortOrder', { type: () => String, nullable: true }) sortOrder,
-    @Args('filter', { type: () => OrderFilter, nullable: true }) filter: OrderFilter,
+    @Args('filter', { type: () => OrderFilter, nullable: true })
+    filter: OrderFilter,
   ) {
-    const { endDate, startDate, status, firstName, carPart, lastName, phoneNumber, user } = filter;
+    const {
+      endDate,
+      startDate,
+      status,
+      firstName,
+      carPart,
+      lastName,
+      phoneNumber,
+      user,
+    } = filter;
 
     const result = await this.prismaService.order.findMany({
       skip: page,
@@ -58,40 +72,73 @@ export class OrderResolver {
       where: {
         isHistory: false,
         userId: user ? user : undefined,
-        user: (firstName || lastName || phoneNumber) ? {
-          firstName: firstName ? { contains: firstName, mode: 'insensitive' } : undefined,
-          lastName: lastName ? { contains: lastName, mode: 'insensitive' } : undefined,
-          phoneNumber: phoneNumber ? { contains: phoneNumber, mode: 'insensitive' } : undefined,
-        } : undefined,
-        status: status ? { id:  status } : undefined,
-        createdAt: (startDate && endDate) ? this.getRangeByDate({ startDate, endDate }) : undefined,
-        carPart: carPart ? { contains: carPart, mode: 'insensitive' } : undefined,
+        user:
+          firstName || lastName || phoneNumber
+            ? {
+                firstName: firstName
+                  ? { contains: firstName, mode: 'insensitive' }
+                  : undefined,
+                lastName: lastName
+                  ? { contains: lastName, mode: 'insensitive' }
+                  : undefined,
+                phoneNumber: phoneNumber
+                  ? { contains: phoneNumber, mode: 'insensitive' }
+                  : undefined,
+              }
+            : undefined,
+        status: status ? { id: status } : undefined,
+        createdAt:
+          startDate && endDate
+            ? this.getRangeByDate({ startDate, endDate })
+            : undefined,
+        carPart: carPart
+          ? { contains: carPart, mode: 'insensitive' }
+          : undefined,
       },
-      include: { model: { include: { type: true, brand: true } }, user: true, status: true, fuels: true },
+      include: {
+        model: { include: { type: true, brand: true } },
+        user: true,
+        status: true,
+        fuels: true,
+      },
     });
     return result;
   }
 
   @Query(() => [Order])
   async getFirstOrder(
-    @Args('sortField', { type: () => String, nullable: true }) sortField: string,
-    @Args('sortOrder', { type: () => String, nullable: true }) sortOrder: string,
+    @Args('sortField', { type: () => String, nullable: true })
+    sortField: string,
+    @Args('sortOrder', { type: () => String, nullable: true })
+    sortOrder: string,
   ) {
-    return this.prismaService.order.findMany(({
+    return this.prismaService.order.findMany({
       orderBy: { [sortField]: sortOrder },
-      take: 1
-    }));
-  };
+      take: 1,
+    });
+  }
 
   @Query(() => ListMetadata)
   async allOrdersMeta(
-    @Args('sortField', { type: () => String, nullable: true }) sortField: string,
-    @Args('sortOrder', { type: () => String, nullable: true }) sortOrder: string,
-    @Args('filter', { type: () => OrderFilter, nullable: true }) filter: OrderFilter,
+    @Args('sortField', { type: () => String, nullable: true })
+    sortField: string,
+    @Args('sortOrder', { type: () => String, nullable: true })
+    sortOrder: string,
+    @Args('filter', { type: () => OrderFilter, nullable: true })
+    filter: OrderFilter,
   ) {
-    const { endDate, startDate, status, user, firstName, lastName, carPart, phoneNumber } = filter;
+    const {
+      endDate,
+      startDate,
+      status,
+      user,
+      firstName,
+      lastName,
+      carPart,
+      phoneNumber,
+    } = filter;
 
-    const result = await this.prismaService.order.count(({
+    const result = await this.prismaService.order.count({
       orderBy: { [sortField]: sortOrder },
       where: {
         userId: user,
@@ -103,16 +150,19 @@ export class OrderResolver {
         createdAt: this.getRangeByDate({ startDate, endDate }),
         status: { id: status },
         carPart: { contains: carPart, mode: 'insensitive' },
-      }
-    }));
+      },
+    });
     return { count: result };
-  };
+  }
 
   getRangeByDate({ startDate, endDate }) {
-    return (startDate && endDate) && {
-      lte: endOfDay(endDate),
-      gte: startOfDay(startDate)
-    };
+    return (
+      startDate &&
+      endDate && {
+        lte: endOfDay(endDate),
+        gte: startOfDay(startDate),
+      }
+    );
   }
 
   /*
@@ -124,40 +174,57 @@ export class OrderResolver {
     it's need to get this order in Front-end. 
   */
   @Mutation(() => Order)
-  async createOrder(@Args({ name: 'createOrderInput', type: () => CreateOrderInput }) createOrderInput) {
-    const { orderNumber, userId, userCarParamId, modelId, fuelId, transmissionId, bodyTypeId, driveTypeId, partTypeId, status: statusId, ...preparedOrder } = createOrderInput;
-    
+  async createOrder(
+    @Args({ name: 'createOrderInput', type: () => CreateOrderInput })
+    createOrderInput,
+  ) {
+    const {
+      orderNumber,
+      userId,
+      userCarParamId,
+      modelId,
+      fuelId,
+      transmissionId,
+      bodyTypeId,
+      driveTypeId,
+      partTypeId,
+      status: statusId,
+      ...preparedOrder
+    } = createOrderInput;
+
     const firstCurrentOrder = await this.prismaService.order.findFirst({
-      where: {orderNumber: orderNumber},
-      orderBy: {createdAt: "desc"}
-    })
+      where: { orderNumber: orderNumber },
+      orderBy: { createdAt: 'desc' },
+    });
 
     const status = await this.prismaService.orderStatus.findFirst({
-      where: { default: true }
-    })
+      where: { default: true },
+    });
 
     const allOrdersToHistory = this.prismaService.order.updateMany({
       where: {
         userId,
-        orderNumber: orderNumber ?? undefined
+        orderNumber: orderNumber ?? undefined,
       },
       data: {
-        isHistory: true
-      }
-    })
+        isHistory: true,
+      },
+    });
 
-    var date = new Date(); 
+    const date = new Date();
 
     const createOrder = this.prismaService.order.create({
       data: {
         orderNumber: orderNumber,
         userCarParamId: userCarParamId,
         user: { connect: { id: userId } },
-        status: statusId ? { connect: { id: statusId } } : { connect: { id: status.id } },
+        status: statusId
+          ? { connect: { id: statusId } }
+          : { connect: { id: status.id } },
         fuels: {
-          create: fuelId.map(id => ({
-            fuelId: id
-          }))
+          create: fuelId.map((id) => ({
+            fuelId: id,
+          })),
         },
         transmission: { connect: { id: transmissionId } },
         bodyType: { connect: { id: bodyTypeId } },
@@ -165,27 +232,52 @@ export class OrderResolver {
         partOfType: { connect: { id: partTypeId } },
         model: { connect: { id: modelId } },
         createdAt: firstCurrentOrder.createdAt,
-        updatedAt: new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(),
-        date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds())),
+        updatedAt: new Date(
+          Date.UTC(
+            date.getUTCFullYear(),
+            date.getUTCMonth(),
+            date.getUTCDate(),
+            date.getUTCHours(),
+            date.getUTCMinutes(),
+            date.getUTCSeconds(),
+          ),
+        ),
         ...preparedOrder,
       },
-      include: { model: { include: { brand: true, type: true } }, user: true, fuels: true, bodyType: true, drive: true, partOfType: true, transmission: true, status: true }
-    })
+      include: {
+        model: { include: { brand: true, type: true } },
+        user: true,
+        fuels: true,
+        bodyType: true,
+        drive: true,
+        partOfType: true,
+        transmission: true,
+        status: true,
+      },
+    });
 
-    const [, result] = await this.prismaService.$transaction([allOrdersToHistory, createOrder]);
+    const [, result] = await this.prismaService.$transaction([
+      allOrdersToHistory,
+      createOrder,
+    ]);
     return result;
   }
-  
-  @Mutation(returns => Order)
+
+  @Mutation((returns) => Order)
   async updateOrder(
-    @Args({ name: 'updateOrderInput', type: () => UpdateOrderInput, nullable: true }) updateOrderInput,
+    @Args({
+      name: 'updateOrderInput',
+      type: () => UpdateOrderInput,
+      nullable: true,
+    })
+    updateOrderInput,
   ) {
     const { id, status: statusId } = updateOrderInput;
     return this.prismaService.order.update({
       where: { id },
       data: {
         orderStatusId: statusId,
-        ...updateOrderInput
+        ...updateOrderInput,
       },
     });
   }

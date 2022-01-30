@@ -2,12 +2,27 @@ import { PrismaClient } from '@prisma/client';
 import axios from 'axios';
 const prisma = new PrismaClient();
 const transportTypes = ['auto', 'moto', 'bus', 'truck'];
-const transmissionArray = ['automatic', 'mechanical', 'variable', 'robot']
+const transmissionArray = ['automatic', 'mechanical', 'variable', 'robot'];
 const fuelArray = ['gasoline', 'diesel', 'electro', 'hybrid'];
 const partArray = ['original', 'analogue'];
-const bodyArray = ['sedan', 'hatchback', 'coupe', 'universal', 'minivan', 'suv', 'pickup', 'cabriolet', 'van', 'limousine'];
+const bodyArray = [
+  'sedan',
+  'hatchback',
+  'coupe',
+  'universal',
+  'minivan',
+  'suv',
+  'pickup',
+  'cabriolet',
+  'van',
+  'limousine',
+];
 const driveArray = ['full', 'front', 'rear'];
-const orderStatusArray = ['processing', 'sent', 'done'];
+const orderStatusArray = [
+  ['processing', true],
+  ['sent', false],
+  ['done', false],
+];
 
 let allBrands = [];
 let typeQueries = [];
@@ -17,7 +32,8 @@ const modelQueries = [];
 async function main() {
   for (const type of transportTypes) {
     let { data: brands } = await axios.get<Record<string, any>[]>(
-      `http://avtoopt.com.ua/apps/get_data.php?type=brands&name=${type === 'auto' ? 'avto' : type
+      `http://avtoopt.com.ua/apps/get_data.php?type=brands&name=${
+        type === 'auto' ? 'avto' : type
       }`,
     );
 
@@ -30,7 +46,8 @@ async function main() {
 
     for (const brand of brands) {
       const { data: models } = await axios.get<Record<string, any>[]>(
-        `http://avtoopt.com.ua/apps/get_data.php?type=models&name=${type === 'auto' ? 'avto' : type
+        `http://avtoopt.com.ua/apps/get_data.php?type=models&name=${
+          type === 'auto' ? 'avto' : type
         }&brand=${encodeURIComponent(brand.title)}`,
       );
 
@@ -65,83 +82,94 @@ async function main() {
       create: {
         name: brand.title,
       },
-      update: {}
+      update: {},
     });
   });
 
   const transmission = transmissionArray.map((data: string) => {
     return prisma.transmission.upsert({
       where: {
-        name: data
+        name: data,
       },
       create: {
-        name: data
+        name: data,
       },
-      update: {}
-    })
-  })
+      update: {},
+    });
+  });
 
   const fuelType = fuelArray.map((data: string) => {
     return prisma.fuelType.upsert({
       where: {
-        name: data
+        name: data,
       },
       create: {
-        name: data
+        name: data,
       },
-      update: {}
-    })
-  })
+      update: {},
+    });
+  });
 
   const partType = partArray.map((data: string) => {
     return prisma.partType.upsert({
       where: {
-        name: data
+        name: data,
       },
       create: {
-        name: data
+        name: data,
       },
-      update: {}
-    })
-  })
+      update: {},
+    });
+  });
 
   const bodyType = bodyArray.map((data: string) => {
     return prisma.bodyType.upsert({
       where: {
-        name: data
+        name: data,
       },
       create: {
-        name: data
+        name: data,
       },
-      update: {}
-    })
-  })
+      update: {},
+    });
+  });
 
   const driveType = driveArray.map((data: string) => {
     return prisma.driveType.upsert({
       where: {
-        name: data
-      },
-      create: {
-        name: data
-      },
-      update: {}
-    })
-  })
-
-  const orderStatus = orderStatusArray.map((data: string) => {
-    return prisma.orderStatus.upsert({
-      where: {
         name: data,
       },
       create: {
-        name: data
+        name: data,
       },
-      update: {}
-    })
-  })
+      update: {},
+    });
+  });
 
-  await prisma.$transaction([...typeQueries, ...brandQueries, ...modelQueries, ...transmission, ...fuelType, ...partType, ...bodyType, ...driveType, ...orderStatus]);
+  const orderStatus = orderStatusArray.map(([status, state]) => {
+    return prisma.orderStatus.upsert({
+      where: {
+        name: status as string,
+      },
+      create: {
+        name: status as string,
+        default: state as boolean,
+      },
+      update: {},
+    });
+  });
+
+  await prisma.$transaction([
+    ...typeQueries,
+    ...brandQueries,
+    ...modelQueries,
+    ...transmission,
+    ...fuelType,
+    ...partType,
+    ...bodyType,
+    ...driveType,
+    ...orderStatus,
+  ]);
 }
 
 main()
